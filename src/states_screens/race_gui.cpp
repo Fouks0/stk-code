@@ -22,6 +22,7 @@
 using namespace irr;
 
 #include <algorithm>
+#include <iomanip>
 
 #include "challenges/unlock_manager.hpp"
 #include "config/user_config.hpp"
@@ -733,14 +734,25 @@ void RaceGUI::drawRank(const AbstractKart *kart,
     oss << rank; // the current font has no . :(   << ".";
 
     core::recti pos;
-    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width),
-                                           int(offset.Y - 0.55f*meter_height));
-    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width),
-                                          int(offset.Y - 0.55f*meter_height));
+    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 2.5f*meter_height));
+	pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 2.5f*meter_height));
 
-    static video::SColor color = video::SColor(255, 255, 255, 255);
-    font->draw(oss.str().c_str(), pos, color, true, true);
-    font->setScale(1.0f);
+	static video::SColor color = video::SColor(255, 255, 255, 255);
+	if (race_manager->getNumberOfKarts() > 1)
+		font->draw(oss.str().c_str(), pos, color, true, true);
+
+	font->setScale(1.0f);
+
+	pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.55f*meter_height));
+	pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.55f*meter_height));
+
+	std::ostringstream oss2;
+	oss2 << std::fixed << std::setprecision(1) << kart->getSpeed()/KILOMETERS_PER_HOUR;
+
+	font->draw(oss2.str().c_str(), pos, color, true, true);
+	font->setScale(1.0f);
+
+
 }   // drawRank
 
 //-----------------------------------------------------------------------------
