@@ -261,6 +261,11 @@ public:
     {
         return m_story_mode_status->getNumHardTrophies();
     }   // getNumHardTropies
+    // -----------------------------------------------------------------------
+    unsigned int getNumBestTrophies() const
+    {
+        return m_story_mode_status->getNumBestTrophies();
+    }   // getNumBestTrophies
     // ------------------------------------------------------------------------
     AchievementsStatus* getAchievementsStatus()
     {

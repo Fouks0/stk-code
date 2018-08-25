@@ -65,6 +65,7 @@ const int OPEN = 1;
 const int COMPLETED_EASY = 2;
 const int COMPLETED_MEDIUM = 3;
 const int COMPLETED_HARD = 4;
+const int COMPLETED_BEST = 5;
 
 /** The constructor is called before anything is attached to the scene node.
  *  So rendering to a texture can be done here. But world is not yet fully
@@ -83,6 +84,7 @@ RaceGUIOverworld::RaceGUIOverworld()
     m_trophy1 = irr_driver->getTexture(FileManager::GUI, "cup_bronze.png");
     m_trophy2 = irr_driver->getTexture(FileManager::GUI, "cup_silver.png");
     m_trophy3 = irr_driver->getTexture(FileManager::GUI, "cup_gold.png"  );
+    m_trophy4 = irr_driver->getTexture(FileManager::GUI, "gp_copy.png"  );
 
     float scaling = irr_driver->getFrameSize().Height / 420.0f;
     const float map_size = 250.0f;
@@ -158,6 +160,8 @@ RaceGUIOverworld::RaceGUIOverworld()
     m_icons[2] = m_trophy1;
     m_icons[3] = m_trophy2;
     m_icons[4] = m_trophy3;
+    m_icons[5] = m_trophy4;
+    
 }   // RaceGUIOverworld
 
 //-----------------------------------------------------------------------------
@@ -320,6 +324,20 @@ void RaceGUIOverworld::drawTrophyPoints()
         font->draw(hardTrophiesW.c_str(), dest, time_color, false, vcenter, NULL, true /* ignore RTL */);
     }
 
+    dest += core::position2di(size*2, 0);
+    if (!m_close_to_a_challenge)
+    {
+        draw2DImage(m_trophy4, dest, source, NULL,
+                                                  NULL, true /* alpha */);
+    }
+    dest += core::position2di((int)(size*1.5f), 0);
+    std::string bestTrophies = StringUtils::toString(player->getNumBestTrophies());
+    core::stringw bestTrophiesW(bestTrophies.c_str());
+    if (!m_close_to_a_challenge)
+    {
+        font->draw(bestTrophiesW.c_str(), dest, time_color, false, vcenter, NULL, true /* ignore RTL */);
+    }
+
     dest = core::rect<s32>(pos.UpperLeftCorner.X - size - 5, pos.UpperLeftCorner.Y,
                            pos.UpperLeftCorner.X - 5, pos.UpperLeftCorner.Y + size);
 
@@ -450,7 +468,8 @@ void RaceGUIOverworld::drawGlobalMiniMap()
 
         const ChallengeStatus* c = PlayerManager::getCurrentPlayer()
                                   ->getChallengeStatus(challenges[n].m_challenge_id);
-        if      (c->isSolved(RaceManager::DIFFICULTY_HARD))   state = COMPLETED_HARD;
+        if      (c->isSolved(RaceManager::DIFFICULTY_BEST))   state = COMPLETED_BEST;
+        else if (c->isSolved(RaceManager::DIFFICULTY_HARD))   state = COMPLETED_HARD;
         else if (c->isSolved(RaceManager::DIFFICULTY_MEDIUM)) state = COMPLETED_MEDIUM;
         else if (c->isSolved(RaceManager::DIFFICULTY_EASY))   state = COMPLETED_EASY;
 

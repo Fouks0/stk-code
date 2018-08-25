@@ -89,16 +89,16 @@
        too often (compared with many items which will only
        affect a karts or two).                                -->
   <!--      bubble  cake  bowl  zipper  plunger  switch swattr rubber para  anvil -->
-  <first  w="25       5    15     5      10       10      10     0     0     0"
+  <first  w="15       5    30     5      30        5      10     0     0     0"
     w-multi=" 0       0     5     0       0        0       0     0     0     0"    />
-  <top33  w="30      30    30    30      30       10      10    10    10     0"
-    w-multi=" 0      10    10     0      10        0       0     0     0     0"    />
-  <mid33  w="30      30    30    30      30       10      20    20    20     0"
-    w-multi=" 0      20    20    20      20        0       0     0     0     0"    />
-  <end33  w=" 0      30    30    30      30       10      20    30    30     0"
-    w-multi=" 0      30    30    30      30        0       0     0     0     0"    />
-  <last   w=" 0      30    10    90      60        0      10    60    60     0"
-    w-multi=" 0      30    30   100      60        0       0     0     0     0"    />
+  <top33  w="30      15    30    30      30        5      10     0     0     0"
+    w-multi=" 0       0    10     0      10        0       0     0     0     0"    />
+  <mid33  w="30      20    30    30      30        5      20     5     0     0"
+    w-multi=" 0       5    20    20      20        0       0     0     0     0"    />
+  <end33  w=" 0      25    10    50      30        5      10     5     5     0"
+    w-multi=" 0      10    30    50      30        0       0     0     0     0"    />
+  <last   w=" 0      30     5    90       5        0      10    10    10     0"
+    w-multi=" 0      20    30   100      20        0       0     0     0     0"    />
   <battle w="10      30    60     0       0       10      30     0     0     0"
     w-multi=" 0       0     5     0       0        0       0     0     0     0"    />
   <soccer w=" 0      30    60     0       0       10      30     0     0     0"

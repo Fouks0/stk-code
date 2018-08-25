@@ -33,7 +33,7 @@ class ChallengeStatus;
 class UTFWriter;
 class XMLNode;
 
-const int CHALLENGE_POINTS[] = { 8, 9, 10 };
+const int CHALLENGE_POINTS[] = { 8, 9, 10, 12 };
 
 /** This class contains the progression through challenges for the story mode.
  *  It maintains a list of all challenges in a mapping of challenge id to
@@ -67,6 +67,7 @@ private:
     int m_easy_challenges;
     int m_medium_challenges;
     int m_hard_challenges;
+    int m_best_challenges;
 
 public:
 
@@ -104,6 +105,9 @@ public:
     // ------------------------------------------------------------------------
     /** Returns the number of fulfilled challenges at har level. */
     int        getNumHardTrophies  () const { return m_hard_challenges;   }
+     // ------------------------------------------------------------------------
+    /** Returns the number of fulfilled challenges at best level. */
+    int        getNumBestTrophies  () const { return m_best_challenges;   }
     // ------------------------------------------------------------------------
     /** Sets if this is the first time the intro is shown. */
     void       setFirstTime(bool ft) { m_first_time = ft;   }

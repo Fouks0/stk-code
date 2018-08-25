@@ -4,9 +4,13 @@
     <mode major="single" minor="quickrace"/>
     <requirements trophies="0"/>
     
+    <best>
+        <karts number="8"/>
+        <requirements position="1" time="55"/>
+    </best>
     <hard>
         <karts number="5"/>
-        <requirements position="1" time="65"/>
+        <requirements position="1" time="60"/>
     </hard>
     <medium>
         <karts number="5"/>

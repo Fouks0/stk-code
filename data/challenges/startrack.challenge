@@ -2,18 +2,22 @@
 <challenge version="2">
     <track id="stk_enterprise" laps="3"/>
     <mode major="single" minor="followtheleader"/>
-    <requirements trophies="110"/>
+    <requirements trophies="10"/>
     
+    <best>
+        <karts number="3"/>
+        <requirements position="2"/>
+    </best>
     <hard>
-        <karts number="6"/>
+        <karts number="3"/>
         <requirements position="2"/>
     </hard>
     <medium>
-        <karts number="6"/>
+        <karts number="2"/>
         <requirements position="2"/>
     </medium>
     <easy>
-        <karts number="5"/>
+        <karts number="2"/>
         <requirements position="2"/>
     </easy>
 </challenge>

@@ -66,15 +66,7 @@ void RaceSetupScreen::init()
     RibbonWidget* w = getWidget<RibbonWidget>("difficulty");
     assert( w != NULL );
 
-    if (UserConfigParams::m_difficulty == RaceManager::DIFFICULTY_BEST &&
-        PlayerManager::getCurrentPlayer()->isLocked("difficulty_best"))
-    {
-        w->setSelection(RaceManager::DIFFICULTY_HARD, PLAYER_ID_GAME_MASTER);
-    }
-    else
-    {
-        w->setSelection( UserConfigParams::m_difficulty, PLAYER_ID_GAME_MASTER );
-    }
+    w->setSelection( UserConfigParams::m_difficulty, PLAYER_ID_GAME_MASTER );
 
     DynamicRibbonWidget* w2 = getWidget<DynamicRibbonWidget>("gamemode");
     assert( w2 != NULL );
@@ -172,16 +164,8 @@ void RaceSetupScreen::init()
         int index = w->findItemNamed("best");
         Widget* hardestWidget = &w->getChildren()[index];
 
-        if (PlayerManager::getCurrentPlayer()->isLocked("difficulty_best"))
-        {
-            hardestWidget->setBadge(LOCKED_BADGE);
-            hardestWidget->setActive(false);
-        }
-        else
-        {
-            hardestWidget->unsetBadge(LOCKED_BADGE);
-            hardestWidget->setActive(true);
-        }
+        hardestWidget->unsetBadge(LOCKED_BADGE);
+        hardestWidget->setActive(true);
     }
 }   // init
 

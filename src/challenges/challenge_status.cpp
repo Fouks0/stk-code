@@ -47,6 +47,7 @@ void ChallengeStatus::load(const XMLNode* challenges_node)
     m_state[0] = CH_INACTIVE;
     m_state[1] = CH_INACTIVE;
     m_state[2] = CH_INACTIVE;
+    m_state[3] = CH_INACTIVE;
 
     std::string solved;
     if (node->get("solved", &solved))
@@ -63,6 +64,13 @@ void ChallengeStatus::load(const XMLNode* challenges_node)
             m_state[0] = CH_SOLVED;
             m_state[1] = CH_SOLVED;
             m_state[2] = CH_SOLVED;
+        }
+        else if (solved == "best")
+        {
+            m_state[0] = CH_SOLVED;
+            m_state[1] = CH_SOLVED;
+            m_state[2] = CH_SOLVED;
+            m_state[3] = CH_SOLVED;
         }
     }   // if has 'solved' attribute
 
@@ -85,7 +93,9 @@ void ChallengeStatus::setSolved(RaceManager::Difficulty d)
 void ChallengeStatus::save(UTFWriter& writer)
 {
     writer << L"        <" << m_data->getId();
-    if (isSolved(RaceManager::DIFFICULTY_HARD))
+    if (isSolved(RaceManager::DIFFICULTY_BEST))
+        writer << L" solved=\"best\"/>\n";
+    else  if (isSolved(RaceManager::DIFFICULTY_HARD))
         writer << L" solved=\"hard\"/>\n";
     else if (isSolved(RaceManager::DIFFICULTY_MEDIUM))
         writer << L" solved=\"medium\"/>\n";

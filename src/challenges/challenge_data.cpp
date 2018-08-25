@@ -161,15 +161,16 @@ ChallengeData::ChallengeData(const std::string& filename)
     difficulties[0] = root->getNode("easy");
     difficulties[1] = root->getNode("medium");
     difficulties[2] = root->getNode("hard");
+    difficulties[3] = root->getNode("best");
 
-    // Note that the challenges can only be done in three difficulties
+    // Note that the challenges can only be done in four difficulties
     if (difficulties[0] == NULL || difficulties[1] == NULL ||
-        difficulties[2] == NULL)
+        difficulties[2] == NULL || difficulties[3] == NULL)
     {
-        error("<easy> or <medium> or <hard>");
+        error("<easy> or <medium> or <hard> or <best>");
     }
 
-    for (int d=0; d<=RaceManager::DIFFICULTY_HARD; d++)
+    for (int d=0; d<=RaceManager::DIFFICULTY_BEST; d++)
     {
         const XMLNode* karts_node = difficulties[d]->getNode("karts");
         if (karts_node == NULL) error("<karts .../>");

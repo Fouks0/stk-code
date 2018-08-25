@@ -342,9 +342,9 @@
         <characteristic name="hard">
             <engine power="*0.89" max-speed="*0.92" />
         </characteristic>
-        <!-- This doesn't need to be changed because the most fast/heavy/extreme
-            values should also be the default ones. -->
-        <characteristic name="best" />
+        <characteristic name="best">
+            <engine power="*1.25" max-speed="*1.3" />
+        </characteristic>
     </difficulties>
 
     <!-- The different kart types, that can be specified in the kart.xml file -->

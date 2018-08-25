@@ -35,6 +35,7 @@ StoryModeStatus::StoryModeStatus(const XMLNode *node)
     m_easy_challenges   = 0;
     m_medium_challenges = 0;
     m_hard_challenges   = 0;
+    m_best_challenges   = 0;
     m_current_challenge = NULL;
 
     // If there is saved data, load it
@@ -81,6 +82,7 @@ void StoryModeStatus::computeActive()
     m_easy_challenges = 0;
     m_medium_challenges = 0;
     m_hard_challenges = 0;
+    m_best_challenges = 0;
 
     m_locked_features.clear(); // start afresh
 
@@ -111,8 +113,18 @@ void StoryModeStatus::computeActive()
                 unlockFeature(i->second, RaceManager::DIFFICULTY_HARD,
                               /*save*/ false);
             }
-
-            if (i->second->isSolved(RaceManager::DIFFICULTY_HARD))
+            if (i->second->isSolved(RaceManager::DIFFICULTY_BEST))
+            {
+                unlockFeature(i->second, RaceManager::DIFFICULTY_BEST,
+                              /*save*/ false);
+            }
+			
+			if (i->second->isSolved(RaceManager::DIFFICULTY_BEST))
+            {
+                m_points += CHALLENGE_POINTS[RaceManager::DIFFICULTY_BEST];
+                m_best_challenges++;
+            }
+            else if (i->second->isSolved(RaceManager::DIFFICULTY_HARD))
             {
                 m_points += CHALLENGE_POINTS[RaceManager::DIFFICULTY_HARD];
                 m_hard_challenges++;
@@ -134,23 +146,30 @@ void StoryModeStatus::computeActive()
             // --------------------------
             lockFeature(i->second);
         }
-
-        if (i->second->isSolved(RaceManager::DIFFICULTY_HARD))
+		
+		if (i->second->isSolved(RaceManager::DIFFICULTY_BEST))
         {
             // challenge beaten at hardest, nothing more to do here
             continue;
         }
+        else if (i->second->isSolved(RaceManager::DIFFICULTY_HARD))
+        {
+            i->second->setActive(RaceManager::DIFFICULTY_BEST);
+        }
         else if (i->second->isSolved(RaceManager::DIFFICULTY_MEDIUM))
         {
+            i->second->setActive(RaceManager::DIFFICULTY_BEST);
             i->second->setActive(RaceManager::DIFFICULTY_HARD);
         }
         else if (i->second->isSolved(RaceManager::DIFFICULTY_EASY))
         {
+            i->second->setActive(RaceManager::DIFFICULTY_BEST);
             i->second->setActive(RaceManager::DIFFICULTY_HARD);
             i->second->setActive(RaceManager::DIFFICULTY_MEDIUM);
         }
         else
         {
+            i->second->setActive(RaceManager::DIFFICULTY_BEST);
             i->second->setActive(RaceManager::DIFFICULTY_HARD);
             i->second->setActive(RaceManager::DIFFICULTY_MEDIUM);
             i->second->setActive(RaceManager::DIFFICULTY_EASY);

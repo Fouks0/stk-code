@@ -69,6 +69,7 @@ public:
         m_state[RaceManager::DIFFICULTY_EASY]   = CH_INACTIVE;
         m_state[RaceManager::DIFFICULTY_MEDIUM] = CH_INACTIVE;
         m_state[RaceManager::DIFFICULTY_HARD]   = CH_INACTIVE;
+        m_state[RaceManager::DIFFICULTY_BEST]   = CH_INACTIVE;
     }
     virtual ~ChallengeStatus() {};
     void load(const XMLNode* config);
@@ -88,7 +89,7 @@ public:
     bool isSolvedAtAnyDifficulty() const
     {
         return m_state[0]==CH_SOLVED || m_state[1]==CH_SOLVED ||
-                m_state[2]==CH_SOLVED;
+                m_state[2]==CH_SOLVED || m_state[3]==CH_SOLVED;
     }   // isSolvedAtAnyDifficulty
     // ------------------------------------------------------------------------
     /** True if this challenge is active at the given difficulty.
