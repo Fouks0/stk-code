@@ -343,7 +343,7 @@
             <engine power="*0.89" max-speed="*0.92" />
         </characteristic>
         <characteristic name="best">
-            <engine power="*1.25" max-speed="*1.3" />
+            <engine power="*1.3" max-speed="*1.33" />
         </characteristic>
     </difficulties>
 

@@ -434,6 +434,10 @@ void Skidding::update(float dt, bool is_on_ground,
                 m_skid_time = t;
                 if(bonus_time>0)
                 {
+                	if (level == 2) {
+                		bonus_speed *= 1.125;
+                		bonus_time *= 1.125;
+                	}
                     m_kart->getKartGFX()
                           ->setCreationRateRelative(KartGFX::KGFX_SKIDL, 1.0f);
                     m_kart->getKartGFX()

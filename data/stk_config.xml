@@ -12,7 +12,7 @@
   <!-- Maximum number of karts to be used at the same time. This limit
        can easily be increased, but some tracks might not have valid start
        positions for those additional karts. -->
-  <karts max-number="20"/>
+  <karts max-number="31"/>
 
   <!-- Scores are the number of points given when the race ends. -->
   <grand-prix>
@@ -61,6 +61,7 @@
     <points points="1" /> <!-- added with 28 karts -->
     <points points="3" /> <!-- added with 29 karts -->
     <points points="5" /> <!-- added with 30 karts -->
+    <points points="1" /> <!-- added with 31 karts -->
   </grand-prix>
 
   <!-- Time in follow-the-leader after which karts are removed.
