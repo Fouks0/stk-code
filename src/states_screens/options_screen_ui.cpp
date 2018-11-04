@@ -132,6 +132,9 @@ void OptionsScreenUI::init()
     CheckBoxWidget* fps = getWidget<CheckBoxWidget>("showfps");
     assert( fps != NULL );
     fps->setState( UserConfigParams::m_display_fps );
+    CheckBoxWidget* timer = getWidget<CheckBoxWidget>("speedrun-timer");
+    assert( timer != NULL );
+    timer->setState( UserConfigParams::m_display_speedrun_timer );
     CheckBoxWidget* news = getWidget<CheckBoxWidget>("enable-internet");
     assert( news != NULL );
     news->setState( UserConfigParams::m_internet_status
@@ -263,6 +266,12 @@ void OptionsScreenUI::eventCallback(Widget* widget, const std::string& name, con
         CheckBoxWidget* fps = getWidget<CheckBoxWidget>("showfps");
         assert( fps != NULL );
         UserConfigParams::m_display_fps = fps->getState();
+    }
+    else if (name == "speedrun-timer")
+    {
+        CheckBoxWidget* timer = getWidget<CheckBoxWidget>("speedrun-timer");
+        assert( timer != NULL );
+        UserConfigParams::m_display_speedrun_timer = timer->getState();
     }
     else if (name=="enable-internet")
     {

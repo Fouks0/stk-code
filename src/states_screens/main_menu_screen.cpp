@@ -20,6 +20,7 @@
 #include "states_screens/main_menu_screen.hpp"
 
 #include "addons/news_manager.hpp"
+#include "challenges/speedrun_timer.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/user_config.hpp"
@@ -475,6 +476,8 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
         PlayerProfile *player = PlayerManager::getCurrentPlayer();
         if (player->isFirstTime())
         {
+            speedrun_timer->startSpeedrunTimer();
+
             CutsceneWorld::setUseDuration(true);
             StateManager::get()->enterGameState();
             race_manager->setMinorMode(RaceManager::MINOR_MODE_CUTSCENE);

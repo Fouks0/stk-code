@@ -22,6 +22,7 @@
 using namespace irr;
 
 #include <algorithm>
+#include <iomanip>
 
 #include "challenges/unlock_manager.hpp"
 #include "config/user_config.hpp"
@@ -74,7 +75,10 @@ RaceGUI::RaceGUI()
     core::dimension2du area = font->getDimension(L"99:99:99");
     m_timer_width = area.Width;
     m_font_height = area.Height;
-
+    
+	m_speed_sum = 0;
+    m_speed_samples = 0;
+    
     if (race_manager->getMinorMode()==RaceManager::MINOR_MODE_FOLLOW_LEADER ||
         race_manager->getMinorMode()==RaceManager::MINOR_MODE_3_STRIKES     ||
         race_manager->getNumLaps() > 9)
@@ -733,14 +737,52 @@ void RaceGUI::drawRank(const AbstractKart *kart,
     oss << rank; // the current font has no . :(   << ".";
 
     core::recti pos;
-    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width),
-                                           int(offset.Y - 0.55f*meter_height));
-    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width),
-                                          int(offset.Y - 0.55f*meter_height));
+    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 2.5f*meter_height));
+	pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 2.5f*meter_height));
 
-    static video::SColor color = video::SColor(255, 255, 255, 255);
-    font->draw(oss.str().c_str(), pos, color, true, true);
-    font->setScale(1.0f);
+	static video::SColor color = video::SColor(255, 255, 255, 255);
+	if (race_manager->getNumberOfKarts() > 1)
+		font->draw(oss.str().c_str(), pos, color, true, true);
+
+	font->setScale(1.0f);
+
+	pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.55f*meter_height));
+	pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.55f*meter_height));
+
+	std::ostringstream oss2;
+	oss2 << std::fixed << std::setprecision(1) << kart->getSpeed()/KILOMETERS_PER_HOUR;
+
+	font->draw(oss2.str().c_str(), pos, color, true, true);
+	
+	font->setScale(0.4f);
+	pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.45f*meter_height));
+	pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.45f*meter_height));
+	if (!kart->hasFinishedRace()) {
+		m_final_speed_avg = 0.;
+		m_speed_sum += std::abs(kart->getSpeed()/KILOMETERS_PER_HOUR);
+		m_speed_samples++;
+		
+		float avg_speed(m_speed_sum/m_speed_samples);
+		std::ostringstream oss3;
+		oss3 << std::fixed << std::setprecision(1) << avg_speed << "/" << std::setprecision(3) << avg_speed*World::getWorld()->getTime()/3600;
+		font->draw(oss3.str().c_str(), pos, color, true, true);
+	}
+	else {
+		if (m_final_speed_avg == 0.) {
+			m_final_speed_avg = m_speed_sum/m_speed_samples;
+			m_final_distance = m_final_speed_avg*World::getWorld()->getTime()/3600;
+			m_speed_sum = 0.;
+			m_speed_samples = 0;
+		}
+		
+		std::ostringstream oss3;
+		oss3 << std::fixed << std::setprecision(1) << m_final_speed_avg << "/" << std::setprecision(3) << m_final_distance;
+		color = video::SColor(255, 0, 255, 0);
+		font->draw(oss3.str().c_str(), pos, color, true, true);
+		color = video::SColor(255, 255, 255, 255);
+	}
+	
+	font->setScale(1.0f);
 }   // drawRank
 
 //-----------------------------------------------------------------------------
@@ -875,14 +917,19 @@ void RaceGUI::drawLap(const AbstractKart* kart,
                       const core::vector2df &scaling)
 {
     // Don't display laps or ranks if the kart has already finished the race.
-    if (kart->hasFinishedRace()) return;
+    if (kart->hasFinishedRace())
+    	return;
 
     World *world = World::getWorld();
     if (!world->raceHasLaps()) return;
     const int lap = world->getKartLaps(kart->getWorldKartId());
 
     // don't display 'lap 0/..' at the start of a race
-    if (lap < 0 ) return;
+    if (lap < 0 ) {
+    	m_speed_sum = 0.;
+		m_speed_samples = 0;
+    	return;
+    }
 
     core::recti pos;
     pos.UpperLeftCorner.Y   = viewport.UpperLeftCorner.Y + m_font_height;

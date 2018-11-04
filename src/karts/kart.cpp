@@ -905,12 +905,12 @@ void Kart::finishedRace(float time, bool from_server)
             if (race_manager->
                 getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER &&
                 getPosition() == 2)
-                m->addMessage(_("You won the race!"), this, 2.0f);
+                m->addMessage(_("Awesome! You survived!"), this, 2.0f);
             else if (race_manager->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
                      race_manager->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL)
             {
                 m->addMessage((getPosition() == 1 ?
-                _("You won the race!") : _("You finished the race!")) ,
+                _("FINISH! Alright, first place!") : _("FINISH! %dth place...", getPosition())) ,
                 this, 2.0f);
             }
         }

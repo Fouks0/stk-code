@@ -174,6 +174,7 @@
 #include "addons/news_manager.hpp"
 #include "audio/music_manager.hpp"
 #include "audio/sfx_manager.hpp"
+#include "challenges/speedrun_timer.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "config/hardware_stats.hpp"
 #include "config/player_manager.hpp"
@@ -1802,6 +1803,10 @@ int main(int argc, char *argv[] )
             race_manager->setupPlayerKartInfo();
             race_manager->startNew(false);
         }
+        //create the speedrun timer before going in the main loop
+        //as it needs to be able to run continuously
+        speedrun_timer = new SpeedrunTimer();
+
         main_loop->run();
 
     }  // try
@@ -1895,6 +1900,7 @@ static void cleanSuperTuxKart()
     Online::ProfileManager::destroy();
     GUIEngine::DialogQueue::deallocate();
     if(font_manager)            delete font_manager;
+    if(speedrun_timer)          delete speedrun_timer;
 
     // Now finish shutting down objects which a separate thread. The
     // RequestManager has been signaled to shut down as early as possible,

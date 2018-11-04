@@ -17,6 +17,7 @@
 
 #include "graphics/irr_driver.hpp"
 
+#include "challenges/speedrun_timer.hpp"
 #include "config/user_config.hpp"
 #include "font/font_manager.hpp"
 #include "graphics/callbacks.hpp"
@@ -1609,6 +1610,54 @@ video::SColorf IrrDriver::getAmbientLight() const
 {
     return m_scene_manager->getAmbientLight();
 }
+                                                                 
+// ----------------------------------------------------------------------------
+/** Displays the timer for Story Mode Speedrun on the screen.
+ */
+void IrrDriver::displayTimer()
+{
+    bool use_digit_font = speedrun_timer->isSpeedrunning();
+
+    gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+
+    core::stringw timer_string;
+    timer_string = speedrun_timer->getSpeedrunTimerString().c_str();
+
+    //The normal timer size ; to not write over it
+    core::dimension2du area = font->getDimension(L"99:99:99");
+    int regular_timer_width = area.Width;
+    int additional_height = 0;
+    if (!use_digit_font)
+    {
+        if(speedrun_timer->playerCanRun())
+        {
+            font = GUIEngine::getLargeFont();
+            font->setScale(1.4f);
+        }
+        else
+        {
+            font = GUIEngine::getSmallFont();
+        }
+        area = font->getDimension(L"Run not started.");
+    }
+    else
+    {
+        area = font->getDimension(L"99:99:99.999");
+    }
+
+    int speedrun_string_width = area.Width;
+    int dist_from_right = speedrun_string_width + regular_timer_width + 20;
+    int screen_width = irr_driver->getActualScreenSize().Width;
+
+    core::rect<s32> position(screen_width - dist_from_right, 30,
+                             screen_width                  , 100);
+   
+   	if (speedrun_timer->speedrunIsFinished())
+   		font->draw(timer_string.c_str(), position, video::SColor(255, 0, 255, 0), false, false, NULL, true);
+    else
+        font->draw(timer_string.c_str(), position, video::SColor(255, 220, 255, 0), false, false, NULL, true);
+}
+
 
 // ----------------------------------------------------------------------------
 /** Displays the FPS on the screen.

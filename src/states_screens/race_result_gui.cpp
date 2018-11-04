@@ -21,6 +21,7 @@
 #include "audio/music_manager.hpp"
 #include "audio/sfx_manager.hpp"
 #include "audio/sfx_base.hpp"
+#include "challenges/speedrun_timer.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/user_config.hpp"
@@ -275,6 +276,7 @@ void RaceResultGUI::eventCallback(GUIEngine::Widget* widget,
                 if (unlocked[n]->getId() == "fortmagma")
                 {
                     gameCompleted = true;
+                    speedrun_timer->stopSpeedrunTimer();
                     break;
                 }
             }

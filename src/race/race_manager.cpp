@@ -21,6 +21,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "challenges/speedrun_timer.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/saved_grand_prix.hpp"
@@ -464,6 +465,8 @@ void RaceManager::startNextRace()
     // sfx_manager->dump();
 
     IrrlichtDevice* device = irr_driver->getDevice();
+    //pause the speedrun timer during loading
+    speedrun_timer->pauseSpeedrunTimer(true);
     GUIEngine::renderLoading();
     device->getVideoDriver()->endScene();
     device->getVideoDriver()->beginScene(true, true,
