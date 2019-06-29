@@ -389,7 +389,7 @@ void LinearWorld::newLap(unsigned int kart_index)
     {
         if (lap_count > 1 && !isLiveJoinWorld())
         {
-            m_race_gui->addMessage(_("Final lap!"), kart,
+            m_race_gui->addMessage(_("Yeah, the Final Lap!"), kart,
                                3.0f, GUIEngine::getSkin()->getColor("font::normal"), true,
                                true /* big font */, true /* outline */);
         }
@@ -421,6 +421,9 @@ void LinearWorld::newLap(unsigned int kart_index)
         m_race_gui->addMessage(_("Lap %i", kart_info.m_finished_laps+1), kart,
                                2.0f, GUIEngine::getSkin()->getColor("font::normal"), true,
                                true /* big font */, true /* outline */);
+        if (kart_info.m_finished_laps + 1 == 2)
+            m_race_gui->addMessage(_("You got boost pow... Oh wait, wrong game!"), kart,
+                                   3.0f, GUIEngine::getSkin()->getColor("font::normal"), true);
     }
 
     // The race positions must be updated here: consider the situation where
@@ -1046,7 +1049,7 @@ void LinearWorld::checkForWrongDirection(unsigned int i, float dt)
     
     if (ki.m_wrong_way_timer > 1.0f)
     {
-        m_race_gui->addMessage(_("WRONG WAY!"), kart,
+        m_race_gui->addMessage(_("IT'S SKIP TI... Oh, wrong version, what u doin?!"), kart,
                                /* time */ -1.0f,
                                video::SColor(255,255,255,255),
                                /*important*/ true,
