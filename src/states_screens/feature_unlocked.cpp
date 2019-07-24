@@ -245,25 +245,25 @@ void FeatureUnlockedCutScene::addTrophy(RaceManager::Difficulty difficulty,
     switch (difficulty)
     {
         case RaceManager::DIFFICULTY_EASY:
-            msg = _("You completed the easy challenge! "
+            msg = _("You survived! "
                     "Points earned on this level: %i/%i",
                     CHALLENGE_POINTS[RaceManager::DIFFICULTY_EASY]*gp_factor, 
                     CHALLENGE_POINTS[max_unlocked_difficulty]*gp_factor);
             break;
         case RaceManager::DIFFICULTY_MEDIUM:
-            msg = _("You completed the intermediate challenge! "
+            msg = _("You survived! "
                     "Points earned on this level: %i/%i",
                     CHALLENGE_POINTS[RaceManager::DIFFICULTY_MEDIUM]*gp_factor,
                     CHALLENGE_POINTS[max_unlocked_difficulty]*gp_factor);
             break;
         case RaceManager::DIFFICULTY_HARD:
-            msg = _("You completed the difficult challenge! "
+            msg = _("You survived! "
                     "Points earned on this level: %i/%i",
                     CHALLENGE_POINTS[RaceManager::DIFFICULTY_HARD]*gp_factor,
                     CHALLENGE_POINTS[max_unlocked_difficulty]*gp_factor);
             break;
         case RaceManager::DIFFICULTY_BEST:
-            msg = _("You completed the SuperTux challenge! "
+            msg = _("You survived! "
                     "Points earned on this level: %i/%i",
                     CHALLENGE_POINTS[RaceManager::DIFFICULTY_BEST]*gp_factor,
                 CHALLENGE_POINTS[max_unlocked_difficulty]*gp_factor);
@@ -306,7 +306,7 @@ void FeatureUnlockedCutScene::addUnlockedKart(const KartProperties* unlocked_kar
                    "Unlocked kart does not exist");
         return;
     }
-    irr::core::stringw msg = _("You unlocked %s!", unlocked_kart->getName());
+    irr::core::stringw msg = _("A new foe appeared! %s", unlocked_kart->getName());
     m_unlocked_stuff.push_back( new UnlockedThing(unlocked_kart, msg) );
 }  // addUnlockedKart
 
@@ -625,7 +625,7 @@ void FeatureUnlockedCutScene::onUpdate(float dt)
     static const int h = irr_driver->getFrameSize().Height;
     const irr::video::SColor color(255, 255, 255, 255);
 
-    GUIEngine::getTitleFont()->draw(_("Challenge Completed"),
+    GUIEngine::getTitleFont()->draw(_("Mission Complete!"),
                                     core::rect< s32 >( 0, 0, w, h/10 ),
                                     color,
                                     true/* center h */, true /* center v */ );

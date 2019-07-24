@@ -160,7 +160,7 @@ void GrandPrixWin::init()
         const core::dimension2d<u32>& frame_size = GUIEngine::getDriver()->getCurrentRenderTargetSize();
 
 
-        core::stringw message = _("You completed a challenge!");
+        core::stringw message = _("Cheater!");
         const int message_width = GUIEngine::getFont()->getDimension(message.c_str()).Width + 30;
 
         const int label_height = GUIEngine::getFontHeight() + 15;

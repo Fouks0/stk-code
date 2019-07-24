@@ -382,7 +382,7 @@ void Achievement::onCompletion()
     // in theory, it should return a copy of the string, but clang tries to
     // optimise away the copy
     core::stringw name = m_achievement_info->getName();
-    core::stringw s = _("Completed achievement \"%s\".", name);
+    core::stringw s = _("Completed course \"%s\".", name);
     MessageQueue::add(MessageQueue::MT_ACHIEVEMENT, s);
 
     // Sends a confirmation to the server that an achievement has been

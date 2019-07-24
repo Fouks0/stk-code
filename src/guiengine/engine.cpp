@@ -1347,7 +1347,7 @@ namespace GUIEngine
         // seems like we need to remind irrlicht from time to time to use
         // the Material2D
         irr_driver->getVideoDriver()->enableMaterial2D();
-        g_title_font->draw(_("Loading"),
+        g_title_font->draw(_("Generating trollish RNG, please wait..."),
                            core::rect< s32 >( 0, screen_h/2 + texture_h/2,
                                               screen_w, screen_h ),
                            SColor(255,255,255,255),

@@ -187,8 +187,8 @@ void RaceResultGUI::enableAllButtons()
          (race_manager->getMajorMode() != RaceManager::MAJOR_MODE_GRAND_PRIX ||
           race_manager->getTrackNumber() + 1 == race_manager->getNumOfTracks() ) )
     {
-        top->setText(n == 1 ? _("You completed a challenge!")
-            : _("You completed challenges!"));
+        top->setText(n == 1 ? _("You survived! Incredible!")
+            : _("You survived! Incredible!!"));
         top->setVisible(true);
         top->setFocusForPlayer(PLAYER_ID_GAME_MASTER);
     }

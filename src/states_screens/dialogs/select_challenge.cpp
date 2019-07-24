@@ -66,7 +66,7 @@ core::stringw getLabel(RaceManager::Difficulty difficulty, const ChallengeData* 
     if (!c->isGhostReplay())
     {
         if (label.size() > 0) label.append(L"\n");
-        label.append(_("Number of AI Karts: %i", c->getNumKarts(difficulty) - 1));
+        label.append(_("Enemies: %i", c->getNumKarts(difficulty) - 1));
     }
 
     return label;

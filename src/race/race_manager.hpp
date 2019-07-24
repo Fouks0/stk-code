@@ -184,9 +184,9 @@ public:
         switch (mode)
         {
             //I18N: Game mode
-            case MINOR_MODE_NORMAL_RACE:    return _("Normal Race");
+            case MINOR_MODE_NORMAL_RACE:    return _("Troll Race");
             //I18N: Game mode
-            case MINOR_MODE_TIME_TRIAL:     return _("Time Trial");
+            case MINOR_MODE_TIME_TRIAL:     return _("Skill Race");
             //I18N: Game mode
             case MINOR_MODE_FOLLOW_LEADER:  return _("Follow the Leader");
             //I18N: Game mode
