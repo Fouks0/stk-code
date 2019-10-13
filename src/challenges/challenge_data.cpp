@@ -163,6 +163,8 @@ ChallengeData::ChallengeData(const std::string& filename)
         m_minor = RaceManager::MINOR_MODE_TIME_TRIAL;
     else if(mode=="quickrace")
         m_minor = RaceManager::MINOR_MODE_NORMAL_RACE;
+    else if(mode=="egghunt")
+        m_minor = RaceManager::MINOR_MODE_EASTER_EGG;
     else if(mode=="followtheleader")
         m_minor = RaceManager::MINOR_MODE_FOLLOW_LEADER;
     else

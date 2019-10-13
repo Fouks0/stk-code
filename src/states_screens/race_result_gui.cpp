@@ -311,7 +311,7 @@ void RaceResultGUI::eventCallback(GUIEngine::Widget* widget,
             bool gameCompleted = false;
             for (unsigned int n = 0; n < unlocked.size(); n++)
             {
-                if (unlocked[n]->getChallengeId() == "fortmagma")
+                if (unlocked[n]->getChallengeId() == "final")
                 {
                     gameCompleted = true;
                     story_mode_timer->stopTimer();

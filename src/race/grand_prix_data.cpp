@@ -428,13 +428,7 @@ bool GrandPrixData::checkConsistency(bool log_error) const
 bool GrandPrixData::isTrackAvailable(const std::string &id,
                                      bool include_locked     ) const
 {
-    if (include_locked)
-        return true;
-    else if (id == "fortmagma")
-        return !PlayerManager::getCurrentPlayer()->isLocked("fortmagma");
-    else
-        return (!m_editable ||
-                !PlayerManager::get()->getCurrentPlayer()->isLocked(id));
+    return true;
 }   // isTrackAvailable
 
 // ----------------------------------------------------------------------------
