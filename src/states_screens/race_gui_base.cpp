@@ -1061,6 +1061,7 @@ void RaceGUIBase::drawPlayerIcon(AbstractKart *kart, int x, int y, int w,
             const core::rect<s32> posNumber(x + w, y + w/4, x + 7*w/4, y + w);
             font->setScale(3.f*((float) w)/(4.f*(float)font->getDimension(L"X").Height));
             font->draw(StringUtils::toWString(numberItems), posNumber, video::SColor(255, 255, 255, 255));
+            font->setScale(1.0f);
         }
     }
     

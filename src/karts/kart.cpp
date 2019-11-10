@@ -1024,7 +1024,7 @@ void Kart::finishedRace(float time, bool from_server)
                 won_the_race = true;
 
             m->addMessage((won_the_race ?
-            _("FINISH! Alright, first place!") : _("FINISH! How disappointing...")),
+            _("FINISH! Alright, first place!") : _("FINISH!")),
             this, 2.0f, video::SColor(255, 255, 255, 255), true, true, true);
         }
     }
@@ -1070,18 +1070,14 @@ void Kart::setRaceResult()
                 else
                     m_race_result = false;
             }
-            else if (this->getPosition() <= 0.5f *
-                World::getWorld()->getCurrentNumKarts() ||
-                this->getPosition() == 1)
+            else if (this->getPosition() == 1)
                 m_race_result = true;
             else
                 m_race_result = false;
         }
         else
         {
-            if (this->getPosition() <= 0.5f *
-                World::getWorld()->getCurrentNumKarts() ||
-                this->getPosition() == 1)
+            if (this->getPosition() == 1)
                 m_race_result = true;
             else
                 m_race_result = false;
