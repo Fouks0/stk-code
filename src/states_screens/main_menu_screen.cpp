@@ -492,14 +492,8 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
     }
     else if (selection == "online")
     {
-        if(UserConfigParams::m_internet_status!=RequestManager::IPERM_ALLOWED)
-        {
-            new MessageDialog(_("You can not play online without internet access. "
-                                "If you want to play online, go in the options menu, "
-                                "and check \"Connect to the Internet\"."));
-            return;
-        }
-        OnlineScreen::getInstance()->push();
+        new MessageDialog(_("Let's wait 21XX..."));
+        return;
     }
     else if (selection == "addons")
     {
