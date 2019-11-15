@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.4)
 
 set(CMAKE_BUILD_TYPE Debug)
 set(BUILD_RECORDER 0)
+set(USE_FRIBIDI 0)
+set(USE_WIIUSE 0)
 
 # root CMakeLists for the SuperTuxKart project
 project(SuperTuxKart)
