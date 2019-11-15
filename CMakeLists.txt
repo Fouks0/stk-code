@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8.4)
 
+set(CMAKE_BUILD_TYPE Debug)
+set(BUILD_RECORDER 0)
+
 # root CMakeLists for the SuperTuxKart project
 project(SuperTuxKart)
 set(PROJECT_VERSION "1.0")
