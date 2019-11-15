@@ -931,16 +931,7 @@ void FileManager::checkAndCreateConfigDir()
     if(m_user_config_dir.size()>0 && *m_user_config_dir.rbegin()!='/')
         m_user_config_dir += "/";
 
-    // 0.10 only because wrong config name is used
-    std::string beta_config_dir = m_user_config_dir + "0.10-beta";
-    m_user_config_dir += "config-0.10/";
-
-    if (fileExists(beta_config_dir) && !fileExists(m_user_config_dir))
-    {
-        Log::info("FileManager", "Rename 0.10-beta directory to config-0.10 "
-            "to keep user story mode progress.");
-        rename(beta_config_dir.c_str(), m_user_config_dir.c_str());
-    }
+    m_user_config_dir += "config-1.0TAS/";
 
     if(!checkAndCreateDirectoryP(m_user_config_dir))
     {
