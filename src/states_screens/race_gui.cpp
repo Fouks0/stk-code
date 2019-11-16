@@ -72,7 +72,7 @@ RaceGUI::RaceGUI()
     // Determine maximum length of the rank/lap text, in order to
     // align those texts properly on the right side of the viewport.
     gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
-    core::dimension2du area = font->getDimension(L"99:99.99");
+    core::dimension2du area = font->getDimension(L"99:99.999");
     m_timer_width = area.Width;
     m_font_height = area.Height;
 
@@ -371,7 +371,7 @@ void RaceGUI::drawGlobalTimer()
 
     bool use_digit_font = true;
 
-    float elapsed_time = World::getWorld()->getTime();
+    float elapsed_time = stk_config->ticks2Time(World::getWorld()->getTimeTicks());
     if (!race_manager->hasTimeTarget() ||
         race_manager ->getMinorMode()==RaceManager::MINOR_MODE_SOCCER ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_FREE_FOR_ALL ||
