@@ -314,9 +314,6 @@ void MainLoop::updateRace(int ticks, bool fast_forward)
 void MainLoop::run()
 {
     m_curr_time = StkTime::getRealTimeMs();
-    // DT keeps track of the leftover time, since the race update
-    // happens in fixed timesteps
-    float left_over_time = 0;
 
 #ifdef WIN32
     HANDLE parent = 0;
@@ -362,10 +359,8 @@ void MainLoop::run()
 
         PROFILER_PUSH_CPU_MARKER("Main loop", 0xFF, 0x00, 0xF7);
 
-        left_over_time += getLimitedDt();
-        int num_steps   = stk_config->time2Ticks(left_over_time);
+        int num_steps   = 1;
         float dt = stk_config->ticks2Time(1);
-        left_over_time -= num_steps * dt ;
 
         // Shutdown next frame if shutdown request is sent while loading the
         // world
@@ -526,7 +521,6 @@ void MainLoop::run()
                     // Reset the timer for correct time for cutscene
                     m_frame_before_loading_world = false;
                     m_curr_time = StkTime::getRealTimeMs();
-                    left_over_time = 0.0f;
                     break;
                 }
 
@@ -554,7 +548,6 @@ void MainLoop::run()
                     // irr_driver->getDevice()->run() loads the world
                     m_frame_before_loading_world = false;
                     m_curr_time = StkTime::getRealTimeMs();
-                    left_over_time = 0.0f;
                 }
 
                 if (abort)
