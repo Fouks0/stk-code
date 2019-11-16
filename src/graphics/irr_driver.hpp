@@ -197,6 +197,7 @@ private:
 
 public:
     void doScreenShot();    
+    void doFrameShot(uint64_t);
 public:
          IrrDriver();
         ~IrrDriver();

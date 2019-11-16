@@ -16,6 +16,7 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#include "graphics/irr_driver.hpp"
 #include "tas.hpp"
 #include "utils/log.hpp"
 
@@ -34,10 +35,25 @@ Tas::~Tas()
 void Tas::reset()
 {
     m_game_status = GameStatus::NORMAL;
+    m_frame_number = 0;
+    m_is_recording_frames = false;
 }
 
 void Tas::init()
 {
     reset();
     Log::info("TAS", "Inited.");
+}
+
+void Tas::saveFrame() {
+    irr_driver->doFrameShot(m_frame_number);
+    m_frame_number++;
+}
+void Tas::startRecordingFrames() {
+    m_frame_number = 0;
+    m_is_recording_frames = true;
+}
+void Tas::stopRecordingFrames() {
+    m_is_recording_frames = false;
+    m_frame_number = 0;
 }

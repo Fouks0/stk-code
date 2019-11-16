@@ -33,6 +33,10 @@ private:
     // Static pointer to the one instance of the Tas object.
     static Tas *m_tas;
     
+    // Frame recording, in order to assemble them later to make a TAS video
+    bool m_is_recording_frames;
+    uint64_t m_frame_number;
+    
     Tas();
     ~Tas();
 public:
@@ -50,6 +54,13 @@ public:
     void  pause() {m_game_status = PAUSED;}
     void  tickAdvance() {m_game_status = TICK_ADVANCE;}
     void  resume() {m_game_status = NORMAL;}
+    
+    // Frames recording. Press L to start/stop
+    bool isRecordingFrames() const {return m_is_recording_frames;}
+    uint64_t getFrameNumber() const {return m_frame_number;}
+    void saveFrame();
+    void startRecordingFrames();
+    void stopRecordingFrames();
 };
 
 #endif

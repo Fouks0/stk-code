@@ -66,6 +66,7 @@
 #include "scriptengine/property_animator.hpp"
 #include "states_screens/dialogs/confirm_resolution_dialog.hpp"
 #include "states_screens/state_manager.hpp"
+#include "tas/tas.hpp"
 #include "tracks/track_manager.hpp"
 #include "tracks/track.hpp"
 #include "utils/constants.hpp"
@@ -1868,6 +1869,30 @@ void IrrDriver::doScreenShot()
 }   // doScreenShot
 
 // ----------------------------------------------------------------------------
+/** Saves the current frame in a file.
+ */
+void IrrDriver::doFrameShot(uint64_t frameNumber)
+{
+    char frameNumberStr[7];
+    sprintf(frameNumberStr, "%06" PRIu64, frameNumber);
+    video::IImage* image = m_video_driver->createScreenShot();
+    if(!image)
+    {
+        Log::error("IrrDriver", (std::string("Could not create frame ") + std::string(frameNumberStr) + std::string("! Stopping frame recording.")).c_str());
+        Tas::get()->stopRecordingFrames();
+        return;
+    }
+
+    // Screenshot was successful.
+    std::string path(std::string(file_manager->getScreenshotDir()) + std::string(frameNumberStr) + std::string(".jpg"));
+    if (!irr_driver->getVideoDriver()->writeImageToFile(image, path.c_str(), 0)) {
+        Log::error("IrrDriver", (std::string("Unable to save frame ") + std::string(frameNumberStr) + std::string("! Stopping frame recording.")).c_str());
+        Tas::get()->stopRecordingFrames();
+    }
+    image->drop();
+}   // doFrameShot
+
+// ----------------------------------------------------------------------------
 /** Update, called once per frame.
  *  \param dt Time since last update
  *  \param is_loading True if the rendering is called during loading of world,
@@ -1933,6 +1958,7 @@ void IrrDriver::update(float dt, bool is_loading)
     }
 
     if (m_request_screenshot) doScreenShot();
+    if (Tas::get()->isRecordingFrames()) Tas::get()->saveFrame();
 
     // Enable this next print statement to get render information printed
     // E.g. number of triangles rendered, culled etc. The stats is only

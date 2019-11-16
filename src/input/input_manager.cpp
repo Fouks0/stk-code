@@ -306,6 +306,25 @@ void InputManager::handleStaticAction(int key, int value)
             }
             break;
         }
+        case IRR_KEY_L: // Record frames
+        {
+            if (value)
+            {
+                if (!Tas::get()->isRecordingFrames())
+                {
+                    Log::info("TAS", "Start recording frames.");
+                    Tas::get()->startRecordingFrames();
+                }
+                else
+                {
+                    char frameNumberStr[7];
+                    sprintf(frameNumberStr, "%06" PRIu64, Tas::get()->getFrameNumber());
+                    Log::info("TAS", (std::string("Stop recording frames at ") + std::string(frameNumberStr)).c_str());
+                    Tas::get()->stopRecordingFrames();
+                }
+            }
+            break;
+        }
 
         case IRR_KEY_SNAPSHOT:
         case IRR_KEY_PRINT:
