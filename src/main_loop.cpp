@@ -43,6 +43,7 @@
 #include "race/history.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/state_manager.hpp"
+#include "tas/tas.hpp"
 #include "utils/profiler.hpp"
 #include "utils/time.hpp"
 
@@ -330,6 +331,12 @@ void MainLoop::run()
 
     while (!m_abort)
     {
+        if (Tas::get()->getGameStatus() == Tas::GameStatus::PAUSED)
+        {
+            irr_driver->getDevice()->run(); // To allow resuming by pressing P again or Tick Advance with O
+            continue;
+        }
+        else if (Tas::get()->getGameStatus() == Tas::GameStatus::TICK_ADVANCE) Tas::get()->pause();
 #ifdef WIN32
         if (parent != 0 && parent != INVALID_HANDLE_VALUE)
         {

@@ -48,6 +48,7 @@
 #include "states_screens/online/networking_lobby.hpp"
 #include "states_screens/options/options_screen_device.hpp"
 #include "states_screens/state_manager.hpp"
+#include "tas/tas.hpp"
 #include "utils/debug.hpp"
 #include "utils/string_utils.hpp"
 
@@ -274,6 +275,34 @@ void InputManager::handleStaticAction(int key, int value)
             {
                 cam->setAngularVelocity(value ?
                     -UserConfigParams::m_fpscam_max_angular_velocity : 0);
+            }
+            break;
+        }
+
+        // TAS stuff
+        case IRR_KEY_P: // Pause/unpause
+        {
+            if (value)
+            {
+                if (Tas::get()->getGameStatus() != Tas::GameStatus::PAUSED)
+                {
+                    Tas::get()->pause();
+                    Log::info("TAS", "Pausing.");
+                }
+                else
+                {
+                    Tas::get()->resume();
+                    Log::info("TAS", "Resuming.");
+                }
+            }
+            break;
+        }
+        case IRR_KEY_O: // Tick Advance
+        {
+            if (value)
+            {
+                Tas::get()->tickAdvance();
+                Log::info("TAS", "Tick Advance.");
             }
             break;
         }

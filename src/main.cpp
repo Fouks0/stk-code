@@ -241,6 +241,7 @@
 #include "states_screens/options/user_screen.hpp"
 #include "states_screens/dialogs/init_android_dialog.hpp"
 #include "states_screens/dialogs/message_dialog.hpp"
+#include "tas/tas.hpp"
 #include "tracks/arena_graph.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
@@ -1725,6 +1726,7 @@ void initRest()
     history                 = new History              ();
     ReplayPlay::create();
     ReplayRecorder::create();
+    Tas::create();
     material_manager        = new MaterialManager      ();
     track_manager           = new TrackManager         ();
     kart_properties_manager = new KartPropertiesManager();
