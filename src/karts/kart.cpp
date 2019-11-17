@@ -1024,7 +1024,7 @@ void Kart::finishedRace(float time, bool from_server)
                 won_the_race = true;
 
             m->addMessage((won_the_race ?
-            _("You won the race!") : _("You finished the race!")) ,
+            _("FINISH! Alright, first place!") : _("FINISH!")) ,
             this, 2.0f, video::SColor(255, 255, 255, 255), true, true, true);
         }
     }
