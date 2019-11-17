@@ -90,16 +90,12 @@
                                      wrap_around="true" />
                         </div>
                         <spacer width="3%"/>
-                        <label id="target-value-text" proportion="3" I18N="In the track info screen" text="Number of laps" text_align="left"/>
-                    </div>
-                    <spacer width="1" height="2%"/>
-                    <div width="100%" height="fit" layout="horizontal-row" >
+                        <label id="target-value-text" proportion="1" I18N="In the track info screen" text="laps" text_align="left"/>
                         <div proportion="1" height="fit" layout="horizontal-row">
                             <spinner id="ai-spinner" width="100%" min_value="1" max_value="20" align="center"
                                      wrap_around="true" />
                         </div>
-                        <spacer width="3%"/>
-                        <label id="ai-text" proportion="3" I18N="In the track info screen" text="Number of AI karts" text_align="left"/>
+                        <label id="ai-text" proportion="3" I18N="In the track info screen" text="AI karts" text_align="left"/>
                     </div>
                     <spacer width="1" height="2%"/>
                     <div width="100%" height="fit" layout="horizontal-row" >
@@ -121,6 +117,22 @@
                         <spacer width="3%"/>
                         <label id="record-race-text" proportion="3" I18N="In the track info screen" text="Record the race for ghost replay" text_align="left"/>
                     </div>
+                    <div width="100%" height="fit" layout="horizontal-row" >
+                        <div proportion="1" height="fit" layout="horizontal-row">
+                            <div width="100%" height="fit" text-align="center" layout="vertical-row" >
+                                <checkbox id="record-inputs" align="center"/>
+                            </div>
+                        </div>
+                        <spacer width="3%"/>
+                        <label id="record-tas-text" proportion="3" I18N="In the track info screen" text="Record inputs" text_align="left"/>
+                    </div>
+                    <div width="100%" height="fit" layout="horizontal-row" >
+                        <label id="inputs-filename-text" proportion="1" I18N="In the track info screen" text="Load inputs file"/>
+                        <spacer width="3%"/>
+                        <textbox id="inputs-filename" proportion="3" height="fit"/>
+                    </div>
+
+
                 </box><!-- Race options box -->
             </div>
         </div>

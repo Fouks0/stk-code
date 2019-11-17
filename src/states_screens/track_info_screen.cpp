@@ -37,6 +37,7 @@
 #include "race/highscore_manager.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/state_manager.hpp"
+#include "tas/tas.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
 #include "utils/string_utils.hpp"
@@ -71,8 +72,12 @@ void TrackInfoScreen::loadedFromFile()
     m_ai_kart_label         = getWidget<LabelWidget>("ai-text");
     m_option                = getWidget<CheckBoxWidget>("option");
     m_record_race           = getWidget<CheckBoxWidget>("record");
+    m_record_inputs_cb      = getWidget<CheckBoxWidget>("record-inputs");
+    m_input_filename_tb     = getWidget<TextBoxWidget>("inputs-filename");
     m_option->setState(false);
     m_record_race->setState(false);
+    m_record_inputs_cb->setState(false);
+    m_input_filename_tb->setText("");
 
     m_highscore_label = getWidget<LabelWidget>("highscores");
 
@@ -117,6 +122,7 @@ void TrackInfoScreen::setTrack(Track *track)
 void TrackInfoScreen::init()
 {
     m_record_this_race = false;
+    m_record_inputs    = false;
 
     const int max_arena_players = m_track->getMaxArenaPlayers();
     const bool has_laps         = race_manager->modeHasLaps();
@@ -222,7 +228,7 @@ void TrackInfoScreen::init()
         m_target_value_spinner->setValue(m_track->getActualNumberOfLap());
         race_manager->setNumLaps(m_target_value_spinner->getValue());
 
-        m_target_value_label->setText(_("Number of laps"), false);
+        m_target_value_label->setText(_("laps"), false);
     }
 
     // Number of AIs
@@ -330,6 +336,7 @@ void TrackInfoScreen::init()
         m_record_race->setActive(true);
         m_record_race->setState(false);
     }
+    m_record_inputs_cb->setState(false);
 
     // ---- High Scores
     m_highscore_label->setVisible(has_highscores);
@@ -421,6 +428,7 @@ void TrackInfoScreen::updateHighScores()
 void TrackInfoScreen::onEnterPressedInternal()
 {
     race_manager->setRecordRace(m_record_this_race);
+    race_manager->setRecordInputs(m_record_inputs);
     // Create a copy of member variables we still need, since they will
     // not be accessible after dismiss:
     const int num_laps = race_manager->modeHasLaps() ? m_target_value_spinner->getValue()
@@ -479,6 +487,7 @@ void TrackInfoScreen::onEnterPressedInternal()
     PlayerManager::getCurrentPlayer()->setCurrentChallenge("");
 
     race_manager->setNumKarts(num_ai + local_players);
+    Tas::get()->setInputsFilename(StringUtils::wideToUtf8(m_input_filename_tb->getText()));
     race_manager->startSingleRace(m_track->getIdent(), num_laps, false);
 }   // onEnterPressedInternal
 
@@ -583,6 +592,10 @@ void TrackInfoScreen::eventCallback(Widget* widget, const std::string& name,
         {
             m_ai_kart_spinner->setActive(true);
         }
+    }
+    else if (name == "record-inputs")
+    {
+        m_record_inputs = m_record_inputs_cb->getState();
     }
     else if (name=="ai-spinner")
     {

@@ -28,6 +28,7 @@ class BareNetworkString;
   */
 class KartControl
 {
+    friend class Tas;
 public:
     /** The skidding control state: SC_NONE: not pressed;
      *  SC_NO_DIRECTION: pressed, but no steering;

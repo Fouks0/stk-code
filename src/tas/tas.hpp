@@ -22,6 +22,28 @@
 #include <cassert>
 #include <memory>
 
+// Stores an input
+class TasInput
+{
+private:
+    uint8_t  m_action;
+    int32_t  m_steer;
+    uint16_t m_accel;
+
+public:
+    TasInput(uint8_t action = 0, int32_t steer = 0, uint16_t accel = 0) : m_action(action), m_steer(steer), m_accel(accel) {}
+
+    std::string toString() const;
+    bool parse(std::string);
+
+    uint8_t  getAction() const {return m_action;}
+    int32_t  getSteer () const {return m_steer;}
+    uint16_t getAccel () const {return m_accel;}
+};
+
+class AbstractKart;
+class StandardRace;
+
 // Class for TAS tools
 class Tas
 {
@@ -33,21 +55,41 @@ private:
     // Static pointer to the one instance of the Tas object.
     static Tas *m_tas;
     
+    // Race infos
+    bool m_inited_for_race;
+    uint64_t m_current_tick;
+    StandardRace *m_standard_race; // Current World
+    AbstractKart *m_player_kart; // Current Player Kart. For now, only support Single Player TASes
+
     // Frame recording, in order to assemble them later to make a TAS video
     bool m_is_recording_frames;
     uint64_t m_frame_number;
+
+    // Data for inputs recording.
+    bool m_is_recording_inputs;
+    std::vector<TasInput> m_recorded_inputs;
+
+    // Data for inputs replay.
+    bool m_has_started; // For StartUp Boost
+    std::string m_inputs_to_play_filename;
+    std::vector<TasInput> m_inputs_to_play;
     
     Tas();
     ~Tas();
 public:
     void  init();
+    void  initForRace(bool);
     void  reset();
+    void  resetForRace();
     static void create() {
         assert(!m_tas);
         m_tas = new Tas();
     }
     static Tas *get() {return m_tas;}
     static void destroy() {delete m_tas; m_tas = NULL;}
+    void  update();
+
+    unsigned int getCurrentKartId() const;
     
     // Press P to pause/unpause, and O to advance one tick
     GameStatus getGameStatus() {return m_game_status;}
@@ -61,6 +103,17 @@ public:
     void saveFrame();
     void startRecordingFrames();
     void stopRecordingFrames();
+
+    // Inputs recording.
+    void  saveInputs();
+    bool  isInputsRecordingFinished() const {return m_current_tick >= m_recorded_inputs.size();}
+
+    // Inputs replay.
+    void  setInputsFilename(std::string filename) {m_inputs_to_play_filename = filename;}
+    bool  loadInputs();
+    bool  isInputReplayFinished() const;
+    void  applyCurrentInput();
+    TasInput getCurrentInput() const;
 };
 
 #endif

@@ -71,6 +71,7 @@
 #include "states_screens/race_gui.hpp"
 #include "states_screens/race_result_gui.hpp"
 #include "states_screens/state_manager.hpp"
+#include "tas/tas.hpp"
 #include "tracks/check_manager.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
@@ -394,6 +395,7 @@ void World::reset(bool restart)
         Log::info("World", "Start Recording race.");
         ReplayRecorder::get()->init();
     }
+    Tas::get()->initForRace(race_manager->isRecordingInputs());
 
     // Reset all data structures that depend on number of karts.
     irr_driver->reset();
@@ -605,6 +607,9 @@ World::~World()
     race_manager->setWatchingReplay(false);
     race_manager->setTimeTarget(0.0f);
     race_manager->setSpareTireKartNum(0);
+
+    race_manager->setRecordInputs(false);
+    Tas::get()->reset();
 
     Camera::removeAllCameras();
 
@@ -1105,14 +1110,21 @@ void World::update(int ticks)
     const int kart_amount = (int)m_karts.size();
     for (int i = 0 ; i < kart_amount; ++i)
     {
-        SpareTireAI* sta =
-            dynamic_cast<SpareTireAI*>(m_karts[i]->getController());
-        // Update all karts that are not eliminated
-        if(!m_karts[i]->isEliminated() || (sta && sta->isMoving()))
+        if (Tas::get()->getCurrentKartId() == m_karts[i]->getWorldKartId() && !Tas::get()->isInputReplayFinished())
+        {
+            Tas::get()->applyCurrentInput();
             m_karts[i]->update(ticks);
-        if (isStartPhase())
-            m_karts[i]->makeKartRest();
+        }
+        else
+        {
+            SpareTireAI* sta = dynamic_cast<SpareTireAI*>(m_karts[i]->getController());
+            // Update all karts that are not eliminated
+            if(!m_karts[i]->isEliminated() || (sta && sta->isMoving()))
+                m_karts[i]->update(ticks);
+        }
+        if (isStartPhase()) m_karts[i]->makeKartRest();
     }
+    Tas::get()->update();
     PROFILER_POP_CPU_MARKER();
     if(race_manager->isRecordingRace()) ReplayRecorder::get()->update(ticks);
 

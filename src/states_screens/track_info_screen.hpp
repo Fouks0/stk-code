@@ -21,6 +21,7 @@
 #define HEADER_TRACK_INFO_SCREEN_HPP
 
 #include "guiengine/screen.hpp"
+#include "guiengine/widgets/text_box_widget.hpp"
 
 namespace GUIEngine
 {
@@ -45,6 +46,10 @@ class TrackInfoScreen : public GUIEngine::Screen,
     Track *m_track;
 
     bool m_record_this_race;
+
+    bool m_record_inputs;
+
+    std::string m_inputs_filename;
 
     bool m_is_soccer;
 
@@ -79,6 +84,12 @@ class TrackInfoScreen : public GUIEngine::Screen,
 
     /** Check box for record race. */
     GUIEngine::CheckBoxWidget* m_record_race;
+
+    /** Check box for record inputs. */
+    GUIEngine::CheckBoxWidget* m_record_inputs_cb;
+
+    /** Inputs filename field. */
+    GUIEngine::TextBoxWidget *m_input_filename_tb;
 
     /** The label of the highscore list. */
     GUIEngine::LabelWidget* m_highscore_label;
