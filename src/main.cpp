@@ -1021,6 +1021,7 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
         UserConfigParams::m_music = false;
     }
 
+    UserConfigParams::m_check_debug = true;
     if (UserConfigParams::m_artist_debug_mode)
     {
         if (CommandLine::has("--camera-wheel-debug"))
@@ -1040,8 +1041,6 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
         }
         if(CommandLine::has("--physics-debug"))
             UserConfigParams::m_physics_debug=1;
-        if(CommandLine::has("--check-debug"))
-            UserConfigParams::m_check_debug=true;
     }
 
     bool init_user = CommandLine::has("--init-user");
@@ -1628,6 +1627,8 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
     // to the application --> ignore it
     CommandLine::has("-psn");
 #endif
+
+    if(CommandLine::has("--no-checklines")) UserConfigParams::m_check_debug = false;
 
     CommandLine::reportInvalidParameters();
 
