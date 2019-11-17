@@ -183,6 +183,7 @@ private:
 
 
 public:
+          MaxSpeed();
           MaxSpeed(AbstractKart *kart);
 
     void  increaseMaxSpeed(unsigned int category, float add_speed,

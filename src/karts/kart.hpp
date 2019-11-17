@@ -67,6 +67,7 @@ class TerrainInfo;
  */
 class Kart : public AbstractKart
 {
+    friend class SaveState;
     friend class Skidding;
 private:
     int m_network_finish_check_ticks;

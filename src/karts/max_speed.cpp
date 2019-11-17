@@ -48,6 +48,15 @@
  *  At the end the maximum is capped by a value specified in stk_config
  *  (to avoid issues with physics etc).
 */
+MaxSpeed::MaxSpeed()
+{
+    m_kart = NULL;
+    // Initialise m_add_engine_force since it might be queried before
+    // update() is called.
+    m_add_engine_force  = 0;
+    // This can be used if command line option -N is used
+    m_current_max_speed = 0;
+}
 MaxSpeed::MaxSpeed(AbstractKart *kart)
 {
     m_kart = kart;

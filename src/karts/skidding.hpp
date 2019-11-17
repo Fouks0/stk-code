@@ -105,6 +105,7 @@ private:
                               float *bonus_force) const;
     float updateSteering(float steer, int ticks);
 public:
+         Skidding();
          Skidding(Kart *kart);
         ~Skidding();
     void reset();

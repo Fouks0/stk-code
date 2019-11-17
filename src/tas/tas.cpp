@@ -75,6 +75,7 @@ void Tas::reset()
     m_has_started = false;
     m_inputs_to_play_filename = "";
     m_inputs_to_play.clear();
+    m_save_state.reset();
 }
 
 void Tas::resetForRace()
@@ -245,4 +246,42 @@ TasInput Tas::getCurrentInput() const
 {
     if (isInputReplayFinished()) return TasInput();
     else return m_inputs_to_play[m_current_tick];
+}
+
+void Tas::saveState()
+{
+    if (!m_inited_for_race || !m_standard_race || !m_player_kart)
+    {
+        Log::info("TAS", "Cannot save state here!");
+        return;
+    }
+    if (m_current_tick < 603)
+    {
+        Log::info("TAS", "Cannot save state before start!");
+        return;
+    }
+    m_save_state.create(m_current_tick, m_standard_race, m_player_kart);
+    if (m_save_state.isValid()) Log::info("TAS", (std::string("State saved for tick ") + std::to_string(m_save_state.getTick())).c_str());
+}
+
+void Tas::restoreState()
+{
+    if (!m_save_state.isValid())
+    {
+        Log::info("TAS", "No valid state to restore!");
+        return;
+    }
+    if (!m_inited_for_race || !m_standard_race || !m_player_kart)
+    {
+        Log::info("TAS", "Cannot restore state here!");
+        return;
+    }
+    if (m_current_tick < 603)
+    {
+        Log::info("TAS", "Cannot restore state before start!");
+        return;
+    }
+    m_save_state.restore(m_standard_race, m_player_kart);
+    m_current_tick = m_save_state.getTick();
+    Log::info("TAS", (std::string("Restored state to tick ") + std::to_string(m_current_tick)).c_str());
 }

@@ -32,6 +32,7 @@
 
 class KartMotionState : public btMotionState
 {
+    friend class SaveState;
 private:
     btTransform m_center_of_mass;
 

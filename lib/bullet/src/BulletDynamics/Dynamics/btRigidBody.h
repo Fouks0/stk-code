@@ -56,7 +56,7 @@ enum	btRigidBodyFlags
 ///Deactivated (sleeping) rigid bodies don't take any processing time, except a minor broadphase collision detection impact (to allow active objects to activate/wake up sleeping objects)
 class btRigidBody  : public btCollisionObject
 {
-
+	friend class SaveState;
 	btMatrix3x3	m_invInertiaTensorWorld;
 	btVector3		m_linearVelocity;
 	btVector3		m_angularVelocity;
@@ -104,7 +104,7 @@ protected:
 
 
 public:
-
+	btRigidBody() {}
 
 	///The btRigidBodyConstructionInfo structure provides information to create a rigid body. Setting mass to zero creates a fixed (non-dynamic) rigid body.
 	///For dynamic objects, you can use the collision shape to approximate the local inertia tensor, otherwise use the zero vector (default argument)

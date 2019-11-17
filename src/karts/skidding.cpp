@@ -37,6 +37,10 @@
 
 /** Constructor of the skidding object.
  */
+Skidding::Skidding()
+{
+    m_kart = NULL;
+}
 Skidding::Skidding(Kart *kart)
 {
 #ifdef SKID_DEBUG

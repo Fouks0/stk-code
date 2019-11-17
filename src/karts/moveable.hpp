@@ -44,6 +44,7 @@ class Material;
 class Moveable: public NoCopy,
                 public SmoothNetworkBody
 {
+    friend class SaveState;
 private:
     Vec3                   m_velocityLC;      /**<Velocity in kart coordinates. */
     /** The 'real' heading between -180 to 180 degrees. */

@@ -325,6 +325,21 @@ void InputManager::handleStaticAction(int key, int value)
             }
             break;
         }
+        case IRR_KEY_Z: // Save and Restore Save States
+        {
+            if (value)
+            {
+                if (control_is_pressed)
+                {
+                    Tas::get()->saveState();
+                }
+                else
+                {
+                    Tas::get()->restoreState();
+                }
+            }
+            break;
+        }
 
         case IRR_KEY_SNAPSHOT:
         case IRR_KEY_PRINT:

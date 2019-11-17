@@ -50,7 +50,7 @@ typedef btAlignedObjectArray<class btCollisionObject*> btCollisionObjectArray;
 /// They can be added to the btCollisionWorld.
 ATTRIBUTE_ALIGNED16(class)	btCollisionObject
 {
-
+    friend class SaveState;
 protected:
 
 	btTransform	m_worldTransform;

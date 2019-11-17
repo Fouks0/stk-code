@@ -30,6 +30,7 @@ class SFXBase;
  */
 class WorldStatus
 {
+friend class SaveState;
 public:
     /** Different clock types for a race. */
     enum ClockType

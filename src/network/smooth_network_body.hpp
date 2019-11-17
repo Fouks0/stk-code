@@ -37,14 +37,15 @@
 
 class SmoothNetworkBody
 {
-private:
+public:
+    friend class SaveState;
     enum SmoothingState
     {
         SS_NONE = 0,
         SS_TO_ADJUST,
         SS_TO_REAL
     };
-
+private:
     /** Client prediction in networked games might cause the visual
      *  and physical position to be different. For visual smoothing
      *  these variable accumulate the error and reduces it over time. */

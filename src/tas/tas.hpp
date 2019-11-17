@@ -22,6 +22,8 @@
 #include <cassert>
 #include <memory>
 
+#include "savestate.hpp"
+
 // Stores an input
 class TasInput
 {
@@ -74,6 +76,9 @@ private:
     std::string m_inputs_to_play_filename;
     std::vector<TasInput> m_inputs_to_play;
     
+    // Save State
+    SaveState m_save_state;
+
     Tas();
     ~Tas();
 public:
@@ -114,6 +119,10 @@ public:
     bool  isInputReplayFinished() const;
     void  applyCurrentInput();
     TasInput getCurrentInput() const;
+
+    // Save States
+    void saveState();
+    void restoreState();
 };
 
 #endif

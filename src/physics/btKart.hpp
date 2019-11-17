@@ -30,6 +30,7 @@ struct btWheelContactPoint;
  */
 class btKart : public btActionInterface
 {
+    friend class SaveState;
 public:
     class btVehicleTuning
     {
