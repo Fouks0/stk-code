@@ -299,6 +299,7 @@ void Tas::restoreState()
     m_save_state.restore(m_standard_race, m_player_kart);
     m_current_tick = m_save_state.getTick();
     m_stats = m_save_state.getStats();
+    loadInputs();
     Log::info("TAS", (std::string("Restored state to tick ") + std::to_string(m_current_tick)).c_str());
 }
 
