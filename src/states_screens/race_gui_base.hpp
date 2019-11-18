@@ -189,6 +189,9 @@ protected:
 
     /** Texture for the lap icon*/
     video::ITexture* m_lap_flag;
+
+    /** Texture for the rank icon*/
+    video::ITexture* m_rank_icon;
     
     RaceGUIMultitouch* m_multitouch_gui;
 

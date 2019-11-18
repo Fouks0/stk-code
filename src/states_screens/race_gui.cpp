@@ -22,6 +22,7 @@
 using namespace irr;
 
 #include <algorithm>
+#include <iomanip>
 #include <limits>
 
 #include "challenges/unlock_manager.hpp"
@@ -52,6 +53,7 @@ using namespace irr;
 #include "network/protocols/client_lobby.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/race_gui_multitouch.hpp"
+#include "tas/tas.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_object_manager.hpp"
 #include "utils/constants.hpp"
@@ -244,6 +246,8 @@ void RaceGUI::renderGlobal(float dt)
 #ifndef SERVER_ONLY
     RaceGUIBase::renderGlobal(dt);
     cleanupMessages(dt);
+
+    drawTasInfos();
 
     // Special case : when 3 players play, use 4th window to display such
     // stuff (but we must clear it)
@@ -792,6 +796,7 @@ void RaceGUI::drawEnergyMeter(int x, int y, const AbstractKart *kart,
 }   // drawEnergyMeter
 
 //-----------------------------------------------------------------------------
+
 /** Draws the rank of a player.
  *  \param kart The kart of the player.
  *  \param offset Offset of top left corner for this display (for splitscreen).
@@ -800,85 +805,70 @@ void RaceGUI::drawEnergyMeter(int x, int y, const AbstractKart *kart,
  *  \param meter_height Height of the meter (inside which the rank is shown).
  *  \param dt Time step size.
  */
-void RaceGUI::drawRank(const AbstractKart *kart,
-                      const core::vector2df &offset,
-                      float min_ratio, int meter_width,
-                      int meter_height, float dt)
+void RaceGUI::drawRank(const AbstractKart *kart, float min_ratio, float dt)
 {
     static video::SColor color = video::SColor(255, 255, 255, 255);
-
-    // Draw rank
     WorldWithRank *world = dynamic_cast<WorldWithRank*>(World::getWorld());
-    if (!world || !world->displayRank())
-        return;
-
-    int id = kart->getWorldKartId();
-
-    if (m_animation_states[id] == AS_NONE)
-    {
-        if (m_last_ranks[id] != kart->getPosition())
-        {
-            m_rank_animation_duration[id] = 0.0f;
-            m_animation_states[id] = AS_SMALLER;
-        }
-    }
-    else
-    {
-        m_rank_animation_duration[id] += dt;
-    }
-
-    float scale = 1.0f;
-    int rank = kart->getPosition();
-    const float DURATION = 0.4f;
-    const float MIN_SHRINK = 0.3f;
-    if (m_animation_states[id] == AS_SMALLER)
-    {
-        scale = 1.0f - m_rank_animation_duration[id]/ DURATION;
-        rank = m_last_ranks[id];
-        if (scale < MIN_SHRINK)
-        {
-            m_animation_states[id] = AS_BIGGER;
-            m_rank_animation_duration[id] = 0.0f;
-            // Store the new rank
-            m_last_ranks[id] = kart->getPosition();
-            scale = MIN_SHRINK;
-        }
-    }
-    else if (m_animation_states[id] == AS_BIGGER)
-    {
-        scale = m_rank_animation_duration[id] / DURATION + MIN_SHRINK;
-        rank = m_last_ranks[id];
-        if (scale > 1.0f)
-        {
-            m_animation_states[id] = AS_NONE;
-            scale = 1.0f;
-        }
-
-    }
-    else
-    {
-        m_last_ranks[id] = kart->getPosition();
-    }
-
+    if (!world || !world->displayRank()) return;
     gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
-    
     int font_height = font->getDimension(L"X").Height;
-    font->setScale((float)meter_height / font_height * 0.4f * scale);
-    font->setShadow(video::SColor(255, 128, 0, 0));
-    std::ostringstream oss;
-    oss << rank; // the current font has no . :(   << ".";
-
+    int icon_width = irr_driver->getActualScreenSize().Height/20;
     core::recti pos;
-    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.64f*meter_width),
-                                           int(offset.Y - 0.49f*meter_height));
-    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.64f*meter_width),
-                                          int(offset.Y - 0.49f*meter_height));
+    pos.UpperLeftCorner.X   = irr_driver->getActualScreenSize().Width - m_lap_width - icon_width - irr_driver->getActualScreenSize().Width/64;
+    pos.LowerRightCorner.X  = irr_driver->getActualScreenSize().Width - irr_driver->getActualScreenSize().Width/64;
+    pos.UpperLeftCorner.Y   = irr_driver->getActualScreenSize().Height*15/100;
+    pos.LowerRightCorner.Y  = irr_driver->getActualScreenSize().Height*15/100 + font_height;
 
     font->setBlackBorder(true);
-    font->draw(oss.str().c_str(), pos, color, true, true);
+    std::ostringstream ossRank;
+    ossRank << kart->getPosition() << "/" << world->getNumKarts();
+    font->draw(ossRank.str().c_str(), pos, color);
     font->setBlackBorder(false);
-    font->setScale(1.0f);
+
+    core::rect<s32> indicator_pos(irr_driver->getActualScreenSize().Width - icon_width - irr_driver->getActualScreenSize().Width/64,
+                                  pos.UpperLeftCorner.Y,
+                                  irr_driver->getActualScreenSize().Width - irr_driver->getActualScreenSize().Width/64,
+                                  pos.UpperLeftCorner.Y + icon_width);
+    core::rect<s32> source_rect(core::position2d<s32>(0,0), m_rank_icon->getSize());
+    draw2DImage(m_rank_icon, indicator_pos, source_rect, NULL, NULL, true);
 }   // drawRank
+
+// Draws the speed of a player.
+void RaceGUI::drawSpeed(const AbstractKart *kart, const core::vector2df &offset, int meter_width, int meter_height)
+{
+    static video::SColor color = video::SColor(255, 255, 255, 255);
+    gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+    font->setScale(meter_width/256.);
+    core::recti pos;
+    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.64f*meter_width), int(offset.Y - 0.52f*meter_height));
+    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.64f*meter_width), int(offset.Y - 0.52f*meter_height));
+    std::ostringstream ossSpeed;
+    ossSpeed << std::fixed << std::setprecision(1) << kart->getSpeed()/KILOMETERS_PER_HOUR;
+    font->draw(ossSpeed.str().c_str(), pos, color, true, true);
+    font->setScale(1.0f);
+}
+
+void RaceGUI::drawTasInfos()
+{
+    gui::ScalableFont* font = GUIEngine::getFont();
+    font->setScale(0.7f);
+    font->setShadow(video::SColor(255, 0, 0, 0));
+    video::SColor color = video::SColor(255, 255, 255, 255);
+    core::rect<s32> pos(irr_driver->getActualScreenSize().Width - m_timer_width,
+                        irr_driver->getActualScreenSize().Height*18/64,
+                        irr_driver->getActualScreenSize().Width,
+                        irr_driver->getActualScreenSize().Height*40/64);
+
+    font->draw(Tas::get()->getReadableInfos().c_str(), pos, color, true, true);
+
+    font->setScale(0.6f);
+    core::rect<s32> pos2(0,
+                         irr_driver->getActualScreenSize().Height*24/64,
+                         320,
+                         irr_driver->getActualScreenSize().Height*40/64);
+    font->draw(Tas::get()->getReadableSurroundingInputsToPlay().c_str(), pos2, color, true, true);
+    font->setScale(1.0f);
+} // drawTasInfos
 
 //-----------------------------------------------------------------------------
 /** Draws the speedometer, the display of available nitro, and
@@ -923,7 +913,8 @@ void RaceGUI::drawSpeedEnergyRank(const AbstractKart* kart,
 
     const float speed =  kart->getSpeed();
 
-    drawRank(kart, offset, min_ratio, meter_width, meter_height, dt);
+    drawRank(kart, min_ratio, dt);
+    drawSpeed(kart, offset, meter_width, meter_height);
 
 
     if(speed <=0) return;  // Nothing to do if speed is negative.
@@ -1257,24 +1248,20 @@ void RaceGUI::drawLap(const AbstractKart* kart,
     if (lap < 0 ) return;
 
     // Display lap flag
-
-
-    int icon_width = irr_driver->getActualScreenSize().Height/19;
-    core::rect<s32> indicator_pos(viewport.LowerRightCorner.X - (icon_width+10),
+    int icon_width = irr_driver->getActualScreenSize().Height/20;
+    pos.UpperLeftCorner.X   = irr_driver->getActualScreenSize().Width - m_lap_width - icon_width - irr_driver->getActualScreenSize().Width/64;
+    pos.LowerRightCorner.X  = irr_driver->getActualScreenSize().Width - irr_driver->getActualScreenSize().Width/64;
+    pos.UpperLeftCorner.Y   = irr_driver->getActualScreenSize().Height*10/100;
+    pos.LowerRightCorner.Y  = irr_driver->getActualScreenSize().Height*10/100 + m_font_height;
+    core::rect<s32> indicator_pos(irr_driver->getActualScreenSize().Width - icon_width - irr_driver->getActualScreenSize().Width/64,
                                   pos.UpperLeftCorner.Y,
-                                  viewport.LowerRightCorner.X - 10,
+                                  irr_driver->getActualScreenSize().Width - irr_driver->getActualScreenSize().Width/64,
                                   pos.UpperLeftCorner.Y + icon_width);
-    core::rect<s32> source_rect(core::position2d<s32>(0,0),
-                                               m_lap_flag->getSize());
-    draw2DImage(m_lap_flag,indicator_pos,source_rect,
-        NULL,NULL,true);
-
-    pos.UpperLeftCorner.X -= icon_width;
-    pos.LowerRightCorner.X -= icon_width;
+    core::rect<s32> source_rect(core::position2d<s32>(0,0), m_rank_icon->getSize());
+    draw2DImage(m_lap_flag, indicator_pos, source_rect, NULL, NULL, true);
 
     std::ostringstream out;
     out << lap + 1 << "/" << race_manager->getNumLaps();
-
     gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
     font->setBlackBorder(true);
     font->draw(out.str().c_str(), pos, color);

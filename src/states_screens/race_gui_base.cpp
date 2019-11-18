@@ -104,6 +104,7 @@ RaceGUIBase::RaceGUIBase()
     m_gauge_empty           = irr_driver->getTexture(FileManager::GUI_ICON, "gauge_empty.png");
     m_gauge_goal            = irr_driver->getTexture(FileManager::GUI_ICON, "gauge_goal.png");
     m_lap_flag              = irr_driver->getTexture(FileManager::GUI_ICON, "lap_flag.png");
+    m_rank_icon             = irr_driver->getTexture(FileManager::GUI_ICON, "challenge.png");
     m_dist_show_overlap     = 2;
     m_icons_inertia         = 2;
 

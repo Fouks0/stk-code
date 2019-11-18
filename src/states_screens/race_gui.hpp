@@ -126,9 +126,11 @@ private:
                                 const core::recti &viewport,
                                 const core::vector2df &scaling);
     void drawRank              (const AbstractKart *kart,
+                                float min_ratio, float dt);
+    void drawSpeed             (const AbstractKart *kart,
                                 const core::vector2df &offset,
-                                float min_ratio, int meter_width,
-                                int meter_height, float dt);
+                                int meter_width, int meter_height);
+    void drawTasInfos          ();
 
     /* Helper functions for drawing meters */
 

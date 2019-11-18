@@ -69,6 +69,7 @@ class Kart : public AbstractKart
 {
     friend class SaveState;
     friend class Skidding;
+    friend class Tas;
 private:
     int m_network_finish_check_ticks;
     int m_network_confirmed_finish_ticks;

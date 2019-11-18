@@ -30,6 +30,7 @@
 #include "network/smooth_network_body.hpp"
 #include "tracks/terrain_info.hpp"
 #include "ISceneNode.h"
+#include "stats.hpp"
 
 class AbstractKart;
 class Kart;
@@ -51,6 +52,7 @@ private:
     uint64_t m_tick;
     uint64_t m_time_ticks; // For World
     double m_time;
+    Stats m_stats;
 
     // SmoothNetworkBody attributes
     std::pair<Vec3, btQuaternion> kartStartSmoothingPostion;
@@ -252,11 +254,12 @@ private:
 public:
     SaveState() {reset();}
     void reset();
-    void create(uint64_t, StandardRace*, AbstractKart*);
+    void create(uint64_t, Stats, StandardRace*, AbstractKart*);
     void restore(StandardRace*, AbstractKart*);
 
     uint64_t getTick() const {return m_tick;}
     bool isValid() const {return m_valid;}
+    Stats getStats() const {return m_stats;}
 };
 
 #endif

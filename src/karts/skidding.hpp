@@ -39,6 +39,7 @@ class ShowCurve;
 class Skidding
 {
 friend class KartRewinder;
+friend class Tas;
 public:
     LEAK_CHECK();
 private:
