@@ -905,14 +905,14 @@ void FileManager::checkAndCreateConfigDir()
 void FileManager::checkAndCreateAddonsDir()
 {
 #if defined(WIN32) || defined(__CYGWIN__)
-    m_addons_dir  = m_user_config_dir+"../addons/";
+    m_addons_dir  = m_user_config_dir+"../addonsalt/";
 #elif defined(__APPLE__)
     m_addons_dir  = getenv("HOME");
-    m_addons_dir += "/Library/Application Support/SuperTuxKart/Addons/";
+    m_addons_dir += "/Library/Application Support/SuperTuxKart/Addonsalt/";
 #else
     m_addons_dir = checkAndCreateLinuxDir("XDG_DATA_HOME", "supertuxkart",
                                           ".local/share", ".stkaddons");
-    m_addons_dir += "addons/";
+    m_addons_dir += "addonsalt/";
 #endif
 
     if(!checkAndCreateDirectory(m_addons_dir))
