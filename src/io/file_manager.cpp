@@ -173,37 +173,12 @@ FileManager::FileManager()
     }
     if(exe_path.size()==0 || exe_path[exe_path.size()-1]!='/')
         exe_path += "/";
-    if ( getenv ( "SUPERTUXKART_DATADIR" ) != NULL )
-        root_dir = std::string(getenv("SUPERTUXKART_DATADIR"))+"/data/" ;
-#ifdef __APPLE__
-    else if( macSetBundlePathIfRelevant( root_dir ) ) { root_dir = root_dir + "data/"; }
-#endif
-    else if(fileExists("data/", version))
+    if(fileExists("data/", version))
         root_dir = "data/" ;
     else if(fileExists("../data/", version))
         root_dir = "../data/" ;
     else if(fileExists("../../data/", version))
         root_dir = "../../data/" ;
-    // Test for old style build environment, with executable in root of stk
-    else if(fileExists(exe_path+"data/"+version))
-        root_dir = (exe_path+"data/").c_str();
-    // Check for windows cmake style: bld/Debug/bin/supertuxkart.exe
-    else if (fileExists(exe_path + "../../../data/"+version))
-        root_dir = exe_path + "../../../data/";
-    else if (fileExists(exe_path + "../data/"+version))
-    {
-        root_dir = exe_path.c_str();
-        root_dir += "../data/";
-    }
-    else
-    {
-#ifdef SUPERTUXKART_DATADIR
-        root_dir = SUPERTUXKART_DATADIR"/data/";
-#else
-        root_dir = "/usr/local/share/games/supertuxkart/";
-#endif
-    }
-
     if (!m_file_system->existFile((root_dir + version).c_str()))
     {
         Log::error("FileManager", "Could not find file '%s'in any "
@@ -216,31 +191,6 @@ FileManager::FileManager()
     }
 
     addRootDirs(root_dir);
-
-    std::string assets_dir;
-
-    if (getenv("SUPERTUXKART_ASSETS_DIR") != NULL)
-    {
-        assets_dir = std::string(getenv("SUPERTUXKART_ASSETS_DIR"));
-    }
-    else if (fileExists(root_dir + "../../stk-assets"))
-    {
-        assets_dir = root_dir + "../../stk-assets";
-    }
-    else if (fileExists(root_dir + "../../supertuxkart-assets"))
-    {
-        assets_dir = root_dir + "../../supertuxkart-assets";
-    }
-    else if (getenv("SUPERTUXKART_ROOT_PATH") != NULL)
-    {
-        //is this needed?
-        assets_dir = std::string(getenv("SUPERTUXKART_ROOT_PATH"));
-    }
-
-    if (!assets_dir.empty() && assets_dir != root_dir)
-    {
-        addRootDirs(assets_dir);
-    }
 
     checkAndCreateConfigDir();
     checkAndCreateAddonsDir();
