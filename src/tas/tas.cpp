@@ -144,8 +144,8 @@ void Tas::init()
 void Tas::initForRace(bool record_inputs)
 {
     resetForRace();
-    StandardRace* sr = dynamic_cast<StandardRace*>(World::getWorld());
-    if (!sr)
+    LinearWorld* lw = dynamic_cast<LinearWorld*>(World::getWorld());
+    if (!lw)
     {
         Log::warn("TAS", "Cannot init for race here!");
         return;
@@ -154,7 +154,7 @@ void Tas::initForRace(bool record_inputs)
     // Find the Player Kart
     for(unsigned int i = 0 ; i < race_manager->getNumberOfKarts() ; i++)
     {
-        AbstractKart *kart = sr->getKart(i);
+        AbstractKart *kart = lw->getKart(i);
         PlayerController *pc = dynamic_cast<PlayerController*>(kart->getController());
         if (pc)
         {
@@ -175,7 +175,7 @@ void Tas::initForRace(bool record_inputs)
     {
         if (loadInputs()) Log::info("TAS", "Inputs successfully loaded.");
     }
-    m_standard_race = sr;
+    m_standard_race = lw;
     m_inited_for_race = true;
     Log::info("TAS", "Successfully inited for the race.");
 }

@@ -36,7 +36,7 @@ class AbstractKart;
 class Kart;
 class btMotionState;
 class btVehicleRaycaster;
-class StandardRace;
+class LinearWorld;
 
 // Stores a Save State (for now, only a kart infos and a bit more like the time)
 // Basically saving most attributes from the kart, which is not really trivial Lol... But as there are pointers and Non Copyables everywhere....
@@ -45,7 +45,7 @@ class StandardRace;
 class SaveState
 {
 private:
-    StandardRace *m_standard_race; // Current World
+    LinearWorld *m_linear_world; // Current World
     Kart *m_player_kart; // Current Player Kart. For now, only support Single Player TASes
 
     bool m_valid;
@@ -254,8 +254,8 @@ private:
 public:
     SaveState() {reset();}
     void reset();
-    void create(uint64_t, Stats, StandardRace*, AbstractKart*);
-    void restore(StandardRace*, AbstractKart*);
+    void create(uint64_t, Stats, LinearWorld*, AbstractKart*);
+    void restore(LinearWorld*, AbstractKart*);
 
     uint64_t getTick() const {return m_tick;}
     bool isValid() const {return m_valid;}

@@ -57,7 +57,7 @@ public:
 };
 
 class AbstractKart;
-class StandardRace;
+class LinearWorld;
 
 // Class for TAS tools
 class Tas
@@ -73,7 +73,7 @@ private:
     // Race infos
     bool m_inited_for_race;
     uint64_t m_current_tick;
-    StandardRace *m_standard_race; // Current World
+    LinearWorld *m_standard_race; // Current World
     AbstractKart *m_player_kart; // Current Player Kart. For now, only support Single Player TASes
 
     // Frame recording, in order to assemble them later to make a TAS video

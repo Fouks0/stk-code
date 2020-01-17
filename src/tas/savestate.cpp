@@ -22,7 +22,7 @@
 #include "karts/abstract_kart.hpp"
 #include "karts/controller/player_controller.hpp"
 #include "karts/kart.hpp"
-#include "modes/standard_race.hpp"
+#include "modes/linear_world.hpp"
 #include "physics/btKart.hpp"
 #include "savestate.hpp"
 #include "tracks/track.hpp"
@@ -31,26 +31,26 @@
 void SaveState::reset()
 {
     m_valid = false;
-    m_standard_race = NULL;
+    m_linear_world = NULL;
     m_player_kart = NULL;
     m_tick = 0;
     m_time = 0.;
 }
 
-void SaveState::create(uint64_t tick, Stats stats, StandardRace *standard_race, AbstractKart *player_kart)
+void SaveState::create(uint64_t tick, Stats stats, LinearWorld *linear_world, AbstractKart *player_kart)
 {
-    if (!standard_race || !dynamic_cast<Kart*>(player_kart))
+    if (!linear_world || !dynamic_cast<Kart*>(player_kart))
     {
         Log::error("Save States", "Invalid world or kart!");
         return;
     }
 
-    m_standard_race = standard_race;
+    m_linear_world = linear_world;
     m_player_kart = dynamic_cast<Kart*>(player_kart);
 
     m_tick = tick;
-    m_time_ticks = standard_race->m_time_ticks;
-    m_time = standard_race->m_time;
+    m_time_ticks = linear_world->m_time_ticks;
+    m_time = linear_world->m_time;
     m_stats = stats;
 
     // SmoothNetworkBody attributes
@@ -257,21 +257,21 @@ void SaveState::create(uint64_t tick, Stats stats, StandardRace *standard_race, 
     m_valid = true;
 }
 
-void SaveState::restore(StandardRace *standard_race, AbstractKart *player_kart)
+void SaveState::restore(LinearWorld *linear_world, AbstractKart *player_kart)
 {
-    if (!standard_race || !player_kart)
+    if (!linear_world || !player_kart)
     {
         Log::error("Save States", "Invalid world or kart!");
         return;
     }
-    if (standard_race != m_standard_race || dynamic_cast<Kart*>(player_kart) != m_player_kart)
+    if (linear_world != m_linear_world || dynamic_cast<Kart*>(player_kart) != m_player_kart)
     {
         Log::error("Save States", "Wrong world or kart!");
         return;
     }
 
-    m_time_ticks = standard_race->m_time_ticks;
-    standard_race->m_time = m_time;
+    m_time_ticks = linear_world->m_time_ticks;
+    linear_world->m_time = m_time;
     World::getWorld()->setTime(m_time);
 
     // SmoothNetworkBody attributes
