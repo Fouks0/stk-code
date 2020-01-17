@@ -62,6 +62,42 @@ bool TasInput::parse(std::string line)
     return true;
 }
 
+bool TasInput::isValid() const
+{
+    if (m_steer < -32768 || m_steer > 32768)
+    {
+        Log::warn("TAS", "Invalid Steer Value!");
+        return false;
+    }
+    if (isBraking() && m_accel > 0)
+    {
+        Log::warn("TAS", "Game does not allow to brake with non zero acceleration!");
+        return false;
+    }
+    return true;
+}
+
+bool TasInput::canSucceed(TasInput previousInput) const
+{
+    if (!previousInput.isSkiddingLeft())
+    {
+        if (isSkiddingLeft() && m_steer <= 0)
+        {
+            Log::warn("TAS", "Game does not allow to start Left Skidding with negative or zero Steer value!");
+            return false;
+        }
+    }
+    if (!previousInput.isSkiddingRight())
+    {
+        if (isSkiddingRight() && m_steer >= 0)
+        {
+            Log::warn("TAS", "Game does not allow to start Right Skidding with positive or zero Steer value!");
+            return false;
+        }
+    }
+    return true;
+}
+
 Tas *Tas::m_tas = NULL;
 
 Tas::Tas()
@@ -260,7 +296,22 @@ void Tas::applyCurrentInput()
 TasInput Tas::getCurrentInput() const
 {
     if (isInputReplayFinished()) return TasInput();
-    else return m_inputs_to_play[m_current_tick];
+    else
+    {
+        TasInput currentInput = m_inputs_to_play[m_current_tick];
+        if (!currentInput.isValid())
+        {
+            Log::warn("TAS", "Invalid input detected, this TAS is invalid!");
+            return TasInput();
+        }
+        if (m_current_tick != 0 ? !currentInput.canSucceed(m_inputs_to_play[m_current_tick - 1]) :
+                                  !currentInput.canSucceed(TasInput()))
+        {
+            Log::warn("TAS", "Invalid input detected, this TAS is invalid!");
+            return TasInput();
+        }
+        return currentInput;
+    }
 }
 
 void Tas::saveState()

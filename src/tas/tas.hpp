@@ -41,6 +41,16 @@ public:
     std::string toStringConstSize() const;
     bool parse(std::string);
 
+    bool isBraking() const {return (m_action & 1) == 1;}
+    bool isUsingNitro() const {return (m_action & 2) == 2;}
+    bool isFiring() const {return (m_action & 8) == 8;}
+    bool isLookingBack() const {return (m_action & 16) == 16;}
+    bool isSkiddingLeft() const {return (m_action & 96) == 64;}
+    bool isSkiddingRight() const {return (m_action & 96) == 96;}
+
+    bool isValid() const;
+    bool canSucceed(TasInput) const;
+
     uint8_t  getAction() const {return m_action;}
     int32_t  getSteer () const {return m_steer;}
     uint16_t getAccel () const {return m_accel;}
