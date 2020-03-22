@@ -24,7 +24,7 @@
 #include <map>
 #include <memory>
 
-#include "network/remote_kart_info.hpp"
+#include "karts/remote_kart_info.hpp"
 #include "utils/no_copy.hpp"
 
 #define ALL_KART_GROUPS_ID  "all"
@@ -97,7 +97,7 @@ public:
     void                     selectKartName(const std::string &kart_name);
     bool                     testAndSetKart(int kartid);
     void                     getRandomKartList(int count,
-                                           RemoteKartInfoList* existing_karts,
+                                           std::vector<RemoteKartInfo>* existing_karts,
                                            std::vector<std::string> *ai_list);
     void                     setHatMeshName(const std::string &hat_name);
     // ------------------------------------------------------------------------

@@ -19,7 +19,7 @@
 #define HEADER_SOCCER_SETUP_SCREEN_HPP
 
 #include "guiengine/screen.hpp"
-#include "network/remote_kart_info.hpp"
+#include "karts/remote_kart_info.hpp"
 
 namespace GUIEngine { class Widget; class LabelWidget; class ModelViewWidget; }
 

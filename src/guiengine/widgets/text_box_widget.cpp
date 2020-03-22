@@ -17,11 +17,9 @@
 
 #include "guiengine/engine.hpp"
 #include "guiengine/modaldialog.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "guiengine/widgets/text_box_widget.hpp"
 #include "guiengine/widgets/CGUIEditBox.hpp"
 #include "utils/ptr_vector.hpp"
-#include "utils/translation.hpp"
 
 #include <IGUIElement.h>
 #include <IGUIEnvironment.h>
@@ -37,10 +35,8 @@ public:
 
     MyCGUIEditBox(const wchar_t* text, bool border, gui::IGUIEnvironment* environment,
                  gui:: IGUIElement* parent, s32 id, const core::rect<s32>& rectangle) :
-        CGUIEditBox(text, border, environment, parent, id, rectangle, translations->isRTLLanguage())
-    {
-        if (translations->isRTLLanguage()) setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
-    }
+        CGUIEditBox(text, border, environment, parent, id, rectangle, false)
+    {}
 
     void addListener(GUIEngine::ITextBoxWidgetListener* listener)
     {
@@ -200,11 +196,6 @@ void TextBoxWidget::setActive(bool active)
 
 EventPropagation TextBoxWidget::onActivationInput(const int playerID)
 {
-    if (GUIEngine::ScreenKeyboard::shouldUseScreenKeyboard())
-    {
-        ((MyCGUIEditBox*)m_element)->openScreenKeyboard();
-    }
-
     // The onWidgetActivated() wasn't used at all before, so always block
     // event to avoid breaking something
     return EVENT_BLOCK;

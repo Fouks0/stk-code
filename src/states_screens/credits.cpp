@@ -29,11 +29,9 @@ using irr::core::stringc;
 #include "guiengine/screen.hpp"
 #include "guiengine/widget.hpp"
 #include "io/file_manager.hpp"
-#include "online/link_helper.hpp"
 #include "states_screens/state_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 using namespace GUIEngine;
 const float TIME_SECTION_FADE = 0.8f;
@@ -133,18 +131,9 @@ void CreditsScreen::loadedFromFile()
 
     stringw line;
     int lineCount = 0;
-#undef DEBUG_TRANSLATIONS    // Enable to only see the translator credits
-#ifdef DEBUG_TRANSLATIONS
-    int my_counter = 0;
-#endif
     // Read file into wide strings (converted from utf-8 on the fly)
     while (getLineAsWide( file, &line ))
     {
-#ifdef DEBUG_TRANSLATIONS
-        if (my_counter > 0)
-            break;
-        my_counter++;
-#endif
         stringc cversion = line.c_str();
         //printf("CREDITS line : %s\n", cversion.c_str());
 
@@ -178,40 +167,6 @@ void CreditsScreen::loadedFromFile()
     {
         Log::error("CreditsScreen", "Could not read anything from CREDITS file!");
         return;
-    }
-
-
-    irr::core::stringw translators_credits = _("translator-credits");
-    const unsigned MAX_PER_SCREEN = 6;
-
-    if (translators_credits != L"translator-credits")
-    {
-        std::vector<irr::core::stringw> translator =
-            StringUtils::split(translators_credits, '\n');
-
-        m_sections.push_back( new CreditsSection("Translations"));
-        for (unsigned int i = 1; i < translator.size(); i = i + MAX_PER_SCREEN)
-        {
-#ifndef SERVER_ONLY
-            line = stringw(translations->getCurrentLanguageName().c_str());
-#endif
-            CreditsEntry entry(line);
-            getCurrentSection()->addEntry( entry );
-
-            for (unsigned int j = 0; i + j < translator.size() && j < MAX_PER_SCREEN; j ++)
-            {
-                getCurrentSection()->addSubEntry(translator[i + j]);
-            }
-        }
-        assert(m_sections.size() > 0);
-
-        // translations should be just before the last screen
-        m_sections.swap( m_sections.size() - 1, m_sections.size() - 2 );
-    }
-
-    if (!Online::LinkHelper::isSupported())
-    {
-        getWidget("donate")->setVisible(false);
     }
 }   // loadedFromFile
 
@@ -402,8 +357,6 @@ void CreditsScreen::eventCallback(GUIEngine::Widget* widget,
     }
     if (name == "donate")
     {
-        // Open donation page
-        Online::LinkHelper::openURL(stk_config->m_donate_url);
     }
 }
 

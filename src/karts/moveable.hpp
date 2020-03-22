@@ -27,7 +27,6 @@ namespace irr
 using namespace irr;
 #include "btBulletDynamicsCommon.h"
 
-#include "network/smooth_network_body.hpp"
 #include "physics/kart_motion_state.hpp"
 #include "physics/user_pointer.hpp"
 #include "utils/no_copy.hpp"
@@ -41,8 +40,7 @@ class Material;
 /**
   * \ingroup karts
   */
-class Moveable: public NoCopy,
-                public SmoothNetworkBody
+class Moveable: public NoCopy
 {
     friend class SaveState;
 private:
@@ -60,8 +58,6 @@ protected:
     scene::ISceneNode     *m_node;
     std::unique_ptr<btRigidBody> m_body;
     std::unique_ptr<KartMotionState> m_motion_state;
-    // ------------------------------------------------------------------------
-    void updateSmoothedGraphics(float dt);
     // ------------------------------------------------------------------------
     virtual void updateGraphics(const Vec3& off_xyz = Vec3(0.0f, 0.0f, 0.0f),
                                 const btQuaternion& off_rotation =
@@ -135,21 +131,9 @@ public:
      */
     virtual void  updateGraphics(float dt) = 0;
     // ------------------------------------------------------------------------
-    void prepareSmoothing()
-    {
-        SmoothNetworkBody::prepareSmoothing(m_transform, getVelocity());
-    }
+    const btTransform &getSmoothedTrans() const { return m_transform; }
     // ------------------------------------------------------------------------
-    void checkSmoothing()
-    {
-        SmoothNetworkBody::checkSmoothing(m_transform, getVelocity());
-    }
-    // ------------------------------------------------------------------------
-    const btTransform &getSmoothedTrans() const
-                              { return SmoothNetworkBody::getSmoothedTrans(); }
-    // ------------------------------------------------------------------------
-    const Vec3& getSmoothedXYZ() const
-           { return (Vec3&)SmoothNetworkBody::getSmoothedTrans().getOrigin(); }
+    const Vec3& getSmoothedXYZ() const { return (Vec3&) m_transform.getOrigin(); }
     // ------------------------------------------------------------------------
     virtual const std::string& getIdent() const
     {

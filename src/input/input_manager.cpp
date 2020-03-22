@@ -25,27 +25,19 @@
 #include "guiengine/event_handler.hpp"
 #include "guiengine/modaldialog.hpp"
 #include "guiengine/screen.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "input/device_manager.hpp"
 #include "input/gamepad_device.hpp"
 #include "input/input.hpp"
 #include "input/keyboard_device.hpp"
-#include "input/multitouch_device.hpp"
-#include "input/wiimote_manager.hpp"
 #include "karts/controller/controller.hpp"
 #include "karts/abstract_kart.hpp"
 #include "modes/demo_world.hpp"
 #include "modes/profile_world.hpp"
 #include "modes/world.hpp"
-#include "network/network_config.hpp"
-#include "network/protocols/client_lobby.hpp"
-#include "network/rewind_manager.hpp"
 #include "physics/physics.hpp"
-#include "race/history.hpp"
 #include "replay/replay_recorder.hpp"
 #include "states_screens/kart_selection.hpp"
 #include "states_screens/main_menu_screen.hpp"
-#include "states_screens/online/networking_lobby.hpp"
 #include "states_screens/options/options_screen_device.hpp"
 #include "states_screens/state_manager.hpp"
 #include "tas/tas.hpp"
@@ -89,10 +81,6 @@ InputManager::InputManager() : m_mode(BOOTSTRAP),
 // -----------------------------------------------------------------------------
 void InputManager::update(float dt)
 {
-#ifdef ENABLE_WIIUSE
-    wiimote_manager->update();
-#endif
-
     if(m_timer_in_use)
     {
         m_timer -= dt;
@@ -358,19 +346,6 @@ void InputManager::handleStaticAction(int key, int value)
                 }
             }
             break;
-        case IRR_KEY_F11:
-            if(value && shift_is_pressed && world && RewindManager::isEnabled())
-            {
-                printf("Enter rewind to time in ticks:");
-                char s[256];
-                fgets(s, 256, stdin);
-                int t;
-                StringUtils::fromString(s,t);
-                RewindManager::get()->rewindTo(t, world->getTicksSinceStart(), false);
-                Log::info("Rewind", "Rewinding from %d to %d",
-                          world->getTicksSinceStart(), t);
-            }
-            break;
 
             /*
             else if (UserConfigParams::m_artist_debug_mode && world)
@@ -473,8 +448,6 @@ void InputManager::handleStaticAction(int key, int value)
             {
                 if(control_is_pressed)
                     ReplayRecorder::get()->save();
-                else
-                    history->Save();
             }
             break;
             /*
@@ -755,8 +728,7 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
 
         if (button == IRR_KEY_RETURN || button == IRR_KEY_BUTTON_A)
         {
-            if (GUIEngine::ModalDialog::isADialogActive() &&
-                !GUIEngine::ScreenKeyboard::isActive())
+            if (GUIEngine::ModalDialog::isADialogActive())
             {
                 GUIEngine::ModalDialog::onEnterPressed();
             }
@@ -776,36 +748,6 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
         // when a device presses fire or rescue
         if (m_device_manager->getAssignMode() == DETECT_NEW)
         {
-            if (NetworkConfig::get()->isNetworking() &&
-                NetworkConfig::get()->isAddingNetworkPlayers())
-            {
-                // Ignore release event
-                if (value == 0)
-                    return;
-                InputDevice *device = NULL;
-                if (type == Input::IT_KEYBOARD)
-                {
-                    //Log::info("InputManager", "New Player Joining with Key %d", button);
-                    device = m_device_manager->getKeyboardFromBtnID(button);
-                }
-                else if (type == Input::IT_STICKBUTTON ||
-                        type == Input::IT_STICKMOTION    )
-                {
-                    device = m_device_manager->getGamePadFromIrrID(deviceID);
-                }
-                if (device && (action == PA_FIRE || action == PA_MENU_SELECT) &&
-                    !GUIEngine::ModalDialog::isADialogActive())
-                {
-                    GUIEngine::Screen* screen = GUIEngine::getCurrentScreen();
-                    NetworkingLobby* lobby = dynamic_cast<NetworkingLobby*>(screen);
-                    if (lobby!=NULL)
-                    {
-                        lobby->openSplitscreenDialog(device);
-                    }
-                    return;
-                }
-            }
-
             // Player is unjoining
             if ((player != NULL) && (action == PA_RESCUE ||
                                      action == PA_MENU_CANCEL ) )
@@ -853,16 +795,10 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
             }
         }
 
-        auto cl = LobbyProtocol::get<ClientLobby>();
-        bool is_nw_spectator = cl && cl->isSpectator() &&
-             StateManager::get()->getGameState() == GUIEngine::GAME &&
-             !GUIEngine::ModalDialog::isADialogActive();
-
         // ... when in-game
         if (StateManager::get()->getGameState() == GUIEngine::GAME &&
              !GUIEngine::ModalDialog::isADialogActive()            &&
-             !GUIEngine::ScreenKeyboard::isActive()                &&
-             !race_manager->isWatchingReplay() && !is_nw_spectator)
+             !race_manager->isWatchingReplay())
         {
             if (player == NULL)
             {
@@ -902,7 +838,7 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
             // When in master-only mode, we can safely assume that players
             // are set up, contrarly to early menus where we accept every
             // input because players are not set-up yet
-            if (m_master_player_only && player == NULL && !is_nw_spectator)
+            if (m_master_player_only && player == NULL)
             {
                 if (type == Input::IT_STICKMOTION ||
                     type == Input::IT_STICKBUTTON)
@@ -930,12 +866,6 @@ void InputManager::dispatchInput(Input::InputType type, int deviceID,
                 {
                     m_timer_in_use = true;
                     m_timer = 0.25;
-                }
-
-                if (is_nw_spectator)
-                {
-                    cl->changeSpectateTarget(action, abs(value), type);
-                    return;
                 }
 
                 // player may be NULL in early menus, before player setup has
@@ -1006,7 +936,6 @@ bool InputManager::masterPlayerOnly() const
  */
 EventPropagation InputManager::input(const SEvent& event)
 {
-    const float ORIENTATION_MULTIPLIER = 10.0f;
     if (event.EventType == EET_JOYSTICK_INPUT_EVENT)
     {
         // Axes - FIXME, instead of checking all of them, ask the bindings
@@ -1154,30 +1083,6 @@ EventPropagation InputManager::input(const SEvent& event)
             return EVENT_BLOCK; // Don't propagate key up events
         }
     }
-    else if (event.EventType == EET_TOUCH_INPUT_EVENT)
-    {
-        MultitouchDevice* device = m_device_manager->getMultitouchDevice();
-        unsigned int id = (unsigned int)event.TouchInput.ID;
-
-        if (device != NULL && id < device->m_events.size())
-        {
-            device->m_events[id].id = id;
-            device->m_events[id].x = event.TouchInput.X;
-            device->m_events[id].y = event.TouchInput.Y;
-
-            if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
-            {
-                device->m_events[id].touched = true;
-            }
-            else if (event.TouchInput.Event == ETIE_LEFT_UP)
-            {
-                device->m_events[id].touched = false;
-            }
-
-            m_device_manager->updateMultitouchDevice();
-            device->updateDeviceState(id);
-        }
-    }
     // Use the mouse to change the looking direction when first person view is activated
     else if (event.EventType == EET_MOUSE_INPUT_EVENT)
     {
@@ -1260,33 +1165,6 @@ EventPropagation InputManager::input(const SEvent& event)
             }
         }
 
-        // Simulate touch events if there is no real device
-        if (UserConfigParams::m_multitouch_active > 1 && 
-            !irr_driver->getDevice()->supportsTouchDevice())
-        {
-            MultitouchDevice* device = m_device_manager->getMultitouchDevice();
-    
-            if (device != NULL && (type == EMIE_LMOUSE_PRESSED_DOWN ||
-                type == EMIE_LMOUSE_LEFT_UP || type == EMIE_MOUSE_MOVED))
-            {
-                device->m_events[0].id = 0;
-                device->m_events[0].x = event.MouseInput.X;
-                device->m_events[0].y = event.MouseInput.Y;
-    
-                if (type == EMIE_LMOUSE_PRESSED_DOWN)
-                {
-                    device->m_events[0].touched = true;
-                }
-                else if (type == EMIE_LMOUSE_LEFT_UP)
-                {
-                    device->m_events[0].touched = false;
-                }
-    
-                m_device_manager->updateMultitouchDevice();
-                device->updateDeviceState(0);
-            }
-        }
-
         /*
         EMIE_LMOUSE_PRESSED_DOWN    Left mouse button was pressed down.
         EMIE_RMOUSE_PRESSED_DOWN    Right mouse button was pressed down.
@@ -1300,42 +1178,6 @@ EventPropagation InputManager::input(const SEvent& event)
                             how fast.
          */
     }
-    else if (event.EventType == EET_ACCELEROMETER_EVENT)
-    {
-        MultitouchDevice* device = m_device_manager->getMultitouchDevice();
-
-        if (device && device->isAccelerometerActive())
-        {
-            m_device_manager->updateMultitouchDevice();
-            
-            float factor = UserConfigParams::m_multitouch_tilt_factor;
-            factor = std::max(factor, 0.1f);
-            if (UserConfigParams::m_multitouch_controls == MULTITOUCH_CONTROLS_GYROSCOPE)
-            {
-                device->updateOrientationFromAccelerometer((float)event.AccelerometerEvent.X,
-                                                           (float)event.AccelerometerEvent.Y);
-                device->updateAxisX(device->getOrientation() * ORIENTATION_MULTIPLIER / factor);
-            }
-            else
-            {
-                device->updateAxisX(float(event.AccelerometerEvent.Y) / factor);
-            }
-        }
-    }
-    else if (event.EventType == EET_GYROSCOPE_EVENT)
-    {
-        MultitouchDevice* device = m_device_manager->getMultitouchDevice();
-
-        if (device && device->isGyroscopeActive())
-        {
-            m_device_manager->updateMultitouchDevice();
-
-            float factor = UserConfigParams::m_multitouch_tilt_factor;
-            factor = std::max(factor, 0.1f);
-            device->updateOrientationFromGyroscope((float)event.GyroscopeEvent.Z);
-            device->updateAxisX(device->getOrientation() * ORIENTATION_MULTIPLIER / factor);
-        }
-    }
 
     // block events in all modes but initial menus (except in text boxes to
     // allow typing, and except in modal dialogs in-game)
@@ -1344,7 +1186,6 @@ EventPropagation InputManager::input(const SEvent& event)
     if (getDeviceManager()->getAssignMode() != NO_ASSIGN &&
         !GUIEngine::isWithinATextBox() &&
         (!GUIEngine::ModalDialog::isADialogActive() &&
-        !GUIEngine::ScreenKeyboard::isActive() &&
         StateManager::get()->getGameState() == GUIEngine::GAME))
     {
         return EVENT_BLOCK;

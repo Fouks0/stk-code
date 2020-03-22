@@ -52,24 +52,7 @@ void SaveState::create(uint64_t tick, Stats stats, LinearWorld *linear_world, Ab
     m_time_ticks = linear_world->m_time_ticks;
     m_time = linear_world->m_time;
     m_stats = stats;
-
-    // SmoothNetworkBody attributes
-    kartStartSmoothingPostion = m_player_kart->m_start_smoothing_postion;
-    kartAdjustPosition = m_player_kart->m_adjust_position;
-    kartAdjustControlPoint = m_player_kart->m_adjust_control_point;
-    kartPrevPositionData = m_player_kart->m_prev_position_data;
-    kartSmoothedTransform = m_player_kart->m_smoothed_transform;
-    kartAdjustTime = m_player_kart->m_adjust_time;
-    kartAdjustTimeDt = m_player_kart->m_adjust_time_dt;
-    kartSmoothing = m_player_kart->m_smoothing;
-    kartEnabled = m_player_kart->m_enabled;
-    kartSmoothRotation = m_player_kart->m_smooth_rotation;
-    kartAdjustVerticalOffset = m_player_kart->m_adjust_vertical_offset;
-    kartMinAdjustLength = m_player_kart->m_min_adjust_length;
-    kartMaxAdjustLength = m_player_kart->m_max_adjust_length;
-    kartMinAdjustSpeed = m_player_kart->m_min_adjust_speed;
-    kartMaxAdjustTime = m_player_kart->m_max_adjust_time;
-    kartAdjustLengthThreshold = m_player_kart->m_adjust_length_threshold;
+    m_stats.resetLostSpeed();
 
     // Moveable attributes
     kartVelocityLC = m_player_kart->m_velocityLC;
@@ -273,24 +256,6 @@ void SaveState::restore(LinearWorld *linear_world, AbstractKart *player_kart)
     m_time_ticks = linear_world->m_time_ticks;
     linear_world->m_time = m_time;
     World::getWorld()->setTime(m_time);
-
-    // SmoothNetworkBody attributes
-    m_player_kart->m_start_smoothing_postion = kartStartSmoothingPostion;
-    m_player_kart->m_adjust_position = kartAdjustPosition;
-    m_player_kart->m_adjust_control_point = kartAdjustControlPoint;
-    m_player_kart->m_prev_position_data = kartPrevPositionData;
-    m_player_kart->m_smoothed_transform = kartSmoothedTransform;
-    m_player_kart->m_adjust_time = kartAdjustTime;
-    m_player_kart->m_adjust_time_dt = kartAdjustTimeDt;
-    m_player_kart->m_smoothing = kartSmoothing;
-    m_player_kart->m_enabled = kartEnabled;
-    m_player_kart->m_smooth_rotation = kartSmoothRotation;
-    m_player_kart->m_adjust_vertical_offset = kartAdjustVerticalOffset;
-    m_player_kart->m_min_adjust_length = kartMinAdjustLength;
-    m_player_kart->m_max_adjust_length = kartMaxAdjustLength;
-    m_player_kart->m_min_adjust_speed = kartMinAdjustSpeed;
-    m_player_kart->m_max_adjust_time = kartMaxAdjustTime;
-    m_player_kart->m_adjust_length_threshold = kartAdjustLengthThreshold;
 
     // Moveable attributes
     m_player_kart->m_velocityLC = kartVelocityLC;

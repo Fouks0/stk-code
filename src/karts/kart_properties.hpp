@@ -251,12 +251,10 @@ public:
     // ------------------------------------------------------------------------
     void setHatMeshName(const std::string &hat_name);
     // ------------------------------------------------------------------------
-    /** Returns the name of this kart.
-        \note Pass it through fridibi as needed, this is the LTR name
-      */
+    /** Returns the name of this kart. */
     core::stringw getName() const
     {
-        return _LTR(m_name.c_str());
+        return m_name.c_str();
     }
 
     // ------------------------------------------------------------------------

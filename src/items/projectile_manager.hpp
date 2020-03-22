@@ -39,6 +39,19 @@ class Rewinder;
 class Track;
 class Vec3;
 
+enum RewinderName : char
+{
+    RN_ITEM_MANAGER = 0x01,
+    RN_KART = 0x02,
+    RN_RED_FLAG = 0x03,
+    RN_BLUE_FLAG = 0x04,
+    RN_CAKE = 0x05,
+    RN_BOWLING = 0x06,
+    RN_PLUNGER = 0x07,
+    RN_RUBBERBALL = 0x08,
+    RN_PHYSICAL_OBJ = 0x09
+};
+
 /**
   * \ingroup items
   */
@@ -77,9 +90,6 @@ public:
      *  \param hit_effect The hit effect to be added. */
     void             addHitEffect(HitEffect *hit_effect)
                                 { m_active_hit_effects.push_back(hit_effect); }
-    // ------------------------------------------------------------------------
-    std::shared_ptr<Rewinder>
-                           addRewinderFromNetworkState(const std::string& uid);
     // ------------------------------------------------------------------------
     std::shared_ptr<Flyable> newProjectile(AbstractKart *kart,
                                            PowerupManager::PowerupType type);

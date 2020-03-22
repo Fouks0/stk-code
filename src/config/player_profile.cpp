@@ -23,7 +23,7 @@
 #include "config/player_manager.hpp"
 #include "karts/kart_properties.hpp"
 #include "karts/kart_properties_manager.hpp"
-#include "online/online_player_profile.hpp"
+#include "io/file_manager.hpp"
 #include "io/xml_node.hpp"
 #include "io/utf_writer.hpp"
 #include "utils/string_utils.hpp"
@@ -42,12 +42,6 @@ PlayerProfile::PlayerProfile(const core::stringw& name, bool is_guest)
     m_is_guest_account    = is_guest;
     m_use_frequency       = is_guest ? -1 : 0;
     m_unique_id           = PlayerManager::get()->getUniqueId();
-    m_saved_session       = false;
-    m_saved_token         = "";
-    m_saved_user_id       = 0;
-    m_last_online_name    = "";
-    m_last_was_online     = false;
-    m_remember_password   = false;
     m_default_kart_color  = 0.0f;
     initRemainingData();
 }   // PlayerProfile
@@ -69,12 +63,6 @@ PlayerProfile::PlayerProfile(const core::stringw& name, bool is_guest)
 */
 PlayerProfile::PlayerProfile(const XMLNode* node)
 {
-    m_saved_session       = false;
-    m_saved_token         = "";
-    m_saved_user_id       = 0;
-    m_last_online_name    = "";
-    m_last_was_online     = false;
-    m_remember_password   = false;
     m_story_mode_status   = NULL;
     m_achievements_status = NULL;
     m_default_kart_color  = 0.0f;
@@ -84,12 +72,6 @@ PlayerProfile::PlayerProfile(const XMLNode* node)
     node->get("guest",              &m_is_guest_account );
     node->get("use-frequency",      &m_use_frequency    );
     node->get("unique-id",          &m_unique_id        );
-    node->get("saved-session",      &m_saved_session    );
-    node->get("saved-user",         &m_saved_user_id    );
-    node->get("saved-token",        &m_saved_token      );
-    node->getAndDecode("last-online-name",   &m_last_online_name );
-    node->get("last-was-online",    &m_last_was_online  );
-    node->get("remember-password",  &m_remember_password);
     node->get("icon-filename",      &m_icon_filename    );
     node->get("default-kart-color", &m_default_kart_color);
     #ifdef DEBUG
@@ -103,9 +85,7 @@ PlayerProfile::~PlayerProfile()
 {
     delete m_story_mode_status;
     delete m_achievements_status;
-#ifdef DEBUG
     m_magic_number = 0xDEADBEEF;
-#endif
 }   // ~PlayerProfile
 
 
@@ -203,17 +183,8 @@ void PlayerProfile::save(UTFWriter &out)
     out << "    <player name=\"" << StringUtils::xmlEncode(m_local_name)
         << "\" guest=\""         << m_is_guest_account
         << "\" use-frequency=\"" << m_use_frequency << "\"\n";
-
     out << "            icon-filename=\"" << m_icon_filename << "\"\n";
-
-    out << "            unique-id=\""  << m_unique_id
-        << "\" saved-session=\""       << m_saved_session << "\"\n";
-
-    out << "            saved-user=\"" << m_saved_user_id
-        << "\" saved-token=\""         << m_saved_token << "\"\n";
-    out << "            last-online-name=\"" << StringUtils::xmlEncode(m_last_online_name)
-        << "\" last-was-online=\""           << m_last_was_online << "\"\n";
-    out << "            remember-password=\""         << m_remember_password << "\"\n";
+    out << "            unique-id=\""  << m_unique_id << "\"\n";
     out << "            default-kart-color=\""        << m_default_kart_color << "\">\n";
     {
         if(m_story_mode_status)
@@ -224,33 +195,6 @@ void PlayerProfile::save(UTFWriter &out)
     }
     out << "    </player>\n";
 }   // save
-
-//------------------------------------------------------------------------------
-// ------------------------------------------------------------------------
-/** Saves the online data, so that it will automatically re-connect
-*  next time this profile is loaded.
-*  \param user_id Id of the online profile.
-*  \param token Token used for authentication.
-*/
-void PlayerProfile::saveSession(int user_id, const std::string &token)
-{
-    m_saved_session = true;
-    m_saved_user_id = user_id;
-    m_saved_token   = token;
-    PlayerManager::get()->save();
-}   // saveSession
-
-// ------------------------------------------------------------------------
-/** Unsets any saved session data. */
-void PlayerProfile::clearSession(bool save)
-{
-    m_saved_session = false;
-    m_saved_user_id = 0;
-    m_saved_token   = "";
-    if(save)
-        PlayerManager::get()->save();
-}   // clearSession
-
 //------------------------------------------------------------------------------
 /** Increments how often that account was used. Guest accounts are not counted.
  */

@@ -32,7 +32,6 @@
 
 #include <line3d.h>
 
-class BareNetworkString;
 class AbstractKart;
 class LODNode;
 
@@ -146,8 +145,6 @@ protected:
 public:
     // ------------------------------------------------------------------------
          ItemState(ItemType type, const AbstractKart *owner=NULL, int id = -1);
-    // ------------------------------------------------------------------------
-         ItemState(const BareNetworkString& buffer);
     // ------------------------------------------------------------------------
     void initItem(ItemType type, const Vec3& xyz, const Vec3& normal);
     void update(int ticks);
@@ -312,8 +309,6 @@ public:
     {
         return m_original_rotation;
     }
-    // ------------------------------------------------------------------------
-    void saveCompleteState(BareNetworkString* buffer) const;
 };   // class ItemState
 
 // ============================================================================

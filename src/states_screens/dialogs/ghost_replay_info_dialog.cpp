@@ -140,20 +140,20 @@ void GhostReplayInfoDialog::updateReplayDisplayedInfo()
     // as the header doesn't work with modal dialogs
     if (is_linear)
         row.push_back(GUIEngine::ListWidget::ListCell
-            (_C("column_name", "Reverse"), -1, 3, true));
+            (_("column_name", "Reverse"), -1, 3, true));
     row.push_back(GUIEngine::ListWidget::ListCell
-        (_C("column_name", "Difficulty"), -1, 4, true));
+        (_("column_name", "Difficulty"), -1, 4, true));
     if (is_linear)
         row.push_back(GUIEngine::ListWidget::ListCell
-            (_C("column_name", "Laps"), -1, 3, true));
+            (_("column_name", "Laps"), -1, 3, true));
     row.push_back(GUIEngine::ListWidget::ListCell
-        (_C("column_name", "Time"), -1, 3, true));
+        (_("column_name", "Time"), -1, 3, true));
     row.push_back(GUIEngine::ListWidget::ListCell
-        (_C("column_name", "Kart"), -1, 1, true));
+        (_("column_name", "Kart"), -1, 1, true));
     row.push_back(GUIEngine::ListWidget::ListCell
-        (_C("column_name", "User"), -1, 5, true));
+        (_("column_name", "User"), -1, 5, true));
     row.push_back(GUIEngine::ListWidget::ListCell
-        (_C("column_name", "Version"), -1, 2, true));
+        (_("column_name", "Version"), -1, 2, true));
 
     m_replay_info_widget->addItem(StringUtils::toString(0), row);
 

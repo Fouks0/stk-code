@@ -30,7 +30,6 @@
 #include "guiengine/message_queue.hpp"
 #include "guiengine/modaldialog.hpp"
 #include "guiengine/scalable_font.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "guiengine/widget.hpp"
 #include "guiengine/widgets/icon_button_widget.hpp"
 #include "guiengine/widgets/label_widget.hpp"
@@ -46,16 +45,12 @@
 #include "modes/capture_the_flag.hpp"
 #include "modes/overworld.hpp"
 #include "modes/soccer_world.hpp"
-#include "network/network_config.hpp"
-#include "network/stk_host.hpp"
-#include "network/protocols/client_lobby.hpp"
 #include "race/highscores.hpp"
 #include "replay/replay_play.hpp"
 #include "replay/replay_recorder.hpp"
 #include "scriptengine/property_animator.hpp"
 #include "states_screens/feature_unlocked.hpp"
 #include "states_screens/main_menu_screen.hpp"
-#include "states_screens/online/networking_lobby.hpp"
 #include "states_screens/race_setup_screen.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
@@ -167,18 +162,6 @@ void RaceResultGUI::enableAllButtons()
         enableGPProgress();
     }
 
-    // If we're in a network world, change the buttons text
-    if (World::getWorld()->isNetworkWorld())
-    {
-        top->setVisible(false);
-        middle->setText(_("Continue"));
-        middle->setVisible(true);
-        middle->setFocusForPlayer(PLAYER_ID_GAME_MASTER);
-        bottom->setText(_("Quit the server"));
-        bottom->setVisible(true);
-        return;
-    }
-
     // If something was unlocked
     // -------------------------
     int n = (int)PlayerManager::getCurrentPlayer()->getRecentlyCompletedChallenges().size();
@@ -257,33 +240,6 @@ void RaceResultGUI::eventCallback(GUIEngine::Widget* widget,
         m_start_track++;
         m_end_track++;
         displayScreenShots();
-    }
-
-    // If we're playing online :
-    if (World::getWorld()->isNetworkWorld())
-    {
-        if (name == "middle") // Continue button (return to server lobby)
-        {
-            // Signal to the server that this client is back in the lobby now.
-            auto cl = LobbyProtocol::get<ClientLobby>();
-            if (cl)
-                cl->doneWithResults();
-            getWidget("middle")->setText(_("Waiting for others"));
-        }
-        if (name == "bottom") // Quit server (return to online lan / wan menu)
-        {
-            race_manager->clearNetworkGrandPrixResult();
-            if (STKHost::existHost())
-            {
-                STKHost::get()->shutdown();
-            }
-            race_manager->exitRace();
-            race_manager->setAIKartOverride("");
-            StateManager::get()->resetAndSetStack(
-                NetworkConfig::get()->getResetScreens().data());
-            NetworkConfig::get()->unsetNetworking();
-        }
-        return;
     }
 
     // If something was unlocked, the 'continue' button was
@@ -457,31 +413,6 @@ void RaceResultGUI::eventCallback(GUIEngine::Widget* widget,
             name.c_str());
     return;
 }   // eventCallback
-
-//-----------------------------------------------------------------------------
-/** Sets up the gui to go back to the lobby. Can only be called in case of a
- *  networked game.
- */
-void RaceResultGUI::backToLobby()
-{
-    if (race_manager->getMajorMode() == RaceManager::MAJOR_MODE_GRAND_PRIX &&
-        race_manager->getTrackNumber() == race_manager->getNumOfTracks() - 1)
-    {
-        core::stringw msg = _("Network grand prix has been finished.");
-        MessageQueue::add(MessageQueue::MT_ACHIEVEMENT, msg);
-    }
-    race_manager->clearNetworkGrandPrixResult();
-    race_manager->exitRace();
-    race_manager->setAIKartOverride("");
-    GUIEngine::ModalDialog::dismiss();
-    GUIEngine::ScreenKeyboard::dismiss();
-    cleanupGPProgress();
-    if (GUIEngine::getCurrentScreen() != NetworkingLobby::getInstance())
-    {
-        StateManager::get()->resetAndSetStack(
-            NetworkConfig::get()->getResetScreens(true/*lobby*/).data());
-    }
-}   // backToLobby
 
 //-----------------------------------------------------------------------------
 void RaceResultGUI::displayCTFResults()

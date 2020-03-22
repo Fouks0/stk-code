@@ -30,13 +30,12 @@
 #include <algorithm>
 #include <string>
 
-#include "network/remote_kart_info.hpp"
+#include "karts/remote_kart_info.hpp"
 #include "race/grand_prix_data.hpp"
-#include "utils/translation.hpp"
+#include "utils/string_utils.hpp"
 #include "utils/vec3.hpp"
 
 class AbstractKart;
-class NetworkString;
 class SavedGrandPrix;
 class Track;
 
@@ -288,8 +287,6 @@ public:
         KartType    m_kart_type;
         /** Player controling the kart, for AI: -1 */
         int         m_local_player_id;
-        /** Global ID of player. */
-        int         m_global_player_id;
         /** In GPs, at the end, will hold the overall rank of this kart
          *  (0<=m_gp_rank < num_karts-1). */
         int         m_gp_rank;
@@ -299,14 +296,12 @@ public:
         PerPlayerDifficulty m_difficulty;
 
         KartStatus(const std::string& ident, const int& prev_finish_pos,
-                   int local_player_id, int global_player_id,
-                   int init_gp_rank, KartType kt,
+                   int local_player_id, int init_gp_rank, KartType kt,
                    PerPlayerDifficulty difficulty) :
                    m_ident(ident), m_score(0), m_last_score(0),
                    m_overall_time(0.0f), m_last_time(0.0f),
                    m_kart_type(kt),
                    m_local_player_id(local_player_id),
-                   m_global_player_id(global_player_id),
                    m_gp_rank(init_gp_rank), m_difficulty(difficulty)
                 { m_boosted_ai = false; }
 
@@ -647,11 +642,6 @@ public:
         return m_kart_status[k].m_local_player_id;
     }   // getKartLocalPlayerId
     // ------------------------------------------------------------------------
-    int getKartGlobalPlayerId(int k) const
-    {
-        return m_kart_status[k].m_global_player_id;
-    }   // getKartGlobalPlayerId
-    // ------------------------------------------------------------------------
     float getOverallTime(int kart) const
     {
         return m_kart_status[kart].m_overall_time;
@@ -875,8 +865,7 @@ public:
     // ------------------------------------------------------------------------
     void addSpareTireKart(const std::string& name)
     {
-        m_kart_status.push_back(KartStatus(name, 0, -1, -1,
-            -1, KT_SPARE_TIRE, PLAYER_DIFFICULTY_NORMAL));
+        m_kart_status.push_back(KartStatus(name, 0, -1, -1, KT_SPARE_TIRE, PLAYER_DIFFICULTY_NORMAL));
         m_num_spare_tire_karts++;
         m_num_karts++;
     }   // addSpareTireKart
@@ -890,10 +879,6 @@ public:
     {
         return m_num_spare_tire_karts;
     }   // getNumSpareTireKarts
-    // ------------------------------------------------------------------------
-    void configGrandPrixResultFromNetwork(NetworkString& ns);
-    // ------------------------------------------------------------------------
-    void clearNetworkGrandPrixResult();
     // ------------------------------------------------------------------------
     void setHitCaptureTime(int hc, float time)
     {
@@ -913,23 +898,10 @@ public:
     // ------------------------------------------------------------------------
     unsigned getFlagReturnTicks() const         { return m_flag_return_ticks; }
     // ------------------------------------------------------------------------
-    void setFlagDeactivatedTicks(unsigned ticks)
-                                          { m_flag_deactivated_ticks = ticks; }
+    void setFlagDeactivatedTicks(unsigned ticks) { m_flag_deactivated_ticks = ticks; }
     // ------------------------------------------------------------------------
-    unsigned getFlagDeactivatedTicks() const
-                                           { return m_flag_deactivated_ticks; }
-    // ------------------------------------------------------------------------
-    /** Whether the current game mode allow live joining even the current game
-     *. started in network*/
-    bool supportsLiveJoining() const
-    {
-        return m_minor_mode == MINOR_MODE_SOCCER ||
-            m_minor_mode == MINOR_MODE_CAPTURE_THE_FLAG ||
-            m_minor_mode == MINOR_MODE_FREE_FOR_ALL;
-    }
+    unsigned getFlagDeactivatedTicks() const { return m_flag_deactivated_ticks; }
 };   // RaceManager
 
 extern RaceManager *race_manager;
 #endif
-
-/* EOF */

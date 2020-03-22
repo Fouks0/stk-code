@@ -217,7 +217,6 @@ public:
                                Input::InputType type, int playerId) OVERRIDE;
     void eventCallback(GUIEngine::Widget* widget, const std::string& name,
                        const int playerID) OVERRIDE;
-    void backToLobby();
 
 
     friend class GUIEngine::ScreenSingleton<RaceResultGUI>;

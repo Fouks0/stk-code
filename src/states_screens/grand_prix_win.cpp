@@ -40,7 +40,6 @@
 #include "tracks/track.hpp"
 #include "tracks/track_object.hpp"
 #include "tracks/track_object_manager.hpp"
-#include "utils/translation.hpp"
 
 #include <ICameraSceneNode.h>
 #include <IGUIEnvironment.h>
@@ -153,8 +152,6 @@ void GrandPrixWin::init()
 
     World::getWorld()->setPhase(WorldStatus::RACE_PHASE);
 
-
-    saveGPButton();
     if (PlayerManager::getCurrentPlayer()->getRecentlyCompletedChallenges().size() > 0)
     {
         const core::dimension2d<u32>& frame_size = GUIEngine::getDriver()->getCurrentRenderTargetSize();

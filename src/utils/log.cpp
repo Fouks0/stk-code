@@ -17,17 +17,11 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "utils/log.hpp"
-
 #include "config/user_config.hpp"
-#include "network/network_config.hpp"
 
 #include <cstdio>
 #include <ctime>
 #include <stdio.h>
-
-#ifdef ANDROID
-#  include <android/log.h>
-#endif
 
 #ifdef WIN32
 #  define WIN32_LEAN_AND_MEAN
@@ -156,21 +150,7 @@ void Log::printMessage(int level, const char *component, const char *format,
         remaining = MAX_LENGTH - index > 0 ? MAX_LENGTH - index : 0;
     }
 
-#ifndef ANDROID
-    if (NetworkConfig::get()->isNetworking() &&
-        NetworkConfig::get()->isServer())
-    {
-        std::time_t result = std::time(nullptr);
-        index += snprintf (line + index, remaining,
-            "%.24s [%s] %s: ", std::asctime(std::localtime(&result)),
-            names[level], component);
-    }
-    else
-#endif
-    {
-        index += snprintf (line + index, remaining,
-            "[%s] %s: ", names[level], component);
-    }
+    index += snprintf (line + index, remaining, "[%s] %s: ", names[level], component);
     remaining = MAX_LENGTH - index > 0 ? MAX_LENGTH - index : 0;
     index += vsnprintf(line + index, remaining, format, args);
     remaining = MAX_LENGTH - index > 0 ? MAX_LENGTH - index : 0;
@@ -224,27 +204,7 @@ void Log::writeLine(const char *line, int level)
         setTerminalColor((LogLevel)level);
         if (m_console_log)
         {
-#ifdef ANDROID
-            android_LogPriority alp;
-            switch (level)
-            {
-                // STK is using the levels slightly different from android
-                // (debug lowest, verbose above it; while android reverses
-                // this order. So to get the same behaviour (e.g. filter
-                // out debug message, but still get verbose, we swap
-                // the order here.
-            case LL_VERBOSE: alp = ANDROID_LOG_DEBUG;   break;
-            case LL_DEBUG:   alp = ANDROID_LOG_VERBOSE; break;
-            case LL_INFO:    alp = ANDROID_LOG_INFO;    break;
-            case LL_WARN:    alp = ANDROID_LOG_WARN;    break;
-            case LL_ERROR:   alp = ANDROID_LOG_ERROR;   break;
-            case LL_FATAL:   alp = ANDROID_LOG_FATAL;   break;
-            default:         alp = ANDROID_LOG_FATAL;
-            }
-            __android_log_print(alp, "SuperTuxKart", "%s", line);
-#else
             printf("%s", line);
-#endif
         }
         resetTerminalColor();  // this prints a \n
     }

@@ -35,7 +35,6 @@
 #include "graphics/sp/sp_texture_manager.hpp"
 #include "graphics/sp/sp_uniform_assigner.hpp"
 #include "guiengine/modaldialog.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "guiengine/widgets/label_widget.hpp"
 #include "guiengine/widgets/text_box_widget.hpp"
 #include "items/powerup_manager.hpp"
@@ -47,7 +46,6 @@
 #include "modes/world.hpp"
 #include "physics/irr_debug_drawer.hpp"
 #include "physics/physics.hpp"
-#include "race/history.hpp"
 #include "main_loop.hpp"
 #include "replay/replay_recorder.hpp"
 #include "scriptengine/script_engine.hpp"
@@ -99,7 +97,6 @@ enum DebugMenuCommand
     DEBUG_SP_TN_VIZ,
     DEBUG_FPS,
     DEBUG_SAVE_REPLAY,
-    DEBUG_SAVE_HISTORY,
     DEBUG_POWERUP_BOWLING,
     DEBUG_POWERUP_BUBBLEGUM,
     DEBUG_POWERUP_CAKE,
@@ -483,9 +480,6 @@ bool handleContextMenuAction(s32 cmd_id)
     case DEBUG_SAVE_REPLAY:
         ReplayRecorder::get()->save();
         break;
-    case DEBUG_SAVE_HISTORY:
-        history->Save();
-        break;
     case DEBUG_POWERUP_BOWLING:
         addPowerup(PowerupManager::POWERUP_BOWLING);
         break;
@@ -852,9 +846,6 @@ bool handleContextMenuAction(s32 cmd_id)
                 return false;
             });
         break;
-        case DEBUG_RENDER_NW_DEBUG:
-            irr_driver->toggleRenderNetworkDebug();
-        break;
         case DEBUG_START_RECORDING:
             irr_driver->setRecording(true);
         break;
@@ -875,8 +866,7 @@ bool onEvent(const SEvent &event)
 
     if (event.EventType == EET_MOUSE_INPUT_EVENT)
     {
-        if (GUIEngine::ModalDialog::isADialogActive() ||
-            GUIEngine::ScreenKeyboard::isActive())
+        if (GUIEngine::ModalDialog::isADialogActive())
             return true;
             
         // Create the menu (only one menu at a time)
@@ -992,13 +982,11 @@ bool onEvent(const SEvent &event)
             mnu->addItem(L"Do not limit FPS", DEBUG_THROTTLE_FPS);
             mnu->addItem(L"Toggle FPS", DEBUG_FPS);
             mnu->addItem(L"Save replay", DEBUG_SAVE_REPLAY);
-            mnu->addItem(L"Save history", DEBUG_SAVE_HISTORY);
             mnu->addItem(L"Print position", DEBUG_PRINT_START_POS);
             mnu->addItem(L"Adjust Lights", DEBUG_ADJUST_LIGHTS);
             mnu->addItem(L"Scripting console", DEBUG_SCRIPT_CONSOLE);
             mnu->addItem(L"Run cutscene(s)", DEBUG_RUN_CUTSCENE);
             mnu->addItem(L"Texture console", DEBUG_TEXTURE_CONSOLE);
-            mnu->addItem(L"Network debugging", DEBUG_RENDER_NW_DEBUG);
             g_debug_menu_visible = true;
             irr_driver->showPointer();
         }

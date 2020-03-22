@@ -26,7 +26,6 @@
 #include "config/user_config.hpp"
 #include "io/file_manager.hpp"
 #include "utils/log.hpp"
-#include "utils/translation.hpp"
 
 #include <sstream>
 #include <stdlib.h>

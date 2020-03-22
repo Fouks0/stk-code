@@ -41,7 +41,6 @@
 #include "LinearMath/btTransform.h"
 
 class AbstractKart;
-class BareNetworkString;
 class btRigidBody;
 class Controller;
 class ItemState;
@@ -92,15 +91,11 @@ private:
     void setAITeam();
     // ------------------------------------------------------------------------
     std::shared_ptr<AbstractKart> createKartWithTeam
-        (const std::string &kart_ident, int index, int local_player_id,
-        int global_player_id, RaceManager::KartType type,
+        (const std::string &kart_ident, int index, int local_player_id, RaceManager::KartType type,
         PerPlayerDifficulty difficulty);
 
 protected:
-
-#ifdef DEBUG
     unsigned int m_magic_number;
-#endif
 
     /* Team related variables. */
     int m_red_ai;
@@ -137,8 +132,7 @@ protected:
           loadAIController  (AbstractKart *kart);
 
     virtual std::shared_ptr<AbstractKart> createKart
-        (const std::string &kart_ident, int index, int local_player_id,
-        int global_player_id, RaceManager::KartType type,
+        (const std::string &kart_ident, int index, int local_player_id, RaceManager::KartType type,
         PerPlayerDifficulty difficulty);
 
     /** Pointer to the race GUI. The race GUI is handled by world. */
@@ -175,9 +169,6 @@ protected:
      * because you are e.g. within World::update()
      */
     bool m_self_destruct;
-
-    /** Set when the world is online and counts network players. */
-    bool m_is_network_world;
     
     virtual void  onGo() OVERRIDE;
     /** Returns true if the race is over. Must be defined by all modes. */
@@ -339,10 +330,6 @@ public:
             m_eliminated_karts--;
     }
     // ------------------------------------------------------------------------
-    virtual void saveCompleteState(BareNetworkString* bns) {}
-    // ------------------------------------------------------------------------
-    virtual void restoreCompleteState(const BareNetworkString& buffer) {}
-    // ------------------------------------------------------------------------
     /** The code that draws the timer should call this first to know
      *  whether the game mode wants a timer drawn. */
     virtual bool shouldDrawTimer() const
@@ -372,11 +359,6 @@ public:
     KartTeam getKartTeam(unsigned int kart_id) const;
     // ------------------------------------------------------------------------
     int getTeamNum(KartTeam team) const;
-    // ------------------------------------------------------------------------
-    /** Set the network mode (true if networked) */
-    void setNetworkWorld(bool is_networked) { m_is_network_world = is_networked; }
-    // ------------------------------------------------------------------------
-    bool isNetworkWorld() const { return m_is_network_world; }
     // ------------------------------------------------------------------------
     /** Set the team arrow on karts if necessary*/
     void initTeamArrows(AbstractKart* k);

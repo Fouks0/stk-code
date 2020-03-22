@@ -26,7 +26,6 @@
  * configuration file.
  */
 
-#include "network/remote_kart_info.hpp"
 #include "utils/interpolation_array.hpp"
 #include "utils/no_copy.hpp"
 
@@ -196,11 +195,6 @@ public:
 
     unsigned m_tc_quality;
 
-    /** Client and server port use random ports if enabled in user config. */
-    uint16_t m_server_discovery_port;
-    uint16_t m_client_port;
-    uint16_t m_server_port;
-
     /* URLs for donating and reseting the password */
     std::string m_donate_url;
     std::string m_password_reset_url;
@@ -213,21 +207,6 @@ public:
     float m_snb_min_adjust_length, m_snb_max_adjust_length,
         m_snb_min_adjust_speed, m_snb_max_adjust_time,
         m_snb_adjust_length_threshold;
-
-    /** URL for the server used for the API multiplayer. */
-    std::string m_server_api;
-
-    /** Version of the server API to use */
-    uint32_t m_server_api_version = 0;
-
-    /** URL for the server used for the addons management. */
-    std::string m_server_addons;
-
-    /** URL for the server used for hardware reporting statistics */
-    std::string m_server_hardware_report;
-
-    /** If true we allow all the server urls to be redirected by the news.xml. */
-    bool m_allow_news_redirects = true;
 
 private:
     /** True if stk_config has been loaded. This is necessary if the

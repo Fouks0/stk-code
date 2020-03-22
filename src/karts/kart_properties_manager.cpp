@@ -509,7 +509,7 @@ const std::vector<int> KartPropertiesManager::getKartsInGroup(
  *                        to this list.
  */
 void KartPropertiesManager::getRandomKartList(int count,
-                                            RemoteKartInfoList* existing_karts,
+                                            std::vector<RemoteKartInfo>* existing_karts,
                                             std::vector<std::string> *ai_list)
 {
     // First: set up flags (based on global kart

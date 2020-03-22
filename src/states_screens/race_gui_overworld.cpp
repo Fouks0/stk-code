@@ -47,12 +47,10 @@
 #include "modes/world.hpp"
 #include "race/grand_prix_manager.hpp"
 #include "race/race_manager.hpp"
-#include "states_screens/race_gui_multitouch.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <ISceneCollisionManager.h>
 #include <ISceneManager.h>
@@ -89,28 +87,6 @@ RaceGUIOverworld::RaceGUIOverworld()
     float scaling = irr_driver->getFrameSize().Height / 420.0f;
     const float map_size = 250.0f;
 
-    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 && 
-                               irr_driver->getDevice()->supportsTouchDevice()) ||
-                               UserConfigParams::m_multitouch_active > 1;
-    
-    if (multitouch_enabled && UserConfigParams::m_multitouch_draw_gui &&
-        race_manager->getNumLocalPlayers() == 1)
-    {
-        m_multitouch_gui = new RaceGUIMultitouch(this);
-    }
-
-    // Check if we have enough space for minimap when touch steering is enabled
-    if (m_multitouch_gui != NULL)
-    {
-        const float map_bottom = (float)(irr_driver->getActualScreenSize().Height - 
-                                         m_multitouch_gui->getHeight());
-        
-        if ((map_size + 20.0f) * scaling > map_bottom)
-        {
-            scaling = map_bottom / (map_size + 20.0f);
-        }
-    }
-
     // Marker texture has to be power-of-two for (old) OpenGL compliance
     //m_marker_rendered_size  =  2 << ((int) ceil(1.0 + log(32.0 * scaling)));
     m_minimap_challenge_size = (int)( 12.0f * scaling);
@@ -132,12 +108,6 @@ RaceGUIOverworld::RaceGUIOverworld()
     if (race_manager->getIfEmptyScreenSpaceExists())
     {
         m_map_left = irr_driver->getActualScreenSize().Width - m_map_width;
-    }
-    else if (m_multitouch_gui != NULL)
-    {
-        m_map_left = (int)((irr_driver->getActualScreenSize().Width - 
-                                                        m_map_width) * 0.9f);
-        m_map_bottom = m_map_height + int(10 * scaling);
     }
 
     m_speed_meter_icon = material_manager->getMaterial("speedback.png");
@@ -173,7 +143,6 @@ RaceGUIOverworld::RaceGUIOverworld()
 //-----------------------------------------------------------------------------
 RaceGUIOverworld::~RaceGUIOverworld()
 {
-    delete m_multitouch_gui;
 }   // ~RaceGUIOverworld
 
 //-----------------------------------------------------------------------------
@@ -210,10 +179,7 @@ void RaceGUIOverworld::renderGlobal(float dt)
     if(!world->isRacePhase()) return;
     if (!m_enabled) return;
 
-    if (m_multitouch_gui == NULL)
-    {
-        drawTrophyPoints();
-    }
+    drawTrophyPoints();
 
     // minimap has no mipmaps so disable material2D
     //irr_driver->getVideoDriver()->enableMaterial2D(false);
@@ -250,10 +216,7 @@ void RaceGUIOverworld::renderPlayerView(const Camera *camera, float dt)
 
     if(!World::getWorld()->isRacePhase()) return;
 
-    if (m_multitouch_gui == NULL)
-    {
-        drawPowerupIcons(kart, viewport, scaling);
-    }
+    drawPowerupIcons(kart, viewport, scaling);
 }   // renderPlayerView
 
 //-----------------------------------------------------------------------------
@@ -392,14 +355,7 @@ void RaceGUIOverworld::drawGlobalMiniMap()
             if(draw_at.getX()>right_most) right_most = draw_at.getX();
         }
 
-        if (m_multitouch_gui != NULL)
-        {
-            m_map_left += m_map_width - (int)right_most;
-        }
-        else
-        {
-            m_map_left -= (int)left_most;
-        }
+        m_map_left -= (int) left_most;
     }
 
     int upper_y = m_map_bottom - m_map_height;
@@ -590,7 +546,7 @@ void RaceGUIOverworld::drawGlobalMiniMap()
                 }
 
                 gui::ScalableFont* font = GUIEngine::getTitleFont();
-                font->draw(translations->fribidize(gp->getName()), pos, video::SColor(255,255,255,255),
+                font->draw(gp->getName(), pos, video::SColor(255,255,255,255),
                            false, true /* vcenter */, NULL);
 
                 core::rect<s32> pos2(pos);
@@ -614,7 +570,7 @@ void RaceGUIOverworld::drawGlobalMiniMap()
                 }
 
                 gui::ScalableFont* font = GUIEngine::getTitleFont();
-                font->draw(translations->fribidize(track->getName()),
+                font->draw(track->getName(),
                            pos, video::SColor(255, 255, 255, 255),
                            false, true /* vcenter */, NULL);
             }
@@ -639,11 +595,6 @@ void RaceGUIOverworld::drawGlobalMiniMap()
                                        GUIEngine::getSkin()->getColor("font::normal"),
                                        true, true /* vcenter */, NULL);
         }
-    }
-    
-    if (m_multitouch_gui != NULL)
-    {
-        m_multitouch_gui->setGuiAction(m_close_to_a_challenge);
     }
 #endif   // SERVER_ONLY
 }   // drawGlobalMiniMap

@@ -156,10 +156,6 @@ public:
         }
         return progress;
     }
-    // ------------------------------------------------------------------------
-    virtual void saveCompleteState(BareNetworkString* bns) OVERRIDE;
-    // ------------------------------------------------------------------------
-    virtual void restoreCompleteState(const BareNetworkString& b) OVERRIDE;
 };   // CaptureTheFlag
 
 #endif

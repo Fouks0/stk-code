@@ -44,7 +44,6 @@ class HitEffect;
 class Item;
 class ItemState;
 class KartGFX;
-class KartRewinder;
 class MaxSpeed;
 class ParticleEmitter;
 class ParticleKind;

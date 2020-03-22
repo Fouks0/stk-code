@@ -21,7 +21,6 @@
 #define HEADER_ACHIEVEMENT_INFO_HPP
 
 #include "io/xml_node.hpp"
-#include "utils/translation.hpp"
 #include "utils/types.hpp"
 
 #include <irrString.h>
@@ -92,7 +91,7 @@ public:
     int                getDepth()             { return getRecursiveDepth(m_goal_tree); }
     uint32_t           getID()          const { return m_id; }
     irr::core::stringw getDescription() const { return _(m_description.c_str()); }
-    irr::core::stringw getName()        const { return _LTR(m_name.c_str()); }
+    irr::core::stringw getName()        const { return _(m_name.c_str()); }
     bool               isSecret()       const { return m_is_secret; }
 
     // This function should not be called if copy already has children

@@ -57,7 +57,6 @@
 #include "karts/kart_model.hpp"
 #include "karts/kart_properties.hpp"
 #include "karts/kart_properties_manager.hpp"
-#include "karts/kart_rewinder.hpp"
 #include "karts/max_speed.hpp"
 #include "karts/rescue_animation.hpp"
 #include "karts/skidding.hpp"
@@ -67,16 +66,9 @@
 #include "modes/overworld.hpp"
 #include "modes/profile_world.hpp"
 #include "modes/soccer_world.hpp"
-#include "network/compress_network_body.hpp"
-#include "network/network_config.hpp"
-#include "network/protocols/client_lobby.hpp"
-#include "network/race_event_manager.hpp"
-#include "network/rewind_info.hpp"
-#include "network/rewind_manager.hpp"
 #include "physics/btKart.hpp"
 #include "physics/btKartRaycast.hpp"
 #include "physics/physics.hpp"
-#include "race/history.hpp"
 #include "tracks/terrain_info.hpp"
 #include "tracks/drive_graph.hpp"
 #include "tracks/drive_node.hpp"
@@ -946,56 +938,6 @@ void Kart::finishedRace(float time, bool from_server)
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL  ||
         race_manager->getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER;
-    if (NetworkConfig::get()->isNetworking() && !from_server)
-    {
-        if (NetworkConfig::get()->isServer())
-        {
-            RaceEventManager::getInstance()->kartFinishedRace(this, time);
-        }   // isServer
-
-        // Ignore local detection of a kart finishing a race in a 
-        // network game.
-        else if (NetworkConfig::get()->isClient())
-        {
-            if (is_linear_race && m_saved_controller == NULL &&
-                !RewindManager::get()->isRewinding())
-            {
-                m_network_finish_check_ticks =
-                    World::getWorld()->getTicksSinceStart() +
-                    stk_config->time2Ticks(1.0f);
-                EndController* ec = new EndController(this, m_controller);
-                Controller* old_controller = m_controller;
-                setController(ec);
-                // Seamless endcontroller replay
-                RewindManager::get()->addRewindInfoEventFunction(new
-                RewindInfoEventFunction(
-                    World::getWorld()->getTicksSinceStart(),
-                    /*undo_function*/[old_controller, this]()
-                    {
-                        if (m_network_finish_check_ticks == -1)
-                            return;
-
-                        m_controller = old_controller;
-                    },
-                    /*replay_function*/[ec, old_controller, this]()
-                    {
-                        if (m_network_finish_check_ticks == -1)
-                            return;
-
-                        m_saved_controller = old_controller;
-                        ec->reset();
-                        m_controller = ec;
-                    }));
-            }
-            return;
-        }
-    }   // !from_server
-
-    if (NetworkConfig::get()->isClient())
-    {
-        m_network_confirmed_finish_ticks =
-            World::getWorld()->getTicksSinceStart();
-    }
 
     m_finished_race = true;
 
@@ -1159,8 +1101,7 @@ void Kart::collectedItem(ItemState *item_state)
                                  m_kart_properties->getBubblegumSpeedFraction() ,
                                  m_kart_properties->getBubblegumFadeInTicks(),
                                  m_bubblegum_ticks);
-        if (!RewindManager::get()->isRewinding())
-            getNextEmitter()->play(getXYZ(), m_goo_sound);
+        getNextEmitter()->play(getXYZ(), m_goo_sound);
 
         // Play appropriate custom character sound
         playCustomSFX(SFXManager::CUSTOM_GOO);
@@ -1366,33 +1307,6 @@ void Kart::update(int ticks)
         m_saved_controller = NULL;
     }
 
-#ifndef ANDROID
-    auto cl = LobbyProtocol::get<ClientLobby>();
-    // Enable spectate mode after 2 seconds which allow player to
-    // release left / right button if they keep pressing it during
-    // finishing line (1 second here because m_network_finish_check_ticks is
-    // already 1 second ahead of time when crossing finished line)
-
-    if (cl && m_finished_race && m_controller->isLocalPlayerController() &&
-        race_manager->getNumLocalPlayers() == 1 &&
-        race_manager->modeHasLaps() &&
-        World::getWorld()->isActiveRacePhase() &&
-        m_network_confirmed_finish_ticks > 0 &&
-        World::getWorld()->getTicksSinceStart() >
-        m_network_confirmed_finish_ticks + stk_config->time2Ticks(1.0f) &&
-        !m_enabled_network_spectator)
-    {
-        static bool msg_shown = false;
-        if (!msg_shown)
-        {
-            msg_shown = true;
-            cl->addSpectateHelperMessage();
-        }
-        m_enabled_network_spectator = true;
-        cl->setSpectator(true);
-    }
-#endif
-
     m_powerup->update(ticks);
 
     // Reset any instant speed increase in the bullet kart
@@ -1413,24 +1327,19 @@ void Kart::update(int ticks)
     {
         m_kart_animation->update(ticks);
     }
-    else if (NetworkConfig::get()->roundValuesNow())
-        CompressNetworkBody::compress(m_body.get(), m_motion_state.get());
 
     float dt = stk_config->ticks2Time(ticks);
-    if (!RewindManager::get()->isRewinding())
+    m_time_previous_counter += dt;
+    while (m_time_previous_counter > stk_config->ticks2Time(1))
     {
-        m_time_previous_counter += dt;
-        while (m_time_previous_counter > stk_config->ticks2Time(1))
+        m_previous_xyz[0] = getXYZ();
+        m_previous_xyz_times[0] = World::getWorld()->getTime();
+        for (int i=m_xyz_history_size-1;i>0;i--)
         {
-            m_previous_xyz[0] = getXYZ();
-            m_previous_xyz_times[0] = World::getWorld()->getTime();
-            for (int i=m_xyz_history_size-1;i>0;i--)
-            {
-                m_previous_xyz[i] = m_previous_xyz[i-1];
-                m_previous_xyz_times[i] = m_previous_xyz_times[i-1];
-            }
-            m_time_previous_counter -= stk_config->ticks2Time(1);
+            m_previous_xyz[i] = m_previous_xyz[i-1];
+            m_previous_xyz_times[i] = m_previous_xyz_times[i-1];
         }
+        m_time_previous_counter -= stk_config->ticks2Time(1);
     }
 
     // Update the position and other data taken from the physics (or
@@ -1518,8 +1427,7 @@ void Kart::update(int ticks)
         m_invulnerable_ticks -= ticks;
     }
 
-    if (!RewindManager::get()->isRewinding())
-        m_slipstream->update(ticks);
+    m_slipstream->update(ticks);
     m_slipstream->updateSpeedIncrease();
 
     // TODO: hiker said this probably will be moved to btKart or so when updating bullet engine.
@@ -1784,8 +1692,6 @@ void Kart::update(int ticks)
         }
     }
 
-    if (RewindManager::get()->isRewinding())
-        return;
     // Remove the shadow if the kart is not on the ground (if a kart
     // is rescued isOnGround might still be true, since the kart rigid
     // body was removed from the physics, but still retain the old
@@ -2247,11 +2153,8 @@ void Kart::handleZipper(const Material *material, bool play_sound)
                                      stk_config->time2Ticks(duration),
                                      stk_config->time2Ticks(fade_out_time));
     // Play custom character sound (weee!)
-    if (!RewindManager::get()->isRewinding())
-    {
-        playCustomSFX(SFXManager::CUSTOM_ZIPPER);
-        m_controller->handleZipper(play_sound);
-    }
+    playCustomSFX(SFXManager::CUSTOM_ZIPPER);
+    m_controller->handleZipper(play_sound);
 
 }   // handleZipper
 
@@ -2282,11 +2185,10 @@ void Kart::updateNitro(int ticks)
             m_min_nitro_ticks = 1;
     }
 
-    bool rewinding = RewindManager::get()->isRewinding();
     bool increase_speed = (m_min_nitro_ticks > 0 && isOnGround());
     if (!increase_speed && m_min_nitro_ticks <= 0)
     {
-        if (m_nitro_sound->getStatus() == SFXBase::SFX_PLAYING && !rewinding)
+        if (m_nitro_sound->getStatus() == SFXBase::SFX_PLAYING)
             m_nitro_sound->stop();
         return;
     }
@@ -2295,7 +2197,7 @@ void Kart::updateNitro(int ticks)
     m_collected_energy -= m_consumption_per_tick*ticks;
     if (m_collected_energy < 0)
     {
-        if(m_nitro_sound->getStatus() == SFXBase::SFX_PLAYING && !rewinding)
+        if(m_nitro_sound->getStatus() == SFXBase::SFX_PLAYING)
             m_nitro_sound->stop();
         m_collected_energy = 0;
         return;
@@ -2303,7 +2205,7 @@ void Kart::updateNitro(int ticks)
 
     if (increase_speed)
     {
-        if(m_nitro_sound->getStatus() != SFXBase::SFX_PLAYING && !rewinding)
+        if(m_nitro_sound->getStatus() != SFXBase::SFX_PLAYING)
             m_nitro_sound->play();
 
         m_max_speed->increaseMaxSpeed(MaxSpeed::MS_INCREASE_NITRO,
@@ -2314,7 +2216,7 @@ void Kart::updateNitro(int ticks)
     }
     else
     {
-        if(m_nitro_sound->getStatus() == SFXBase::SFX_PLAYING && !rewinding)
+        if(m_nitro_sound->getStatus() == SFXBase::SFX_PLAYING)
             m_nitro_sound->stop();
     }
 }   // updateNitro
@@ -2547,8 +2449,7 @@ void Kart::playCrashSFX(const Material* m, AbstractKart *k)
 void Kart::beep()
 {
     // If the custom horn can't play (isn't defined) then play the default one
-    if (!playCustomSFX(SFXManager::CUSTOM_HORN) &&
-        !RewindManager::get()->isRewinding())
+    if (!playCustomSFX(SFXManager::CUSTOM_HORN))
     {
         getNextEmitter()->play(getXYZ(), m_horn_sound);
     }
@@ -3237,23 +3138,6 @@ void Kart::updateGraphics(float dt)
         unsetSquash();
 #endif
 
-    // Disable smoothing network body so it doesn't smooth the animation
-    // for karts in client
-    if (NetworkConfig::get()->isNetworking() &&
-        NetworkConfig::get()->isClient())
-    {
-        if (m_kart_animation && SmoothNetworkBody::isEnabled())
-        {
-            SmoothNetworkBody::setEnable(false);
-        }
-        else if (!m_kart_animation && !SmoothNetworkBody::isEnabled())
-        {
-            SmoothNetworkBody::setEnable(true);
-            SmoothNetworkBody::reset();
-            SmoothNetworkBody::setSmoothedTransform(getTrans());
-        }
-    }
-
     if (m_kart_animation)
         m_kart_animation->updateGraphics(dt);
 
@@ -3353,8 +3237,6 @@ void Kart::updateGraphics(float dt)
     // If the kart is leaning, part of the kart might end up 'in' the track.
     // To avoid this, raise the kart enough to offset the leaning.
     float lean_height = tanf(m_current_lean) * getKartWidth()*0.5f;
-
-    Moveable::updateSmoothedGraphics(dt);
 
     // Update the skidding jump height:
     Vec3 center_shift(0, 0, 0);
@@ -3479,8 +3361,7 @@ const float Kart::getRecentPreviousXYZTime() const
 // ------------------------------------------------------------------------
 void Kart::playSound(SFXBuffer* buffer)
 {
-    if (!RewindManager::get()->isRewinding())
-        getNextEmitter()->play(getXYZ(), buffer);
+    getNextEmitter()->play(getXYZ(), buffer);
 }   // playSound
 
 // ------------------------------------------------------------------------

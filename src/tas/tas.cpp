@@ -20,12 +20,14 @@
 
 #include "graphics/irr_driver.hpp"
 #include "guiengine/message_queue.hpp"
+#include "items/item_manager.hpp"
 #include "karts/abstract_kart.hpp"
 #include "karts/controller/player_controller.hpp"
 #include "karts/kart.hpp"
 #include "modes/standard_race.hpp"
 #include "tas.hpp"
 #include "tracks/track.hpp"
+#include "tracks/track_object_manager.hpp"
 #include "utils/log.hpp"
 
 std::string TasInput::toString() const
@@ -347,10 +349,14 @@ void Tas::restoreState()
         Log::info("TAS", "Cannot restore state before start!");
         return;
     }
+    // Track::getCurrentTrack()->reset();
+    ItemManager::get()->reset();
+    Track::getCurrentTrack()->m_track_object_manager->reset();
     m_save_state.restore(m_standard_race, m_player_kart);
     m_current_tick = m_save_state.getTick();
     m_stats = m_save_state.getStats();
     loadInputs();
+    
     Log::info("TAS", (std::string("Restored state to tick ") + std::to_string(m_current_tick)).c_str());
 }
 
@@ -368,6 +374,7 @@ std::string Tas::getReadableInfos() const
         oss << std::fixed << std::setprecision(3) << "v: " << 3.6*kart->getSpeed() << std::endl
             << "dv: " << 3.6*m_stats.dv() << std::noshowpos << std::endl
             << "va: " << 3.6*m_stats.averageSpeed() << std::endl
+            << "lv: " << 3.6*m_stats.lv() << std::endl
             << "Dist: " << m_stats.distance() << std::endl;
         if (pc)
         {

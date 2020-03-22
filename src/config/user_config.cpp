@@ -39,7 +39,6 @@ static std::vector<UserConfigParam*> all_params;
 #include "io/xml_node.hpp"
 #include "race/race_manager.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <algorithm>
 #include <fstream>

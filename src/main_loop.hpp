@@ -64,13 +64,6 @@ public:
     bool isAborted() const { return m_abort; }
     // ------------------------------------------------------------------------
     void setFrameBeforeLoadingWorld()  { m_frame_before_loading_world = true; }
-    // ------------------------------------------------------------------------
-    void setTicksAdjustment(int ticks)
-    {
-        m_ticks_adjustment.lock();
-        m_ticks_adjustment.getData() += ticks;
-        m_ticks_adjustment.unlock();
-    }
 };   // MainLoop
 
 extern MainLoop* main_loop;

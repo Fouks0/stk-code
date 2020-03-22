@@ -658,9 +658,7 @@ void ThreeStrikesBattle::spawnSpareTireKarts()
     unsigned int spawn_sta = unsigned(ratio);
     if (spawn_sta > m_spare_tire_karts.size())
         spawn_sta = (int)m_spare_tire_karts.size();
-    m_race_gui->addMessage(_P("%i spare tire kart has been spawned!",
-                              "%i spare tire karts have been spawned!",
-                              spawn_sta), NULL, 2.0f);
+    m_race_gui->addMessage(_("%i spare tire kart(s) has/have been spawned!", spawn_sta), NULL, 2.0f);
     for (unsigned int i = 0; i < spawn_sta; i++)
     {
         SpareTireAI* sta = dynamic_cast<SpareTireAI*>

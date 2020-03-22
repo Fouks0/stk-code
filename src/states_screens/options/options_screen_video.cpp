@@ -31,15 +31,14 @@
 #include "guiengine/widget.hpp"
 #include "io/file_manager.hpp"
 #include "states_screens/dialogs/custom_video_settings.hpp"
+#include "states_screens/dialogs/message_dialog.hpp"
 #include "states_screens/options/options_screen_audio.hpp"
 #include "states_screens/options/options_screen_general.hpp"
 #include "states_screens/options/options_screen_input.hpp"
-#include "states_screens/options/options_screen_language.hpp"
 #include "states_screens/options/options_screen_ui.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -456,22 +455,22 @@ void OptionsScreenVideo::updateTooltip()
 
     //I18N: in the graphical options tooltip;
     // indicates a graphical feature is enabled
-    const core::stringw enabled = _LTR("Enabled");
+    const core::stringw enabled = _("Enabled");
     //I18N: in the graphical options tooltip;
     // indicates a graphical feature is disabled
-    const core::stringw disabled = _LTR("Disabled");
+    const core::stringw disabled = _("Disabled");
     //I18N: if only important particles effects is enabled
-    const core::stringw important_only = _LTR("Important only");
+    const core::stringw important_only = _("Important only");
 
     //I18N: in the graphical options tooltip;
     // indicates the rendered image quality is very low
-    const core::stringw very_low = _LTR("Very Low");
+    const core::stringw very_low = _("Very Low");
     //I18N: in the graphical options tooltip;
     // indicates the rendered image quality is low
-    const core::stringw low = _LTR("Low");
+    const core::stringw low = _("Low");
     //I18N: in the graphical options tooltip;
     // indicates the rendered image quality is high
-    const core::stringw high = _LTR("High");
+    const core::stringw high = _("High");
 
     //I18N: in graphical options
     tooltip = _("Particles Effects: %s",
@@ -550,7 +549,7 @@ void OptionsScreenVideo::eventCallback(Widget* widget, const std::string& name,
         else if (selection == "tab_general")
             screen = OptionsScreenGeneral::getInstance();
         else if (selection == "tab_language")
-            screen = OptionsScreenLanguage::getInstance();
+            new MessageDialog("Deleted feature! There is only one surviving language since 20XX.");
         if(screen)
             StateManager::get()->replaceTopMostScreen(screen);
     }

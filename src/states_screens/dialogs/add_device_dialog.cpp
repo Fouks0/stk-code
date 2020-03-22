@@ -28,8 +28,6 @@
 #include "states_screens/state_manager.hpp"
 #include "utils/cpp2011.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
-#include "input/wiimote_manager.hpp"
 
 #include <IGUIStaticText.h>
 #include <IGUIEnvironment.h>
@@ -47,12 +45,7 @@ AddDeviceDialog::AddDeviceDialog() : ModalDialog(0.90f, 0.80f)
     ScalableFont* font = GUIEngine::getFont();
     const int textHeight = GUIEngine::getFontHeight();
     const int buttonHeight = textHeight + 10;
-
-#ifdef ENABLE_WIIUSE
-    const int nbButtons = 3;
-#else
     const int nbButtons = 2;
-#endif
 
     const int y_bottom = m_area.getHeight() - nbButtons*(buttonHeight + 10) - 10;
     const int y_stride = buttonHeight+10;
@@ -76,32 +69,10 @@ AddDeviceDialog::AddDeviceDialog() : ModalDialog(0.90f, 0.80f)
                                               /*word wrap*/true,
                                               m_irrlicht_window);
     b->setTabStop(false);
-    b->setRightToLeft(translations->isRTLText(msg));
+    b->setRightToLeft(false);
     // because it looks like 'setRightToLeft' applies next time
     // setText is called only
     b->setText(msg.c_str());
-
-#ifdef ENABLE_WIIUSE
-    {
-        ButtonWidget* widget = new ButtonWidget();
-        widget->m_properties[PROP_ID] = "addwiimote";
-
-        //I18N: In the 'add new input device' dialog
-        widget->setText( _("Add Wiimote") );
-
-        const int textWidth =
-            font->getDimension( widget->getText().c_str() ).Width + 40;
-
-        widget->m_x = m_area.getWidth()/2 - textWidth/2;
-        widget->m_y = cur_y;
-        widget->m_w = textWidth;
-        widget->m_h = buttonHeight;
-        widget->setParent(m_irrlicht_window);
-        m_widgets.push_back(widget);
-        widget->add();
-        cur_y += y_stride;
-    }
-#endif  // ENABLE_WIIUSE
 
     {
         ButtonWidget* widget = new ButtonWidget();
@@ -173,17 +144,6 @@ GUIEngine::EventPropagation AddDeviceDialog::processEvent
 
         return GUIEngine::EVENT_BLOCK;
     }
-#ifdef ENABLE_WIIUSE
-    else if (eventSource == "addwiimote")
-    {
-        // Remove the previous modal dialog to avoid a warning
-        GUIEngine::ModalDialog::dismiss();
-        if(wiimote_manager->askUserToConnectWiimotes() > 0)
-            ((OptionsScreenInput*)GUIEngine::getCurrentScreen())->rebuildDeviceList();
-
-        return GUIEngine::EVENT_BLOCK;
-    }
-#endif
 
     return GUIEngine::EVENT_LET;
 }   // processEvent

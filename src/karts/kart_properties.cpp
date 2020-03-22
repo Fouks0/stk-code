@@ -18,7 +18,6 @@
 
 #include "karts/kart_properties.hpp"
 
-#include "addons/addon.hpp"
 #include "config/stk_config.hpp"
 #include "config/player_manager.hpp"
 #include "graphics/central_settings.hpp"
@@ -39,7 +38,6 @@
 #include "utils/constants.hpp"
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -212,9 +210,9 @@ void KartProperties::load(const std::string &filename, const std::string &node)
     // If this is an addon kart, add "addon_" to the identifier - just in
     // case that an addon kart has the same directory name (and therefore
     // identifier) as an included kart.
-    if(Addon::isAddon(filename))
+    if (StringUtils::startsWith(filename, file_manager->getAddonsDir()))
     {
-        m_ident = Addon::createAddonId(m_ident);
+        m_ident = "addon_" + m_ident;
         m_is_addon = true;
     }
 

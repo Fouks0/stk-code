@@ -20,7 +20,6 @@
 #include "guiengine/engine.hpp"
 #include "guiengine/scalable_font.hpp"
 #include "guiengine/skin.hpp"
-#include "utils/translation.hpp"
 
 #include <IGUIElement.h>
 #include <IGUIEnvironment.h>
@@ -85,7 +84,7 @@ void LabelWidget::add()
                                                           false, word_wrap, m_parent, -1);
         irrwidget->setTextRestrainedInside(false);
     }
-    irrwidget->setRightToLeft(translations->isRTLText(message));
+    irrwidget->setRightToLeft(false);
 
     m_element = irrwidget;
     irrwidget->setTextAlignment( align, valign );
@@ -140,7 +139,7 @@ void LabelWidget::setText(const wchar_t *text, bool expandIfNeeded)
 
     Widget::setText(text);
     if (m_element)
-        getIrrlichtElement<IGUIStaticText>()->setRightToLeft(translations->isRTLText(getText()));
+        getIrrlichtElement<IGUIStaticText>()->setRightToLeft(false);
 }   // setText
 
 // ----------------------------------------------------------------------------

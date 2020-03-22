@@ -47,9 +47,6 @@ private:
     /** Spinner for reverse mode. */
     GUIEngine::SpinnerWidget *m_reverse_spinner;
 
-    /** Spinner for number of tracks (in case of random GP). */
-    GUIEngine::SpinnerWidget *m_num_tracks_spinner;
-
     /** Spinner for number of AI karts. */
     GUIEngine::SpinnerWidget* m_ai_kart_spinner;
 
@@ -61,9 +58,6 @@ private:
 
     /** Number of available tracks */
     int m_max_num_tracks;
-
-    /** Get number of available tracks for random GPs */
-    int getMaxNumTracks(std::string group);
 
 protected: // Necessary for RandomGPInfoScreen
     float m_curr_time;
@@ -77,7 +71,6 @@ protected: // Necessary for RandomGPInfoScreen
      * labels as possible by just changing their text. */
     void addTracks();
     void addScreenshot();
-    void updateRandomGP();
     GrandPrixData::GPReverseType getReverse() const;
 
 public:

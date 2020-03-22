@@ -37,10 +37,8 @@
 #include "karts/kart_properties.hpp"
 #include "karts/kart_properties_manager.hpp"
 #include "modes/overworld.hpp"
-#include "network/network_config.hpp"
 #include "states_screens/race_setup_screen.hpp"
 #include "utils/log.hpp"
-#include "utils/translation.hpp"
 #include "utils/random_generator.hpp"
 
 #include <IGUIEnvironment.h>
@@ -383,27 +381,24 @@ void KartSelectionScreen::init()
     // way of player joining by pressing 'fire' instead of 'select'.
     input_manager->getDeviceManager()->mapFireToSelect(true);
 
-    if (!NetworkConfig::get()->isNetworking())
+    StateManager::get()->resetActivePlayers();
+    if (!m_multiplayer)
     {
-        StateManager::get()->resetActivePlayers();
-        if (!m_multiplayer)
-        {
-            joinPlayer(input_manager->getDeviceManager()->getLatestUsedDevice(),
-                NULL/*player profile*/);
-            w->updateItemDisplay();
+        joinPlayer(input_manager->getDeviceManager()->getLatestUsedDevice(),
+            NULL/*player profile*/);
+        w->updateItemDisplay();
 
-            // Player 0 select default kart
-            if (!w->setSelection(UserConfigParams::m_default_kart, 0, true))
-            {
-                // if kart from config not found, select the first instead
-                w->setSelection(0, 0, true);
-            }
-        }
-        else
+        // Player 0 select default kart
+        if (!w->setSelection(UserConfigParams::m_default_kart, 0, true))
         {
-            // Add multiplayer message
-            addMultiplayerMessage();
+            // if kart from config not found, select the first instead
+            w->setSelection(0, 0, true);
         }
+    }
+    else
+    {
+        // Add multiplayer message
+        addMultiplayerMessage();
     }
 }   // init
 
@@ -1520,7 +1515,7 @@ void KartSelectionScreen::setKartsFromCurrentGroup()
     {
         const KartProperties* prop = karts.get(i);
         if (PlayerManager::getCurrentPlayer()->isLocked(prop->getIdent()) &&
-            !m_multiplayer && !NetworkConfig::get()->isNetworking())
+            !m_multiplayer)
         {
             w->addItem(_("Locked : solve active challenges to gain access to more!"),
                        ID_LOCKED + prop->getIdent(),
@@ -1529,7 +1524,7 @@ void KartSelectionScreen::setKartsFromCurrentGroup()
         }
         else
         {
-            w->addItem(translations->fribidize(prop->getName()),
+            w->addItem(prop->getName(),
                        prop->getIdent(),
                        prop->getAbsoluteIconFile(), 0,
                        IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);

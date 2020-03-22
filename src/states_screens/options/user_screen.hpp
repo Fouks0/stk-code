@@ -57,22 +57,8 @@ private:
      *  same time. */
     enum UserScreenState { STATE_NONE=0, STATE_LOGIN=1, STATE_LOGOUT=2} m_state;
 
-    /** The user name that is currently being logged out. Used to
-     *  display more meaningful sign-out message. */
-    irr::core::stringw m_sign_out_name;
-
-    /** The user name that is currently being logged out. Used to
-     *  display more meaningful sign-out message. */
-    irr::core::stringw m_sign_in_name;
-
-    /** Online check box. */
-    GUIEngine::CheckBoxWidget *m_online_cb;
-
     /** User name entry field. */
     GUIEngine::TextBoxWidget *m_username_tb;
-
-    /** Password widget. */
-    GUIEngine::TextBoxWidget *m_password_tb;
 
     /** Label field for warning and error messages. */
     GUIEngine::LabelWidget * m_info_widget;
@@ -88,18 +74,11 @@ private:
      *  all cleared. */
     bool m_new_registered_data;
 
-    /** Set from the register screen if the newly created account can be
-     *  used directly without waiting to confirm the account. */
-    bool m_auto_login;
-
     void selectUser(int index);
-    void makeEntryFieldsVisible();
-    void login();
     void closeScreen();
     void deletePlayer();
     void doDeletePlayer();
     PlayerProfile* getSelectedPlayer();
-    virtual void onUpdate(float dt) OVERRIDE;
 
 public:
     /** \brief implement callback from parent class GUIEngine::Screen */
@@ -118,16 +97,7 @@ public:
     /** \brief implement callback from parent class GUIEngine::Screen */
     virtual void tearDown() OVERRIDE;
 
-    /** \brief implement optional callback from parent class GUIEngine::Screen */
-    virtual void unloaded() OVERRIDE;
-
-    void setNewAccountData(bool online, bool auto_login,
-                           const core::stringw &online_name="",
-                           const core::stringw &password="");
-    void loginSuccessful();
-    void loginError(const irr::core::stringw &error_message);
-    void logoutSuccessful();
-    void logoutError(const irr::core::stringw &error_message);
+    void setNewAccountData(const core::stringw &online_name = "");
 
     virtual GUIEngine::EventPropagation filterActions(PlayerAction action,
         int deviceID,

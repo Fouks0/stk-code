@@ -369,7 +369,7 @@ void PlayerKartWidget::add()
     irr::core::stringw name; // name of the player
     if (m_associated_player)
         name = m_associated_player->getProfile()->getName();
-    core::stringw label = translations->fribidize(name);
+    core::stringw label = name;
 
     if (m_parent_screen->m_multiplayer)
     {
@@ -377,7 +377,7 @@ void PlayerKartWidget::add()
         for (int n=0; n<player_amount; n++)
         {
             core::stringw name = PlayerManager::get()->getPlayer(n)->getName();
-            core::stringw label = translations->fribidize(name);
+            core::stringw label = name;
             m_player_ident_spinner->addLabel(label);
             if (UserConfigParams::m_per_player_difficulty)
             {

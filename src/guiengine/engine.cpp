@@ -675,7 +675,6 @@ namespace GUIEngine
 #include "guiengine/message_queue.hpp"
 #include "guiengine/scalable_font.hpp"
 #include "guiengine/screen.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "guiengine/skin.hpp"
 #include "guiengine/widget.hpp"
 #include "guiengine/dialog_queue.hpp"
@@ -973,7 +972,6 @@ namespace GUIEngine
         g_current_screen = NULL;
         needsUpdate.clearWithoutDeleting();
 
-        if (ScreenKeyboard::isActive()) ScreenKeyboard::dismiss();
         if (ModalDialog::isADialogActive()) ModalDialog::dismiss();
 
         if (g_font)
@@ -1191,12 +1189,7 @@ namespace GUIEngine
         {
             bool dialog_opened = false;
             
-            if (ScreenKeyboard::isActive())
-            {
-                ScreenKeyboard::getCurrent()->onUpdate(dt);
-                dialog_opened = true;
-            }
-            else if (ModalDialog::isADialogActive())
+            if (ModalDialog::isADialogActive())
             {
                 ModalDialog::getCurrent()->onUpdate(dt);
                 dialog_opened = true;
@@ -1212,11 +1205,7 @@ namespace GUIEngine
         }
         else
         {
-            if (ScreenKeyboard::isActive())
-            {
-                ScreenKeyboard::getCurrent()->onUpdate(dt);
-            }
-            else if (ModalDialog::isADialogActive())
+            if (ModalDialog::isADialogActive())
             {
                 ModalDialog::getCurrent()->onUpdate(dt);
             }
@@ -1394,13 +1383,6 @@ namespace GUIEngine
 
     Widget* getWidget(const char* name)
     {
-        if (ScreenKeyboard::isActive())
-        {
-            Widget* widget = ScreenKeyboard::getCurrent()->getWidget(name);
-            if (widget != NULL) 
-                return widget;
-        }
-        
         // if a modal dialog is shown, search within it too
         if (ModalDialog::isADialogActive())
         {
@@ -1419,13 +1401,6 @@ namespace GUIEngine
     // -----------------------------------------------------------------------
     Widget* getWidget(const int id)
     {
-        if (ScreenKeyboard::isActive())
-        {
-            Widget* widget = ScreenKeyboard::getCurrent()->getWidget(id);
-            if (widget != NULL) 
-                return widget;
-        }
-        
         // if a modal dialog is shown, search within it too
         if (ModalDialog::isADialogActive())
         {

@@ -29,7 +29,6 @@
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
 #include "utils/random_generator.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 
@@ -275,8 +274,7 @@ void ArenasScreen::buildTrackList()
             }
             else
             {
-                w->addItem( translations->fribidize(curr->getName()), curr->getIdent(), curr->getScreenshotFile(), 0,
-                           IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE );
+                w->addItem(curr->getName(), curr->getIdent(), curr->getScreenshotFile(), 0, IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE);
             }
         }
 
@@ -327,8 +325,7 @@ void ArenasScreen::buildTrackList()
             }
             else
             {
-                w->addItem( translations->fribidize(curr->getName()), curr->getIdent(), curr->getScreenshotFile(), 0,
-                           IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE );
+                w->addItem(curr->getName(), curr->getIdent(), curr->getScreenshotFile(), 0, IconButtonWidget::ICON_PATH_TYPE_ABSOLUTE );
             }
         }
     }
@@ -338,9 +335,7 @@ void ArenasScreen::buildTrackList()
     w->updateItemDisplay();
 
     if (m_unsupported_arena.size() > 0)
-        w->setText( _P("%d arena unavailable in single player.",
-                       "%d arenas unavailable in single player.",
-                       (int)m_unsupported_arena.size()) );
+        w->setText(_("%d arena(s) unavailable in single player.", (int) m_unsupported_arena.size()));
 }
 
 // ------------------------------------------------------------------------------------------------------

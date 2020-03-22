@@ -39,7 +39,6 @@ class AbstractKart;
 class Camera;
 class Material;
 class Referee;
-class RaceGUIMultitouch;
 
 /**
   * \brief An abstract base class for the two race guis (race_gui and
@@ -133,8 +132,7 @@ private:
     video::ITexture* m_plunger_face;
     
     /** Translated strings 'ready', 'set', 'go'. */
-    core::stringw    m_string_ready, m_string_set, m_string_go, m_string_goal,
-        m_string_waiting_for_others, m_string_waiting_for_the_server;
+    core::stringw    m_string_ready, m_string_set, m_string_go, m_string_goal;
 
     /** The position of the referee for all karts. */
     std::vector<Vec3> m_referee_pos;
@@ -192,8 +190,6 @@ protected:
 
     /** Texture for the rank icon*/
     video::ITexture* m_rank_icon;
-    
-    RaceGUIMultitouch* m_multitouch_gui;
 
     //void createMarkerTexture();
     void createRegularPolygon(unsigned int n, float radius,

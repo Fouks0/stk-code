@@ -21,7 +21,6 @@
 #include "guiengine/widgets/ribbon_widget.hpp"
 #include "modes/world.hpp"
 #include "states_screens/state_manager.hpp"
-#include "utils/translation.hpp"
 
 using namespace GUIEngine;
 

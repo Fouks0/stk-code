@@ -31,7 +31,6 @@
 #include "graphics/material_manager.hpp"
 #include "graphics/render_info.hpp"
 #include "guiengine/modaldialog.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "io/file_manager.hpp"
 #include "input/device_manager.hpp"
 #include "input/keyboard_device.hpp"
@@ -44,23 +43,16 @@
 #include "karts/controller/soccer_ai.hpp"
 #include "karts/controller/spare_tire_ai.hpp"
 #include "karts/controller/test_ai.hpp"
-#include "karts/controller/network_ai_controller.hpp"
-#include "karts/controller/network_player_controller.hpp"
 #include "karts/kart.hpp"
 #include "karts/kart_model.hpp"
 #include "karts/kart_properties_manager.hpp"
-#include "karts/kart_rewinder.hpp"
 #include "main_loop.hpp"
 #include "modes/overworld.hpp"
 #include "modes/profile_world.hpp"
-#include "network/protocols/client_lobby.hpp"
-#include "network/network_config.hpp"
-#include "network/rewind_manager.hpp"
 #include "physics/btKart.hpp"
 #include "physics/physics.hpp"
 #include "physics/triangle_mesh.hpp"
 #include "race/highscore_manager.hpp"
-#include "race/history.hpp"
 #include "race/race_manager.hpp"
 #include "replay/replay_play.hpp"
 #include "replay/replay_recorder.hpp"
@@ -79,7 +71,6 @@
 #include "tracks/track_object_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/profiler.hpp"
-#include "utils/translation.hpp"
 #include "utils/string_utils.hpp"
 
 #include <algorithm>
@@ -127,11 +118,7 @@ World* World::m_world = NULL;
  */
 World::World() : WorldStatus()
 {
-    RewindManager::setEnable(NetworkConfig::get()->isNetworking());
-#ifdef DEBUG
     m_magic_number = 0xB01D6543;
-#endif
-
     m_race_gui           = NULL;
     m_saved_race_gui     = NULL;
     m_use_highscores     = true;
@@ -139,7 +126,6 @@ World::World() : WorldStatus()
     m_schedule_unpause   = false;
     m_schedule_exit_race = false;
     m_schedule_tutorial  = false;
-    m_is_network_world   = false;
 
     m_stop_music_when_dialog_open = true;
 
@@ -173,7 +159,6 @@ void World::init()
     // constructor is called, so the wrong race gui would be created.
     createRaceGUI();
     main_loop->renderGUI(1000);
-    RewindManager::create();
     main_loop->renderGUI(1100);
     // Grab the track file
     Track *track = track_manager->getTrack(race_manager->getTrackName());
@@ -217,23 +202,16 @@ void World::init()
     {
         main_loop->renderGUI(7000, i, num_karts);
         if (race_manager->getKartType(i) == RaceManager::KT_GHOST) continue;
-        std::string kart_ident = history->replayHistory()
-                               ? history->getKartIdent(i)
-                               : race_manager->getKartIdent(i);
+        std::string kart_ident = race_manager->getKartIdent(i);
         int local_player_id  = race_manager->getKartLocalPlayerId(i);
-        int global_player_id = race_manager->getKartGlobalPlayerId(i);
         std::shared_ptr<AbstractKart> new_kart;
         if (hasTeam())
         {
-            new_kart = createKartWithTeam(kart_ident, i, local_player_id,
-                global_player_id, race_manager->getKartType(i),
-                race_manager->getPlayerDifficulty(i));
+            new_kart = createKartWithTeam(kart_ident, i, local_player_id, race_manager->getKartType(i), race_manager->getPlayerDifficulty(i));
         }
         else
         {
-            new_kart = createKart(kart_ident, i, local_player_id,
-                global_player_id, race_manager->getKartType(i),
-                race_manager->getPlayerDifficulty(i));
+            new_kart = createKart(kart_ident, i, local_player_id, race_manager->getKartType(i), race_manager->getPlayerDifficulty(i));
         }
         new_kart->setBoostAI(race_manager->hasBoostedAI(i));
         m_karts.push_back(new_kart);
@@ -252,22 +230,6 @@ void World::init()
     {
         Weather::getInstance<Weather>();   // create Weather instance
     }
-
-    if (Camera::getNumCameras() == 0)
-    {
-        auto cl = LobbyProtocol::get<ClientLobby>();
-        if ( (NetworkConfig::get()->isServer() && 
-              !ProfileWorld::isNoGraphics()       ) ||
-            race_manager->isWatchingReplay()        ||
-            (cl && cl->isSpectator()))
-        {
-            // In case that the server is running with gui, watching replay or
-            // spectating the game, create a camera and attach it to the first
-            // kart.
-            Camera::createCamera(World::getWorld()->getKart(0), 0);
-
-        }   // if server with graphics of is watching replay
-    } // if getNumCameras()==0
 
     const unsigned int kart_amount = (unsigned int)m_karts.size();
     for (unsigned int i = 0; i < kart_amount; i++)
@@ -315,8 +277,6 @@ void World::initTeamArrows(AbstractKart* k)
  */
 void World::reset(bool restart)
 {
-    RewindManager::get()->reset();
-
     // If m_saved_race_gui is set, it means that the restart was done
     // when the race result gui was being shown. In this case restore the
     // race gui (note that the race result gui is cached and so never really
@@ -334,7 +294,6 @@ void World::reset(bool restart)
     m_faster_music_active = false;
     m_eliminated_karts    = 0;
     m_eliminated_players  = 0;
-    m_is_network_world = false;
 
     for ( KartList::iterator i = m_karts.begin(); i != m_karts.end() ; ++i )
     {
@@ -386,10 +345,8 @@ void World::reset(bool restart)
     // Enable SFX again
     SFXManager::get()->resumeAll();
 
-    RewindManager::get()->reset();
     race_manager->reset();
     // Make sure to overwrite the data from the previous race.
-    if(!history->replayHistory()) history->initRecording();
     if(race_manager->isRecordingRace())
     {
         Log::info("World", "Start Recording race.");
@@ -416,12 +373,9 @@ void World::createRaceGUI()
  *  \param index Index of the kart.
  *  \param local_player_id If the kart is a player kart this is the index of
  *         this player on the local machine.
- *  \param global_player_id If the kart is a player kart this is the index of
- *         this player globally (i.e. including network players).
  */
 std::shared_ptr<AbstractKart> World::createKart
-    (const std::string &kart_ident, int index, int local_player_id,
-    int global_player_id, RaceManager::KartType kart_type,
+    (const std::string &kart_ident, int index, int local_player_id, RaceManager::KartType kart_type,
     PerPlayerDifficulty difficulty)
 {
     unsigned int gk = 0;
@@ -430,29 +384,11 @@ std::shared_ptr<AbstractKart> World::createKart
 
     std::shared_ptr<RenderInfo> ri = std::make_shared<RenderInfo>();
     core::stringw online_name;
-    if (global_player_id > -1)
-    {
-        ri->setHue(race_manager->getKartInfo(global_player_id)
-            .getDefaultKartColor());
-        online_name = race_manager->getKartInfo(global_player_id)
-            .getPlayerName();
-    }
 
     int position           = index+1;
     btTransform init_pos   = getStartTransform(index - gk);
     std::shared_ptr<AbstractKart> new_kart;
-    if (RewindManager::get()->isEnabled())
-    {
-        auto kr = std::make_shared<KartRewinder>(kart_ident, index, position,
-            init_pos, difficulty, ri);
-        kr->rewinderAdd();
-        new_kart = kr;
-    }
-    else
-    {
-        new_kart = std::make_shared<Kart>(kart_ident, index, position,
-            init_pos, difficulty, ri);
-    }
+    new_kart = std::make_shared<Kart>(kart_ident, index, position, init_pos, difficulty, ri);
 
     new_kart->init(race_manager->getKartType(index));
     Controller *controller = NULL;
@@ -460,36 +396,15 @@ std::shared_ptr<AbstractKart> World::createKart
     {
     case RaceManager::KT_PLAYER:
     {
-        if (NetworkConfig::get()->isNetworkAITester())
+        controller = new LocalPlayerController(new_kart.get(),
+            local_player_id, difficulty);
+        const PlayerProfile* p = StateManager::get()
+            ->getActivePlayer(local_player_id)->getConstProfile();
+        if (p && p->getDefaultKartColor() > 0.0f)
         {
-            AIBaseController* ai = NULL;
-            if (race_manager->isBattleMode())
-                ai = new BattleAI(new_kart.get());
-            else
-                ai = new SkiddingAI(new_kart.get());
-            controller = new NetworkAIController(new_kart.get(),
-                local_player_id, ai);
-        }
-        else
-        {
-            controller = new LocalPlayerController(new_kart.get(),
-                local_player_id, difficulty);
-            const PlayerProfile* p = StateManager::get()
-                ->getActivePlayer(local_player_id)->getConstProfile();
-            if (p && p->getDefaultKartColor() > 0.0f)
-            {
-                ri->setHue(p->getDefaultKartColor());
-            }
+            ri->setHue(p->getDefaultKartColor());
         }
         m_num_players ++;
-        break;
-    }
-    case RaceManager::KT_NETWORK_PLAYER:
-    {
-        controller = new NetworkPlayerController(new_kart.get());
-        if (!online_name.empty())
-            new_kart->setOnScreenText(online_name.c_str());
-        m_num_players++;
         break;
     }
     case RaceManager::KT_AI:
@@ -500,6 +415,9 @@ std::shared_ptr<AbstractKart> World::createKart
     case RaceManager::KT_GHOST:
     case RaceManager::KT_LEADER:
     case RaceManager::KT_SPARE_TIRE:
+        break;
+    default:
+        assert(false);
         break;
     }
 
@@ -561,7 +479,6 @@ Controller* World::loadAIController(AbstractKart* kart)
 World::~World()
 {
     material_manager->unloadAllTextures();
-    RewindManager::destroy();
 
     irr_driver->onUnloadWorld();
 
@@ -643,21 +560,6 @@ void World::onGo()
         if (m_karts[i]->isGhostKart()) continue;
         m_karts[i]->getVehicle()->setAllBrakes(0);
     }
-    // Reset track objects 1 more time to make sure all instances of moveable
-    // fall at the same instant when race start in network
-    if (NetworkConfig::get()->isNetworking())
-    {
-        PtrVector<TrackObject>& objs = Track::getCurrentTrack()
-            ->getTrackObjectManager()->getObjects();
-        for (TrackObject* curr : objs)
-        {
-            if (curr->getPhysicalObject())
-            {
-                curr->reset();
-                curr->resetEnabled();
-            }
-        }
-    }
 }   // onGo
 
 //-----------------------------------------------------------------------------
@@ -669,7 +571,6 @@ void World::onGo()
 void World::terminateRace()
 {
     // In case the user opened paused dialog in network
-    GUIEngine::ScreenKeyboard::dismiss();
     GUIEngine::ModalDialog::dismiss();
 
     m_schedule_pause = false;
@@ -692,10 +593,7 @@ void World::terminateRace()
     // to show it in the GUI
     int best_highscore_rank = -1;
     std::string highscore_who = "";
-    if (!isNetworkWorld())
-    {
-        updateHighscores(&best_highscore_rank);
-    }
+    updateHighscores(&best_highscore_rank);
 
     updateAchievementDataEndRace();
 
@@ -926,9 +824,7 @@ void World::updateWorld(int ticks)
     }
 
     // Don't update world if a menu is shown or the race is over.
-    if (getPhase() == FINISH_PHASE ||
-        (!NetworkConfig::get()->isNetworking() &&
-        getPhase() == IN_GAME_MENU_PHASE))
+    if (getPhase() == FINISH_PHASE || getPhase() == IN_GAME_MENU_PHASE)
         return;
 
     try
@@ -1029,14 +925,6 @@ void World::scheduleTutorial()
  */
 void World::updateGraphics(float dt)
 {
-    if (auto cl = LobbyProtocol::get<ClientLobby>())
-    {
-        // Reset all smooth network body of rewinders so the rubber band effect
-        // of moveable does not exist during firstly live join.
-        if (cl->hasLiveJoiningRecently())
-            RewindManager::get()->resetSmoothNetworkBody();
-    }
-
     PROFILER_PUSH_CPU_MARKER("World::update (weather)", 0x80, 0x7F, 0x00);
     if (UserConfigParams::m_particles_effects > 1 && Weather::getInstance())
     {
@@ -1093,9 +981,6 @@ void World::update(int ticks)
 
     PROFILER_PUSH_CPU_MARKER("World::update (sub-updates)", 0x20, 0x7F, 0x00);
     WorldStatus::update(ticks);
-    PROFILER_POP_CPU_MARKER();
-    PROFILER_PUSH_CPU_MARKER("World::update (RewindManager)", 0x20, 0x7F, 0x40);
-    RewindManager::get()->update(ticks);
     PROFILER_POP_CPU_MARKER();
 
     PROFILER_PUSH_CPU_MARKER("World::update (Track object manager)", 0x20, 0x7F, 0x40);
@@ -1168,7 +1053,7 @@ void World::updateTrack(int ticks)
 // ----------------------------------------------------------------------------
 Highscores* World::getHighscores() const
 {
-    if (isNetworkWorld() || !m_use_highscores) return NULL;
+    if (!m_use_highscores) return NULL;
 
     const Highscores::HighscoreType type = "HST_" + getIdent();
 
@@ -1432,8 +1317,7 @@ unsigned int World::getNumberOfRescuePositions() const
 
 //-----------------------------------------------------------------------------
 std::shared_ptr<AbstractKart> World::createKartWithTeam
-    (const std::string &kart_ident, int index, int local_player_id,
-    int global_player_id, RaceManager::KartType kart_type,
+    (const std::string &kart_ident, int index, int local_player_id, RaceManager::KartType kart_type,
     PerPlayerDifficulty difficulty)
 {
     int cur_red = getTeamNum(KART_TEAM_RED);
@@ -1450,11 +1334,6 @@ std::shared_ptr<AbstractKart> World::createKartWithTeam
             team = KART_TEAM_BLUE;
         m_kart_team_map[index] = team;
     }
-    else if (NetworkConfig::get()->isNetworking())
-    {
-        m_kart_team_map[index] = race_manager->getKartInfo(index).getKartTeam();
-        team = race_manager->getKartInfo(index).getKartTeam();
-    }
     else
     {
         int rm_id = index -
@@ -1466,11 +1345,6 @@ std::shared_ptr<AbstractKart> World::createKartWithTeam
     }
 
     core::stringw online_name;
-    if (global_player_id > -1)
-    {
-        online_name = race_manager->getKartInfo(global_player_id)
-            .getPlayerName();
-    }
 
     // Notice: In blender, please set 1,3,5,7... for blue starting position;
     // 2,4,6,8... for red.
@@ -1491,18 +1365,7 @@ std::shared_ptr<AbstractKart> World::createKartWithTeam
         std::make_shared<RenderInfo>(1.0f));
 
     std::shared_ptr<AbstractKart> new_kart;
-    if (RewindManager::get()->isEnabled())
-    {
-        auto kr = std::make_shared<KartRewinder>(kart_ident, index, position,
-            init_pos, difficulty, ri);
-        kr->rewinderAdd();
-        new_kart = kr;
-    }
-    else
-    {
-        new_kart = std::make_shared<Kart>(kart_ident, index, position,
-            init_pos, difficulty, ri);
-    }
+    new_kart = std::make_shared<Kart>(kart_ident, index, position, init_pos, difficulty, ri);
 
     new_kart->init(race_manager->getKartType(index));
     Controller *controller = NULL;
@@ -1514,12 +1377,6 @@ std::shared_ptr<AbstractKart> World::createKartWithTeam
             difficulty);
         m_num_players ++;
         break;
-    case RaceManager::KT_NETWORK_PLAYER:
-        controller = new NetworkPlayerController(new_kart.get());
-        if (!online_name.empty())
-            new_kart->setOnScreenText(online_name.c_str());
-        m_num_players++;
-        break;
     case RaceManager::KT_AI:
         controller = loadAIController(new_kart.get());
         break;
@@ -1528,6 +1385,9 @@ std::shared_ptr<AbstractKart> World::createKartWithTeam
     case RaceManager::KT_LEADER:
         break;
     case RaceManager::KT_SPARE_TIRE:
+        break;
+    default:
+        assert(false);
         break;
     }
 

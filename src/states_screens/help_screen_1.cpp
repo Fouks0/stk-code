@@ -58,42 +58,7 @@ void HelpScreen1::loadedFromFile()
 
 void HelpScreen1::eventCallback(Widget* widget, const std::string& name, const int playerID)
 {
-    if (name == "startTutorial")
-    {
-        race_manager->setNumPlayers(1);
-        race_manager->setMajorMode (RaceManager::MAJOR_MODE_SINGLE);
-        race_manager->setMinorMode (RaceManager::MINOR_MODE_TUTORIAL);
-        race_manager->setNumKarts( 1 );
-        race_manager->setTrack( "tutorial" );
-        race_manager->setDifficulty(RaceManager::DIFFICULTY_EASY);
-        race_manager->setReverseTrack(false);
-
-        // Use keyboard 0 by default (FIXME: let player choose?)
-        InputDevice* device = input_manager->getDeviceManager()->getKeyboard(0);
-
-        // Create player and associate player with keyboard
-        StateManager::get()->createActivePlayer(PlayerManager::getCurrentPlayer(),
-                                                device);
-
-        if (kart_properties_manager->getKart(UserConfigParams::m_default_kart) == NULL)
-        {
-            Log::warn("HelpScreen1", "Cannot find kart '%s', will revert to default",
-                      UserConfigParams::m_default_kart.c_str());
-            UserConfigParams::m_default_kart.revertToDefaults();
-        }
-        race_manager->setPlayerKart(0, UserConfigParams::m_default_kart);
-
-        // ASSIGN should make sure that only input from assigned devices
-        // is read.
-        input_manager->getDeviceManager()->setAssignMode(ASSIGN);
-        input_manager->getDeviceManager()
-            ->setSinglePlayer( StateManager::get()->getActivePlayer(0) );
-
-        StateManager::get()->enterGameState();
-        race_manager->setupPlayerKartInfo();
-        race_manager->startNew(false);
-    }
-    else if (name == "category")
+    if (name == "category")
     {
         std::string selection = ((RibbonWidget*)widget)->getSelectionIDString(PLAYER_ID_GAME_MASTER);
 
@@ -127,10 +92,6 @@ void HelpScreen1::init()
 {
     Screen::init();
     RibbonWidget* w = this->getWidget<RibbonWidget>("category");
-    ButtonWidget* tutorial = getWidget<ButtonWidget>("startTutorial");
-
-    tutorial->setActive(StateManager::get()->getGameState() !=
-                                                       GUIEngine::INGAME_MENU);
 
     if (w != NULL)
     {

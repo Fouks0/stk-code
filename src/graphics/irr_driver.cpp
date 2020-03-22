@@ -59,9 +59,6 @@
 #include "main_loop.hpp"
 #include "modes/profile_world.hpp"
 #include "modes/world.hpp"
-#include "network/network_config.hpp"
-#include "network/stk_host.hpp"
-#include "network/stk_peer.hpp"
 #include "physics/physics.hpp"
 #include "scriptengine/property_animator.hpp"
 #include "states_screens/dialogs/confirm_resolution_dialog.hpp"
@@ -894,7 +891,7 @@ void IrrDriver::changeResolution(const int w, const int h,
     // is actually called from the gui, i.e. the event loop, i.e. while the
     // old device is active - so we can't delete this device (which we must
     // do in applyResolutionSettings
-    if (w < 1024 || h < 720)
+    if (w != 1920 || h != 1080)
         m_resolution_changing = RES_CHANGE_YES_WARN;
     else
         m_resolution_changing = RES_CHANGE_YES;
@@ -1756,16 +1753,12 @@ void IrrDriver::displayFPS()
         prev_state = current_state;
     }
 
-    uint32_t ping = 0;
-    if (STKHost::existHost())
-        ping = STKHost::get()->getClientPingToServer();
     if (no_trust)
     {
         no_trust--;
 
         static video::SColor fpsColor = video::SColor(255, 0, 0, 0);
-        font->draw(StringUtils::insertValues (L"FPS: ... Ping: %dms", ping),
-            core::rect< s32 >(100,0,400,50), fpsColor, false);
+        font->draw(StringUtils::insertValues(L"FPS: ..."), core::rect< s32 >(100,0,400,50), fpsColor, false);
         return;
     }
 
@@ -1786,23 +1779,20 @@ void IrrDriver::displayFPS()
     {
         fps_string = StringUtils::insertValues
                     (L"FPS: %d/%d/%d  - PolyCount: %d Solid, "
-                      "%d Shadows - LightDist : %d\nComplexity %d, Total skinning joints: %d, "
-                      "Ping: %dms",
+                      "%d Shadows - LightDist : %d\nComplexity %d, Total skinning joints: %d, ",
                     min, fps, max, SP::sp_solid_poly_count,
                     SP::sp_shadow_poly_count, m_last_light_bucket_distance, irr_driver->getSceneComplexity(),
-                    m_skinning_joint, ping);
+                    m_skinning_joint);
     }
     else
     {
         if (CVS->isGLSL())
         {
-            fps_string = _("FPS: %d/%d/%d - %d KTris, Ping: %dms", min, fps,
-                max, SP::sp_solid_poly_count / 1000, ping);
+            fps_string = _("FPS: %d/%d/%d - %d KTris", min, fps, max, SP::sp_solid_poly_count / 1000);
         }
         else
         {
-            fps_string = _("FPS: %d/%d/%d - %d KTris, Ping: %dms", min, fps,
-                max, (int)roundf(kilotris), ping);
+            fps_string = _("FPS: %d/%d/%d - %d KTris", min, fps, max, (int) roundf(kilotris));
         }
     }
 
@@ -1950,10 +1940,6 @@ void IrrDriver::update(float dt, bool is_loading)
                                    video::SColor(255,100,101,140));
 
         GUIEngine::render(dt, is_loading);
-        if (m_render_nw_debug && !is_loading)
-        {
-            renderNetworkDebug();
-        }
         m_video_driver->endScene();
     }
 
@@ -1976,68 +1962,6 @@ void IrrDriver::update(float dt, bool is_loading)
     }
 #endif
 }   // update
-
-// ----------------------------------------------------------------------------
-void IrrDriver::renderNetworkDebug()
-{
-#ifndef SERVER_ONLY
-    if (!NetworkConfig::get()->isNetworking() ||
-        NetworkConfig::get()->isServer() || !STKHost::existHost())
-        return;
-
-    auto peer = STKHost::get()->getServerPeerForClient();
-    if (!peer)
-        return;
-
-    const core::dimension2d<u32>& screen_size =
-        m_video_driver->getScreenSize();
-    core::rect<s32>background_rect(
-        (int)(0.02f * screen_size.Width),
-        (int)(0.3f * screen_size.Height),
-        (int)(0.98f * screen_size.Width),
-        (int)(0.6f * screen_size.Height));
-    video::SColor color(0x80, 0xFF, 0xFF, 0xFF);
-    GL32_draw2DRectangle(color, background_rect);
-    uint64_t r, d, h, m, s, f;
-    r = STKHost::get()->getNetworkTimer();
-    d = r / 86400000;
-    r = r % 86400000;
-    h = r / 3600000;
-    r = r % 3600000;
-    m = r / 60000;
-    r = r % 60000;
-    s = r / 1000;
-    f = r % 1000;
-    char str[128];
-    sprintf(str, "%d day(s), %02d:%02d:%02d.%03d",
-        (int)d, (int)h, (int)m, (int)s, (int)f);
-
-    gui::IGUIFont* font = GUIEngine::getFont();
-    unsigned height = font->getDimension(L"X").Height + 2;
-    background_rect.UpperLeftCorner.X += 5;
-    static video::SColor black = video::SColor(255, 0, 0, 0);
-    font->draw(StringUtils::insertValues(
-        L"Server time: %s      Server state frequency: %d",
-        str, NetworkConfig::get()->getStateFrequency()),
-        background_rect, black, false);
-
-    background_rect.UpperLeftCorner.Y += height;
-    font->draw(StringUtils::insertValues(
-        L"Upload speed (KBps): %f      Download speed (KBps): %f",
-        (float)STKHost::get()->getUploadSpeed() / 1024.0f,
-        (float)STKHost::get()->getDownloadSpeed() / 1024.0f,
-        NetworkConfig::get()->getStateFrequency()), background_rect, black,
-        false);
-
-    background_rect.UpperLeftCorner.Y += height;
-    font->draw(StringUtils::insertValues(
-        L"Packet loss: %d      Packet loss variance: %d",
-        peer->getENetPeer()->packetLoss,
-        peer->getENetPeer()->packetLossVariance,
-        NetworkConfig::get()->getStateFrequency()), background_rect, black,
-        false);
-#endif
-}   // renderNetworkDebug
 
 // ----------------------------------------------------------------------------
 void IrrDriver::setRecording(bool val)

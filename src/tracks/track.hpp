@@ -26,6 +26,8 @@
   * objects.
   */
 
+#include "utils/log.hpp"
+
 #include <string>
 #include <vector>
 
@@ -36,7 +38,6 @@ using namespace irr;
 #include "LinearMath/btTransform.h"
 
 #include "utils/aligned_array.hpp"
-#include "utils/translation.hpp"
 #include "utils/vec3.hpp"
 #include "utils/ptr_vector.hpp"
 
@@ -94,6 +95,7 @@ struct Subtitle
   */
 class Track
 {
+friend class Tas;
 private:
 
     /** If a race is in progress, this stores the active track object.

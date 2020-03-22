@@ -17,10 +17,8 @@
 
 #include "states_screens/options/options_screen_ui.hpp"
 
-#include "addons/news_manager.hpp"
 #include "audio/sfx_manager.hpp"
 #include "audio/sfx_base.hpp"
-#include "config/hardware_stats.hpp"
 #include "config/player_manager.hpp"
 #include "config/user_config.hpp"
 #include "font/bold_face.hpp"
@@ -37,18 +35,16 @@
 #include "guiengine/widgets/spinner_widget.hpp"
 #include "guiengine/widget.hpp"
 #include "io/file_manager.hpp"
-#include "online/request_manager.hpp"
 #include "states_screens/main_menu_screen.hpp"
+#include "states_screens/dialogs/message_dialog.hpp"
 #include "states_screens/options/options_screen_audio.hpp"
 #include "states_screens/options/options_screen_general.hpp"
 #include "states_screens/options/options_screen_input.hpp"
-#include "states_screens/options/options_screen_language.hpp"
 #include "states_screens/options/options_screen_video.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -122,15 +118,6 @@ void OptionsScreenUI::loadedFromFile()
     //I18N: In the UI options, minimap position in the race UI 
     minimap_options->addLabel( core::stringw(_("Hidden")));
     minimap_options->m_properties[GUIEngine::PROP_MIN_VALUE] = "0";
-
-    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 && 
-                               irr_driver->getDevice()->supportsTouchDevice()) ||
-                               UserConfigParams::m_multitouch_active > 1;
-
-    if (multitouch_enabled && UserConfigParams::m_multitouch_draw_gui)
-    {
-        minimap_options->m_properties[GUIEngine::PROP_MIN_VALUE] = "1";
-    }
     minimap_options->m_properties[GUIEngine::PROP_MAX_VALUE] = "2";
 }   // loadedFromFile
 
@@ -150,15 +137,6 @@ void OptionsScreenUI::init()
     GUIEngine::SpinnerWidget* minimap_options = getWidget<GUIEngine::SpinnerWidget>("minimap");
     assert( minimap_options != NULL );
 
-    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 && 
-                               irr_driver->getDevice()->supportsTouchDevice()) ||
-                               UserConfigParams::m_multitouch_active > 1;
-
-    if (multitouch_enabled && UserConfigParams::m_multitouch_draw_gui &&
-        UserConfigParams::m_minimap_display == 0)
-    {
-        UserConfigParams::m_minimap_display = 1;
-    }
     minimap_options->setValue(UserConfigParams::m_minimap_display);
 
     // ---- video modes
@@ -223,7 +201,7 @@ void OptionsScreenUI::eventCallback(Widget* widget, const std::string& name, con
         else if (selection == "tab_general")
             screen = OptionsScreenGeneral::getInstance();
         else if (selection == "tab_language")
-            screen = OptionsScreenLanguage::getInstance();
+            new MessageDialog("Deleted feature! There is only one surviving language since 20XX.");
         if(screen)
             StateManager::get()->replaceTopMostScreen(screen);
     }

@@ -87,7 +87,7 @@ SavedGrandPrix::SavedGrandPrix(unsigned int player_id,
                                                 kart_list[i].m_ident,
                                                 kart_list[i].m_score,
                                                 kart_list[i].m_local_player_id,
-                                                kart_list[i].m_global_player_id,
+                                                -1,
                                                 kart_list[i].m_overall_time
                                                 );
         m_karts.push_back(newKart);
@@ -141,7 +141,7 @@ void SavedGrandPrix::setKarts(const std::vector<RaceManager::KartStatus> &kart_l
                                                 kart_list[i].m_ident,
                                                 kart_list[i].m_score,
                                                 kart_list[i].m_local_player_id,
-                                                kart_list[i].m_global_player_id,
+                                                -1,
                                                 kart_list[i].m_overall_time
                                                 );
         m_karts.push_back(newKart);

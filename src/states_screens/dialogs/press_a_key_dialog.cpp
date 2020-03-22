@@ -21,7 +21,6 @@
 #include "input/input_manager.hpp"
 #include "states_screens/dialogs/press_a_key_dialog.hpp"
 #include "states_screens/options/options_screen_device.hpp"
-#include "utils/translation.hpp"
 
 using namespace GUIEngine;
 using namespace irr::gui;

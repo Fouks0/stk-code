@@ -353,12 +353,7 @@ void FontWithFace::setDPI()
     const int screen_width = irr_driver->getActualScreenSize().Width;
     const int screen_height = irr_driver->getActualScreenSize().Height;
 
-    if (UserConfigParams::m_hidpi_enabled)
-    {
-        float scale = screen_height / 480.0f;
-        m_face_dpi = int(getScalingFactorTwo() * getScalingFactorOne() * scale);
-    }
-    else if (screen_height > 1300)
+    if (screen_height > 1300)
     {
         float scale = screen_height / 480.0f * 0.45f;
         m_face_dpi = int(getScalingFactorTwo() * (getScalingFactorOne() + 0.3f) * scale);

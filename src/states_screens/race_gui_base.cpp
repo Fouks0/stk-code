@@ -43,9 +43,6 @@
 #include "modes/capture_the_flag.hpp"
 #include "modes/linear_world.hpp"
 #include "modes/world.hpp"
-#include "network/protocols/client_lobby.hpp"
-#include "network/network_config.hpp"
-#include "states_screens/race_gui_multitouch.hpp"
 #include "tracks/track.hpp"
 #include "utils/constants.hpp"
 
@@ -72,11 +69,6 @@ RaceGUIBase::RaceGUIBase()
     m_string_go             = _("Go!");
     //I18N: Shown when a goal is scored
     m_string_goal           = _("GOAL!");
-    // I18N: Shown waiting for other players in network to finish loading or
-    // waiting
-    m_string_waiting_for_others = _("Waiting for others");
-    // I18N: Shown waiting for the server in network if live join or specatate
-    m_string_waiting_for_the_server = _("Waiting for the server");
 
     m_music_icon = irr_driver->getTexture("notes.png");
     if (!m_music_icon)
@@ -109,7 +101,6 @@ RaceGUIBase::RaceGUIBase()
     m_icons_inertia         = 2;
 
     m_referee               = NULL;
-    m_multitouch_gui        = NULL;
 }   // RaceGUIBase
 
 // ----------------------------------------------------------------------------
@@ -163,11 +154,6 @@ void RaceGUIBase::reset()
     m_plunger_speed     = core::vector2df(0,0);
     m_plunger_state     = PLUNGER_STATE_INIT;
     clearAllMessages();
-    
-    if (m_multitouch_gui != NULL)
-    {
-        m_multitouch_gui->reset();
-    }
 }   // reset
 
 //-----------------------------------------------------------------------------
@@ -440,15 +426,10 @@ void RaceGUIBase::update(float dt)
             m_referee_height += dt*5.0f;
             m_referee->selectReadySetGo(2);
         }
-        else if (world->getPhase()==World::WAIT_FOR_SERVER_PHASE ||
-            (NetworkConfig::get()->isNetworking() &&
-            world->getPhase()==World::TRACK_INTRO_PHASE))
+        else if (world->getPhase() == World::WAIT_FOR_SERVER_PHASE)
         {
         }
-        else if ((!NetworkConfig::get()->isNetworking() &&
-            world->getPhase()==World::TRACK_INTRO_PHASE) ||
-            (NetworkConfig::get()->isNetworking() &&
-            world->getPhase()==World::SERVER_READY_PHASE))
+        else if (world->getPhase()==World::TRACK_INTRO_PHASE)
         {
             m_referee->selectReadySetGo(0);   // set red color
             m_referee_height -= dt*5.0f;
@@ -493,15 +474,6 @@ void RaceGUIBase::preRenderCallback(const Camera *camera)
 // ----------------------------------------------------------------------------
 void RaceGUIBase::renderPlayerView(const Camera *camera, float dt)
 {
-    const core::recti &viewport = camera->getViewport();
-    const core::vector2df scaling = camera->getScaling();
-    const AbstractKart* kart = camera->getKart();
-    if(!kart) return;
-    
-    if (m_multitouch_gui != NULL)
-    {
-        m_multitouch_gui->draw(kart, viewport, scaling);
-    }
 }   // renderPlayerView
 
 
@@ -653,13 +625,6 @@ void RaceGUIBase::drawGlobalReadySetGo()
     switch (World::getWorld()->getPhase())
     {
     case WorldStatus::WAIT_FOR_SERVER_PHASE:
-        {
-            font->draw(StringUtils::loadingDots(
-                World::getWorld()->isLiveJoinWorld() ?
-                m_string_waiting_for_the_server.c_str() :
-                m_string_waiting_for_others.c_str()
-                ), pos, color, true, true);
-        }
         break;
     case WorldStatus::READY_PHASE:
         {
@@ -712,11 +677,7 @@ void RaceGUIBase::drawGlobalPlayerIcons(int bottom_margin)
 
     unsigned int sta = race_manager->getNumSpareTireKarts();
     unsigned int total_karts = race_manager->getNumberOfKarts() - sta;
-    unsigned int num_karts = 0;
-    if (NetworkConfig::get()->isNetworking())
-        num_karts = World::getWorld()->getCurrentNumKarts();
-    else
-        num_karts = race_manager->getNumberOfKarts() - sta;
+    unsigned int num_karts = race_manager->getNumberOfKarts() - sta;
     // May happen in spectate mode if all players disconnected before server
     // reset
     if (num_karts == 0)
@@ -903,13 +864,7 @@ void RaceGUIBase::drawGlobalPlayerIcons(int bottom_margin)
 
         AbstractKart* target_kart = NULL;
         Camera* cam = Camera::getActiveCamera();
-        auto cl = LobbyProtocol::get<ClientLobby>();
-        bool is_nw_spectate = cl && cl->isSpectator();
-        // For network spectator highlight
-        if (race_manager->getNumLocalPlayers() == 1 && cam && is_nw_spectate)
-            target_kart = cam->getKart();
-        bool is_local = is_nw_spectate ? kart == target_kart :
-            kart->getController()->isLocalPlayerController();
+        bool is_local = kart->getController()->isLocalPlayerController();
 
         int w = is_local ? ICON_PLAYER_WIDTH : ICON_WIDTH;
         drawPlayerIcon(kart, x, y, w, is_local);

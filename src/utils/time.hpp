@@ -148,16 +148,6 @@ public:
         return mktime(&t);
     }   // addInterval
 
-    // ------------------------------------------------------------------------
-    class ScopeProfiler
-    {
-        uint64_t m_time;
-        std::string m_name;
-    public:
-        ScopeProfiler(const char* name);
-        ~ScopeProfiler();
-    };   // class ScopeProfiler
-
 };   // namespace time
 #endif
 

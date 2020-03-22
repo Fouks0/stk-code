@@ -120,12 +120,6 @@ void STKConfig::load(const std::string &filename)
         Log::fatal("StkConfig", "Wrong number of item switches defined in stk_config");
     }
 
-    if (m_client_port == 0 || m_server_port == 0 || m_server_discovery_port == 0 ||
-        m_client_port == m_server_port || m_client_port == m_server_discovery_port ||
-        m_server_port == m_server_discovery_port)
-    {
-        Log::fatal("StkConfig", "Invalid default port values.");
-    }
     CHECK_NEG(m_max_karts,                 "<karts max=..."             );
     CHECK_NEG(m_item_switch_ticks,         "item switch-time"           );
     CHECK_NEG(m_bubblegum_counter,         "bubblegum disappear counter");
@@ -135,8 +129,6 @@ void STKConfig::load(const std::string &filename)
     CHECK_NEG(m_max_kart_version,          "<kart-version max=...>"     );
     CHECK_NEG(m_min_track_version,         "min-track-version"          );
     CHECK_NEG(m_max_track_version,         "max-track-version"          );
-    CHECK_NEG(m_min_server_version,        "min-server-version"         );
-    CHECK_NEG(m_max_server_version,        "max-server-version"         );
     CHECK_NEG(m_skid_fadeout_time,         "skid-fadeout-time"          );
     CHECK_NEG(m_near_ground,               "near-ground"                );
     CHECK_NEG(m_delay_finish_time,         "delay-finish-time"          );
@@ -194,8 +186,6 @@ void STKConfig::init_defaults()
     m_max_kart_version           = -100;
     m_min_track_version          = -100;
     m_max_track_version          = -100;
-    m_min_server_version         = -100;
-    m_max_server_version         = -100;
     m_max_display_news           = -100;
     m_replay_max_frames          = -100;
     m_replay_delta_steering      = -100;
@@ -223,9 +213,6 @@ void STKConfig::init_defaults()
     m_cutscene_fov               = 0.61f;
     m_max_skinning_bones         = 1024;
     m_tc_quality                 = 16;
-    m_server_discovery_port      = 2757;
-    m_client_port                = 2758;
-    m_server_port                = 2759;
     m_snb_min_adjust_length = m_snb_max_adjust_length =
         m_snb_min_adjust_speed = m_snb_max_adjust_time =
         m_snb_adjust_length_threshold = UNDEFINED;
@@ -257,31 +244,8 @@ void STKConfig::getAllData(const XMLNode * root)
         node->get("max", &m_max_track_version);
     }
 
-    if(const XMLNode *node = root->getNode("server-version"))
-    {
-        node->get("min", &m_min_server_version);
-        node->get("max", &m_max_server_version);
-    }
-
     if(const XMLNode *kart_node = root->getNode("karts"))
         kart_node->get("max-number", &m_max_karts);
-
-    if (const XMLNode *node = root->getNode("HardwareReportServer"))
-    {
-        node->get("url", &m_server_hardware_report);
-    }
-
-    if (const XMLNode *node = root->getNode("OnlineServer"))
-    {
-        node->get("url", &m_server_api);
-        node->get("server-version", &m_server_api_version);
-    }
-
-    if (const XMLNode *node = root->getNode("AddonServer"))
-    {
-        node->get("url", &m_server_addons);
-        node->get("allow-news-redirects", &m_allow_news_redirects);
-    }
 
     if(const XMLNode *gp_node = root->getNode("grand-prix"))
     {
@@ -515,19 +479,6 @@ void STKConfig::getAllData(const XMLNode * root)
     if (const XMLNode *tc = root->getNode("texture-compression"))
     {
         tc->get("quality", &m_tc_quality);
-    }
-
-    if (const XMLNode *np = root->getNode("network-ports"))
-    {
-        unsigned server_discovery_port = 0;
-        unsigned client_port = 0;
-        unsigned server_port = 0;
-        np->get("server-discovery-port", &server_discovery_port);
-        np->get("client-port", &client_port);
-        np->get("server-port", &server_port);
-        m_server_discovery_port = (uint16_t)server_discovery_port;
-        m_client_port = (uint16_t)client_port;
-        m_server_port = (uint16_t)server_port;
     }
 
     if (const XMLNode *ns = root->getNode("network-smoothing"))

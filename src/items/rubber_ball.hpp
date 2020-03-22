@@ -220,16 +220,6 @@ public:
     virtual bool updateAndDelete(int ticks) OVERRIDE;
     virtual bool hit(AbstractKart* kart, PhysicalObject* obj=NULL) OVERRIDE;
     virtual void setAnimation(AbstractKartAnimation *animation) OVERRIDE;
-    // ------------------------------------------------------------------------
-    /** This object does not create an explosion, all affects on
-     *  karts are handled by this hit() function. */
-    //virtual HitEffect *getHitEffect() const {return NULL; }
-    // ------------------------------------------------------------------------
-    virtual BareNetworkString* saveState(std::vector<std::string>* ru)
-        OVERRIDE;
-    // ------------------------------------------------------------------------
-    virtual void restoreState(BareNetworkString *buffer, int count) OVERRIDE;
-    // ------------------------------------------------------------------------
     virtual void onFireFlyable() OVERRIDE;
 
 };   // RubberBall

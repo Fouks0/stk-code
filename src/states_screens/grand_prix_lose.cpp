@@ -43,7 +43,6 @@
 #include "tracks/track.hpp"
 #include "tracks/track_object.hpp"
 #include "tracks/track_object_manager.hpp"
-#include "utils/translation.hpp"
 
 #include <ISceneManager.h>
 #include <SColor.h>
@@ -108,8 +107,6 @@ void GrandPrixLose::init()
     Screen::init();
 
     World::getWorld()->setPhase(WorldStatus::RACE_PHASE);
-
-    saveGPButton();
 
     m_phase = 1;
     m_global_time = 0.0f;

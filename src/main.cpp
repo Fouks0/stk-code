@@ -58,19 +58,14 @@
  animations -> physics
  karts -> audio
  physics -> audio
- "translations\n(too many connections\nto draw)"
  "configuration\n(too many connections\nto draw)"
  addons -> tracks
  addons -> karts
  guiengine -> addons
  guiengine -> race
- addons -> online_manager
  challenges -> race
 # challenges -> modes
  guiengine -> challenges
- online_manager -> addons
- online_manager -> "STK Server"
- "STK Server" -> online_manager
  karts -> replay
  replay 
  # force karts and tracks on the same level, looks better this way
@@ -172,12 +167,9 @@
 
 #include "main_loop.hpp"
 #include "achievements/achievements_manager.hpp"
-#include "addons/addons_manager.hpp"
-#include "addons/news_manager.hpp"
 #include "audio/music_manager.hpp"
 #include "audio/sfx_manager.hpp"
 #include "challenges/unlock_manager.hpp"
-#include "config/hardware_stats.hpp"
 #include "config/player_manager.hpp"
 #include "config/player_profile.hpp"
 #include "config/stk_config.hpp"
@@ -199,11 +191,9 @@
 #include "input/device_manager.hpp"
 #include "input/input_manager.hpp"
 #include "input/keyboard_device.hpp"
-#include "input/wiimote_manager.hpp"
 #include "io/file_manager.hpp"
 #include "items/attachment_manager.hpp"
 #include "items/item_manager.hpp"
-#include "items/network_item_manager.hpp"
 #include "items/powerup_manager.hpp"
 #include "items/projectile_manager.hpp"
 #include "karts/combined_characteristic.hpp"
@@ -214,32 +204,15 @@
 #include "modes/cutscene_world.hpp"
 #include "modes/demo_world.hpp"
 #include "modes/profile_world.hpp"
-#include "network/protocols/connect_to_server.hpp"
-#include "network/protocols/client_lobby.hpp"
-#include "network/protocols/server_lobby.hpp"
-#include "network/network_config.hpp"
-#include "network/network_string.hpp"
-#include "network/rewind_manager.hpp"
-#include "network/rewind_queue.hpp"
-#include "network/server.hpp"
-#include "network/server_config.hpp"
-#include "network/servers_manager.hpp"
-#include "network/stk_host.hpp"
-#include "network/stk_peer.hpp"
-#include "online/profile_manager.hpp"
-#include "online/request_manager.hpp"
 #include "race/grand_prix_manager.hpp"
 #include "race/highscore_manager.hpp"
-#include "race/history.hpp"
 #include "race/race_manager.hpp"
 #include "replay/replay_play.hpp"
 #include "replay/replay_recorder.hpp"
 #include "states_screens/main_menu_screen.hpp"
-#include "states_screens/online/networking_lobby.hpp"
-#include "states_screens/online/register_screen.hpp"
+#include "states_screens/register_screen.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
-#include "states_screens/dialogs/init_android_dialog.hpp"
 #include "states_screens/dialogs/message_dialog.hpp"
 #include "tas/tas.hpp"
 #include "tracks/arena_graph.hpp"
@@ -253,7 +226,6 @@
 #include "utils/mini_glm.hpp"
 #include "utils/profiler.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 static void cleanSuperTuxKart();
 static void cleanUserConfig();
@@ -567,13 +539,9 @@ void cmdLineHelp()
     "       --laps=N           Define number of laps to N.\n"
     "       --mode=N           N=0 Normal, N=1 Time trial, N=2 Battle, N=3 Soccer,\n"
     "                          N=4 Follow The Leader. In configure server use --battle-mode=n\n"
-    "                          for battle server and --soccer-timed / goals for soccer server\n"
-    "                          to control verbosely, see below:\n"
     "       --difficulty=N     N=0 Beginner, N=1 Intermediate, N=2 Expert, N=3 SuperTux.\n"
     "       --battle-mode=n    Specify battle mode in netowrk, 0 is Free-For-All and\n"
     "                          1 is Capture The Flag.\n"
-    "       --soccer-timed     Use time limit mode in network soccer game.\n"
-    "       --soccer-goals     Use goals limit mode in network soccer game.\n"
     "       --reverse          Play track in reverse (if allowed)\n"
     "  -f,  --fullscreen       Use fullscreen display.\n"
     "  -w,  --windowed         Use windowed display (default).\n"
@@ -596,41 +564,27 @@ void cmdLineHelp()
     "                          spaces are allowed in the track names.\n"
     "       --demo-laps=n      Number of laps to use in a demo.\n"
     "       --demo-karts=n     Number of karts to use in a demo.\n"
-    // "       --history          Replay history file 'history.dat'.\n"
     // "       --test-ai=n        Use the test-ai for every n-th AI kart.\n"
     // "                          (so n=1 means all Ais will be the test ai)\n"
     // "
     // "    --disable-item-collection Disable item collection. Useful for\n"
     // "                          debugging client/server item management.\n"
-    // "    --network-item-debugging Print item handling debug information.\n"
     "       --server-config=file Specify the server_config.xml for server hosting, it will create\n"
     "                            one if not found.\n"
-    "       --network-console  Enable network console.\n"
     "       --wan-server=name  Start a Wan server (not a playing client).\n"
     "       --public-server    Allow direct connection to the server (without stk server)\n"
     "       --lan-server=name  Start a LAN server (not a playing client).\n"
-    "       --server-password= Sets a password for a server (both client&server).\n"
     "       --connect-now=ip   Connect to a server with IP known now\n"
     "                          (in format x.x.x.x:xxx(port)), the port should be its\n"
     "                          public port.\n"
     "       --server-id=n      Server id in stk addons for --connect-now.\n"
-    "       --network-ai=n     Numbers of AI for connecting to linear race server, used\n"
-    "                          together with --connect-now.\n"
-    "       --login=s          Automatically log in (set the login).\n"
-    "       --password=s       Automatically log in (set the password).\n"
-    "       --init-user        Save the above login and password (if set) in config.\n"
     "       --disable-polling  Don't poll for logged in user.\n"
     "       --port=n           Port number to use.\n"
     "       --auto-connect     Automatically connect to fist server and start race\n"
     "       --max-players=n    Maximum number of clients (server only).\n"
     "       --min-players=n    Minimum number of clients for owner less server(server only).\n"
-    "       --motd             Message showing in all lobby of clients, can specify a .txt file.\n"
-    "       --auto-end         Automatically end network game after 1st player finished\n"
-    "                          for some time (currently his finished time * 0.25 + 15.0). \n"
-    "       --no-auto-end      Don't automatically end network game after 1st player finished\n"
     "       --team-choosing    Enable choosing team in lobby for team game.\n"
     "       --no-team-choosing Disable choosing team in lobby for team game.\n"
-    "       --network-gp=n     Specify number of tracks used in network grand prix.\n"
     "       --graphical-server Enable graphical view in server.\n"
     "       --no-validation    Allow non validated and unencrypted connection in wan.\n"
     "       --ranked           Server will submit ranking to stk addons server.\n"
@@ -765,14 +719,8 @@ int handleCmdLinePreliminary()
         UserConfigParams::m_verbosity |= UserConfigParams::LOG_MISC;
     if(CommandLine::has("--debug=all") )
         UserConfigParams::m_verbosity |= UserConfigParams::LOG_ALL;
-    if(CommandLine::has("--online"))
-        History::m_online_history_replay = true;
-#if !(defined(SERVER_ONLY) || defined(ANDROID))
     if(CommandLine::has("--apitrace"))
-    {
         SP::sp_apitrace = true;
-    }
-#endif
 
     std::string s;
     if(CommandLine::has("--stk-config", &s))
@@ -952,16 +900,12 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
     int n;
     std::string s;
 
-    irr::core::stringw login, password;
-
     if (CommandLine::has("--unit-testing"))
         UserConfigParams::m_unit_testing = true;
     if (CommandLine::has("--gamepad-debug"))
         UserConfigParams::m_gamepad_debug=true;
     if (CommandLine::has("--keyboard-debug"))
         UserConfigParams::m_keyboard_debug = true;
-    if (CommandLine::has("--wiimote-debug"))
-        UserConfigParams::m_wiimote_debug = true;
     if(CommandLine::has("--tutorial-debug"))
             UserConfigParams::m_tutorial_debug = true;
     if(CommandLine::has( "--track-debug",&n))
@@ -982,8 +926,6 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
         AIBaseController::setTestAI(n);
     if (CommandLine::has("--fps-debug"))
         UserConfigParams::m_fps_debug = true;
-    if (CommandLine::has("--rewind") )
-        RewindManager::setEnable(true);
     if(CommandLine::has("--soccer-ai-stats"))
     {
         UserConfigParams::m_arena_ai_stats=true;
@@ -1043,353 +985,8 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
             UserConfigParams::m_physics_debug=1;
     }
 
-    bool init_user = CommandLine::has("--init-user");
-    if (init_user)
-    {
-        PlayerManager::get()->enforceCurrentPlayer();
-        PlayerManager::getCurrentPlayer()->setRememberPassword(true);
-        UserConfigParams::m_internet_status = Online::RequestManager::IPERM_ALLOWED;
-    }
-    if (CommandLine::has("--login", &s))
-        login = s.c_str();
-    if (CommandLine::has("--password", &s))
-        password = s.c_str();
-
-    bool can_wan = false;
-    if (!login.empty() && !password.empty())
-    {
-        if (!PlayerManager::getCurrentPlayer())
-        {
-            Log::error("Main", "Run supertuxkart with --init-user");
-            cleanSuperTuxKart();
-            return false;
-        }
-        irr::core::stringw s;
-        PlayerManager::requestSignIn(login, password);
-        while (PlayerManager::getCurrentOnlineState() != PlayerProfile::OS_SIGNED_IN)
-        {
-            Online::RequestManager::get()->update(0.0f);
-            StkTime::sleep(1);
-        }
-        Log::info("Main", "Logged in from command-line.");
-        if (init_user)
-            PlayerManager::getCurrentPlayer()->setWasOnlineLastTime(true);
-        can_wan = true;
-    }
-    if (init_user)
-    {
-        Log::info("Main", "Done saving user, leaving");
-        cleanSuperTuxKart();
-        return false;
-    }
-
-    if (!can_wan && CommandLine::has("--login-id", &n) &&
-        CommandLine::has("--token", &s))
-    {
-        NetworkConfig::get()->setCurrentUserId(n);
-        NetworkConfig::get()->setCurrentUserToken(s);
-        can_wan = true;
-    }
-
-    if (CommandLine::has( "--difficulty", &s))
-    {
-        int n = atoi(s.c_str());
-        if (n < 0 || n > RaceManager::DIFFICULTY_LAST)
-        {
-            Log::warn("main", "Invalid difficulty '%s', use easy.\n",
-                      s.c_str());
-            race_manager->setDifficulty(RaceManager::Difficulty(0));
-            ServerConfig::m_server_difficulty = 0;
-        }
-        else
-        {
-            race_manager->setDifficulty(RaceManager::Difficulty(n));
-            ServerConfig::m_server_difficulty = n;
-        }
-    }   // --difficulty
-
-    if (CommandLine::has("--mode", &n))
-    {
-        switch (n)
-        {
-        // The order here makes server creation screen easier
-        case 0:
-        {
-            ServerConfig::m_server_mode = 3;
-            race_manager->setMinorMode(RaceManager::MINOR_MODE_NORMAL_RACE);
-            break;
-        }
-        case 1:
-        {
-            ServerConfig::m_server_mode = 4;
-            race_manager->setMinorMode(RaceManager::MINOR_MODE_TIME_TRIAL);
-            break;
-        }
-        case 2:
-        {
-            ServerConfig::m_server_mode = 7;
-            race_manager->setMinorMode(RaceManager::MINOR_MODE_FREE_FOR_ALL);
-            break;
-        }
-        case 3:
-        {
-            ServerConfig::m_server_mode = 6;
-            race_manager->setMinorMode(RaceManager::MINOR_MODE_SOCCER);
-            break;
-        }
-        case 4:
-        {
-            race_manager->setMinorMode(RaceManager::MINOR_MODE_FOLLOW_LEADER);
-            break;
-        }
-        default:
-            Log::warn("main", "Invalid race mode '%d' - ignored.", n);
-        }
-    }   // --mode
-
-    const bool is_soccer =
-        race_manager->getMinorMode() == RaceManager::MINOR_MODE_SOCCER;
-    const bool is_battle = race_manager->isBattleMode();
-
-    if (!has_server_config)
-    {
-        if (CommandLine::has("--soccer-timed") && is_soccer)
-            ServerConfig::m_soccer_goal_target = false;
-        else if (CommandLine::has("--soccer-goals") && is_soccer)
-            ServerConfig::m_soccer_goal_target = true;
-        else if (CommandLine::has("--network-gp", &n))
-        {
-            ServerConfig::m_gp_track_count = n;
-            if (ServerConfig::m_server_mode == 3)
-                ServerConfig::m_server_mode = 0;
-            else
-                ServerConfig::m_server_mode = 1;
-        }
-        else if (CommandLine::has("--battle-mode", &n) && is_battle)
-        {
-            switch (n)
-            {
-            case 0:
-                ServerConfig::m_server_mode = 7;
-                break;
-            case 1:
-                ServerConfig::m_server_mode = 8;
-                break;
-            default:
-                break;
-            }
-        }
-        else if (is_battle)
-        {
-            Log::warn("main", "Set to ffa for battle server");
-            ServerConfig::m_server_mode = 7;
-        }
-        else if (is_soccer)
-        {
-            Log::warn("main", "Set to goal target for soccer server");
-            ServerConfig::m_soccer_goal_target = true;
-        }
-    }
-
-    if (CommandLine::has("--network-console"))
-    {
-        ServerConfig::m_enable_console = true;
-        STKHost::m_enable_console = true;
-    }
-    else if (ServerConfig::m_enable_console &&
-        NetworkConfig::get()->isServer() && !has_parent_process)
-    {
-        STKHost::m_enable_console = true;
-    }
-
     if (CommandLine::has("--disable-item-collection"))
         ItemManager::disableItemCollection();
-
-    if (CommandLine::has("--network-item-debugging"))
-        NetworkItemManager::m_network_item_debugging = true;
-    
-    std::string server_password;
-    if (CommandLine::has("--server-password", &s))
-    {
-        ServerConfig::m_private_server_password = s;
-        server_password = s;
-    }
-
-    if (CommandLine::has("--motd", &s))
-        ServerConfig::m_motd = s;
-
-    if (CommandLine::has("--team-choosing"))
-    {
-        ServerConfig::m_team_choosing = true;
-    }
-    if (CommandLine::has("--no-team-choosing"))
-    {
-        ServerConfig::m_team_choosing = false;
-    }
-    if (CommandLine::has("--ranked"))
-    {
-        ServerConfig::m_ranked = true;
-    }
-    if (CommandLine::has("--no-ranked"))
-    {
-        ServerConfig::m_ranked = false;
-    }
-    if (CommandLine::has("--auto-end"))
-    {
-        ServerConfig::m_auto_end = true;
-    }
-    if (CommandLine::has("--no-auto-end"))
-    {
-        ServerConfig::m_auto_end = false;
-    }
-    if (CommandLine::has("--owner-less"))
-    {
-        ServerConfig::m_owner_less = true;
-    }
-    if (CommandLine::has("--no-owner-less"))
-    {
-        ServerConfig::m_owner_less = false;
-    }
-    if (CommandLine::has("--firewalled-server"))
-    {
-        ServerConfig::m_firewalled_server = true;
-    }
-    if (CommandLine::has("--no-firewalled-server"))
-    {
-        ServerConfig::m_firewalled_server = false;
-    }
-    if (CommandLine::has("--connection-debug"))
-    {
-        Network::m_connection_debug = true;
-    }
-    if (CommandLine::has("--server-id-file", &s))
-    {
-        NetworkConfig::get()->setServerIdFile(
-            file_manager->getUserConfigFile(s));
-        ServerConfig::m_server_configurable = true;
-    }
-    if (CommandLine::has("--disable-polling"))
-    {
-        Online::RequestManager::m_disable_polling = true;
-    }
-    if (CommandLine::has("--max-players", &n))
-    {
-        ServerConfig::m_server_max_players = n;
-    }
-    if (ServerConfig::m_server_max_players < 1)
-    {
-        ServerConfig::m_server_max_players = 1;
-    }
-
-    if (CommandLine::has("--min-players", &n))
-    {
-        if (n > ServerConfig::m_server_max_players)
-            n = 1;
-        ServerConfig::m_min_start_game_players = n;
-    }
-    if (CommandLine::has("--port", &n))
-    {
-        // We don't know if this instance is going to be a client
-        // or server, so just set both ports, only one will be used anyway
-        NetworkConfig::get()->setClientPort(n);
-        ServerConfig::m_server_port = n;
-    }
-    if (CommandLine::has("--public-server"))
-    {
-        NetworkConfig::get()->setIsPublicServer();
-    }
-
-    unsigned server_id = 0;
-    if ((NetworkConfig::get()->isServer() && ServerConfig::m_wan_server) ||
-        CommandLine::has("--server-id", &server_id))
-    {
-        PlayerProfile* player = PlayerManager::getCurrentPlayer();
-        // Try to use saved user token if exists
-        if (!can_wan && player && player->wasOnlineLastTime() &&
-            player->wasOnlineLastTime() && player->hasSavedSession())
-        {
-            while (PlayerManager::getCurrentOnlineState() !=
-                PlayerProfile::OS_SIGNED_IN)
-            {
-                Online::RequestManager::get()->update(0.0f);
-                StkTime::sleep(1);
-            }
-            can_wan = true;
-        }
-        else if (!can_wan)
-        {
-            Log::warn("main","No saved online player session to create "
-                "or connect to a wan server.");
-        }
-    }
-
-    if (CommandLine::has("--connect-now", &s))
-    {
-        NetworkConfig::get()->setIsServer(false);
-        if (CommandLine::has("--network-ai", &n))
-        {
-            NetworkConfig::get()->setNetworkAITester(true);
-            PlayerManager::get()->createGuestPlayers(n);
-            for (int i = 0; i < n; i++)
-            {
-                NetworkConfig::get()->addNetworkPlayer(
-                    NULL, PlayerManager::get()->getPlayer(i),
-                    PLAYER_DIFFICULTY_NORMAL);
-            }
-        }
-        else
-        {
-            NetworkConfig::get()->addNetworkPlayer(
-                input_manager->getDeviceManager()->getLatestUsedDevice(),
-                PlayerManager::getCurrentPlayer(), PLAYER_DIFFICULTY_NORMAL);
-        }
-        TransportAddress server_addr(s);
-        auto server = std::make_shared<Server>(0,
-            StringUtils::utf8ToWide(server_addr.toString()), 0, 0, 0, 0,
-            server_addr, !server_password.empty(), false);
-        NetworkConfig::get()->doneAddingNetworkPlayers();
-        if (server_id != 0)
-        {
-            NetworkConfig::get()->setIsWAN();
-            server->setServerId(server_id);
-            server->setSupportsEncryption(true);
-        }
-        else
-            NetworkConfig::get()->setIsLAN();
-        STKHost::create();
-        NetworkingLobby::getInstance()->setJoinedServer(server);
-    }
-
-    if (NetworkConfig::get()->isServer())
-    {
-        const std::string& server_name = ServerConfig::m_server_name;
-        if (ServerConfig::m_wan_server)
-        {
-            if (can_wan)
-            {
-                // Server owner online account will keep online as long as
-                // server is live
-                Online::RequestManager::m_disable_polling = true;
-                NetworkConfig::get()->setIsWAN();
-                NetworkConfig::get()->setIsPublicServer();
-                ServerConfig::loadServerLobbyFromConfig();
-                Log::info("main", "Creating a WAN server '%s'.",
-                    server_name.c_str());
-            }
-        }
-        else
-        {
-            NetworkConfig::get()->setIsLAN();
-            ServerConfig::loadServerLobbyFromConfig();
-            Log::info("main", "Creating a LAN server '%s'.",
-                server_name.c_str());
-        }
-    }
-
-    if (CommandLine::has("--auto-connect"))
-    {
-        NetworkConfig::get()->setAutoConnect(true);
-    }
 
     // Race parameters
     if(CommandLine::has("--kartsize-debug"))
@@ -1578,15 +1175,6 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
         race_manager->setNumLaps(999999); // profile end depends on time
     }   // --profile-time
 
-    if(CommandLine::has("--history"))
-    {
-        history->setReplayHistory(true);
-        // Force the no-start screen flag, since this initialises
-        // the player structures correctly.
-        if (!History::m_online_history_replay)
-            UserConfigParams::m_no_start_screen = true;
-    }   // --history
-
     // Demo mode
     if(CommandLine::has("--demo-mode", &s))
     {
@@ -1617,17 +1205,6 @@ int handleCmdLine(bool has_server_config, bool has_parent_process)
     if(CommandLine::has("--demo-tracks", &s))
         DemoWorld::setTracks(StringUtils::split(s,','));
 
-#ifdef ENABLE_WIIUSE
-    if(CommandLine::has("--wii"))
-        WiimoteManager::enable();
-#endif
-
-#ifdef __APPLE__
-    // on OS X, sometimes the Finder will pass a -psn* something parameter
-    // to the application --> ignore it
-    CommandLine::has("-psn");
-#endif
-
     if(CommandLine::has("--no-checklines")) UserConfigParams::m_check_debug = false;
 
     CommandLine::reportInvalidParameters();
@@ -1653,18 +1230,6 @@ void initUserConfig()
     // depend on artist debug flag). So init the rest of the file manager
     // after reading the user config file.
     file_manager->init();
-    if (UserConfigParams::m_language.toString() != "system")
-    {
-#ifdef WIN32
-        std::string s=std::string("LANGUAGE=")
-                     +UserConfigParams::m_language.c_str();
-        _putenv(s.c_str());
-#else
-        setenv("LANGUAGE", UserConfigParams::m_language.c_str(), 1);
-#endif
-    }
-
-    translations            = new Translations();   // needs file_manager
     stk_config              = new STKConfig();      // in case of --stk-config
                                                     // command line parameters
 }   // initUserConfig
@@ -1699,32 +1264,16 @@ void initRest()
     font_manager->loadFonts();
     GUIEngine::init(device, driver, StateManager::get());
 
-    // This only initialises the non-network part of the add-ons manager. The
-    // online section of the add-ons manager will be initialised from a
-    // separate thread running in network HTTP.
-#ifndef SERVER_ONLY
-    addons_manager = NULL;
-    if (!ProfileWorld::isNoGraphics())
-        addons_manager = new AddonsManager();
-#endif
-    Online::ProfileManager::create();
-
     // The request manager will start the login process in case of a saved
     // session, so we need to read the main data from the players.xml file.
     // The rest will be read later (since the rest needs the unlock- and
     // achievement managers to be created, which can only be created later).
     PlayerManager::create();
-    Online::RequestManager::get()->startNetworkThread();
-#ifndef SERVER_ONLY
-    if (!ProfileWorld::isNoGraphics())
-        NewsManager::get();   // this will create the news manager
-#endif
 
     music_manager = new MusicManager();
     SFXManager::create();
     // The order here can be important, e.g. KartPropertiesManager needs
     // defaultKartProperties, which are defined in stk_config.
-    history                 = new History              ();
     ReplayPlay::create();
     ReplayRecorder::create();
     Tas::create();
@@ -1779,62 +1328,6 @@ void initRest()
 }   // initRest
 
 //=============================================================================
-void askForInternetPermission()
-{
-    if (UserConfigParams::m_internet_status !=
-        Online::RequestManager::IPERM_NOT_ASKED)
-        return;
-
-    class ConfirmServer :
-          public MessageDialog::IConfirmDialogListener
-    {
-    public:
-        virtual void onConfirm()
-        {
-            // Typically internet is disabled here (just better safe
-            // than sorry). If internet should be allowed, the news
-            // manager needs to be started (which in turn activates
-            // the add-ons manager).
-#ifndef SERVER_ONLY
-            bool need_to_start_news_manager =
-                UserConfigParams::m_internet_status !=
-                Online::RequestManager::IPERM_ALLOWED &&
-                !ProfileWorld::isNoGraphics();
-            UserConfigParams::m_internet_status =
-                                  Online::RequestManager::IPERM_ALLOWED;
-            if (need_to_start_news_manager)
-                NewsManager::get()->init(false);
-#endif
-            GUIEngine::ModalDialog::dismiss();
-        }   // onConfirm
-        // --------------------------------------------------------
-        virtual void onCancel()
-        {
-            UserConfigParams::m_internet_status =
-                Online::RequestManager::IPERM_NOT_ALLOWED;
-            GUIEngine::ModalDialog::dismiss();
-        }   // onCancel
-    };   // ConfirmServer
-
-    MessageDialog *dialog =
-    new MessageDialog(_("SuperTuxKart may connect to a server "
-        "to download add-ons and notify you of updates. We also collect "
-        "anonymous hardware statistics to help with the development of STK. "
-        "Please read our privacy policy at http://privacy.supertuxkart.net. "
-        "Would you like this feature to be enabled? (To change this setting "
-        "at a later time, go to options, select tab "
-        "'General', and edit \"Connect to the "
-        "Internet\" and \"Send anonymous HW statistics\")."),
-        MessageDialog::MESSAGE_DIALOG_YESNO,
-        new ConfirmServer(), true, true, 0.7f, 0.7f);
-
-    // Changes the default focus to be 'cancel' ('ok' as default is not
-    // GDPR compliant, see #3378).
-    dialog->setFocusCancel();
-    GUIEngine::DialogQueue::get()->pushDialog(dialog, false);
-}   // askForInternetPermission
-
-//=============================================================================
 
 #if defined(WIN32) && defined(_MSC_VER)
     #ifdef DEBUG
@@ -1845,10 +1338,6 @@ void askForInternetPermission()
 #endif
 
 // ----------------------------------------------------------------------------
-#ifdef ANDROID
-extern "C"
-{
-#endif
 void main_abort()
 {
     if (main_loop)
@@ -1856,9 +1345,6 @@ void main_abort()
         main_loop->requestAbort();
     }
 }
-#ifdef ANDROID
-}
-#endif
 
 // ----------------------------------------------------------------------------
 int main(int argc, char *argv[] )
@@ -1914,60 +1400,12 @@ int main(int argc, char *argv[] )
 
         // ServerConfig will use stk_config for server version testing
         stk_config->load(file_manager->getAsset("stk_config.xml"));
-        bool no_graphics = !CommandLine::has("--graphical-server");
-        // Load current server config first, if any option is specified than
-        // override it later
-        // Disable sound if found server-config or wan/lan server name
-        if (!server_config.empty())
-        {
-            if (no_graphics)
-            {
-                ProfileWorld::disableGraphics();
-                UserConfigParams::m_enable_sound = false;
-            }
-            ServerConfig::loadServerConfig(server_config);
-            NetworkConfig::get()->setIsServer(true);
-        }
-        else
-            ServerConfig::loadServerConfig();
-
-        if (CommandLine::has("--wan-server", &s))
-        {
-            if (no_graphics)
-            {
-                ProfileWorld::disableGraphics();
-                UserConfigParams::m_enable_sound = false;
-            }
-            NetworkConfig::get()->setIsServer(true);
-            ServerConfig::m_server_name = s;
-            ServerConfig::m_wan_server = true;
-            if (CommandLine::has("--no-validation"))
-                ServerConfig::m_validating_player = false;
-            else
-                ServerConfig::m_validating_player = true;
-        }
-        else if (CommandLine::has("--lan-server", &s))
-        {
-            if (no_graphics)
-            {
-                ProfileWorld::disableGraphics();
-                UserConfigParams::m_enable_sound = false;
-            }
-            NetworkConfig::get()->setIsServer(true);
-            ServerConfig::m_server_name = s;
-            ServerConfig::m_wan_server = false;
-            ServerConfig::m_validating_player = false;
-        }
 
         if (!ProfileWorld::isNoGraphics())
             profiler.init();
         initRest();
 
         input_manager = new InputManager ();
-
-#ifdef ENABLE_WIIUSE
-        wiimote_manager = new WiimoteManager();
-#endif
 
         // Get into menu mode initially.
         input_manager->setMode(InputManager::MENU);
@@ -2041,33 +1479,6 @@ int main(int argc, char *argv[] )
         if (!handleCmdLine(!server_config.empty(), has_parent_process))
             exit(0);
 
-#ifndef SERVER_ONLY
-        if (!ProfileWorld::isNoGraphics())
-        {
-            addons_manager->checkInstalledAddons();
-
-            // Load addons.xml to get info about add-ons even when not
-            // allowed to access the Internet
-            if (UserConfigParams::m_internet_status !=
-                Online::RequestManager::IPERM_ALLOWED)
-            {
-                std::string xml_file = file_manager->getAddonsFile("addonsX.xml");
-                if (file_manager->fileExists(xml_file))
-                {
-                    try
-                    {
-                        const XMLNode *xml = new XMLNode(xml_file);
-                        addons_manager->initAddons(xml);
-                    }
-                    catch (std::runtime_error& e)
-                    {
-                        Log::warn("Addons", "Exception thrown when initializing add-ons manager : %s", e.what());
-                    }
-                }
-            }
-        }
-#endif
-
         if(UserConfigParams::m_unit_testing)
         {
             runUnitTests();
@@ -2077,36 +1488,6 @@ int main(int argc, char *argv[] )
 #ifndef SERVER_ONLY
         if (!ProfileWorld::isNoGraphics())
         {
-            // Some Android devices have only 320x240 and height >= 480 is bare
-            // minimum to make the GUI working as expected.
-            if (irr_driver->getActualScreenSize().Height < 480)
-            {
-                if (UserConfigParams::m_old_driver_popup)
-                {
-                    MessageDialog *dialog =
-                        new MessageDialog(_("Your screen resolution is too "
-                                            "low to run STK."),
-                                            /*from queue*/ true);
-                    GUIEngine::DialogQueue::get()->pushDialog(dialog);
-                }
-                Log::warn("main", "Screen size is too small!");
-            }
-            
-            #ifdef ANDROID
-            if (UserConfigParams::m_multitouch_controls == MULTITOUCH_CONTROLS_UNDEFINED)
-            {
-                int32_t touch = AConfiguration_getTouchscreen(
-                                                    global_android_app->config);
-                
-                if (touch != ACONFIGURATION_TOUCHSCREEN_NOTOUCH)
-                {
-                    InitAndroidDialog* init_android = new InitAndroidDialog(
-                                                                    0.6f, 0.6f);
-                    GUIEngine::DialogQueue::get()->pushDialog(init_android);
-                }
-            }
-            #endif
-
             if (GraphicsRestrictions::isDisabled(
                 GraphicsRestrictions::GR_DRIVER_RECENT_ENOUGH))
             {
@@ -2122,7 +1503,6 @@ int main(int argc, char *argv[] )
             }
             else if (!CVS->isGLSL())
             {
-                #if !defined(ANDROID)
                 if (UserConfigParams::m_old_driver_popup)
                 {
                     #ifdef USE_GLES2
@@ -2138,24 +1518,12 @@ int main(int argc, char *argv[] )
                         version), /*from queue*/ true);
                     GUIEngine::DialogQueue::get()->pushDialog(dialog);
                 }
-                #endif
                 Log::warn("OpenGL", "OpenGL version is too old!");
-            }
-
-            // Note that on the very first run of STK internet status is set to
-            // "not asked", so the report will only be sent in the next run.
-            if(UserConfigParams::m_internet_status==Online::RequestManager::IPERM_ALLOWED)
-            {
-                HardwareStats::reportHardwareStats();
             }
         }
 #endif
 
-        if (STKHost::existHost())
-        {
-            NetworkingLobby::getInstance()->push();
-        }
-        else if (!UserConfigParams::m_no_start_screen)
+        if (!UserConfigParams::m_no_start_screen)
         {
             if (UserConfigParams::m_enforce_current_player)
             {
@@ -2166,8 +1534,7 @@ int main(int argc, char *argv[] )
             // so we immediately start the main menu (unless it was requested
             // to always show the login screen). Otherwise show the login
             // screen first.
-            if(PlayerManager::getCurrentPlayer() && !
-                UserConfigParams::m_always_show_login_screen)
+            if(PlayerManager::getCurrentPlayer())
             {
                 MainMenuScreen::getInstance()->push();
             }
@@ -2183,52 +1550,12 @@ int main(int argc, char *argv[] )
                     RegisterScreen::getInstance()->setParent(UserScreen::getInstance());
                 }
             }
-#ifdef ENABLE_WIIUSE
-            // Show a dialog to allow connection of wiimotes. */
-            if(WiimoteManager::isEnabled())
-            {
-                wiimote_manager->askUserToConnectWiimotes();
-            }
-#endif
-            askForInternetPermission();
         }
         else
         {
             setupRaceStart();
             // Go straight to the race
             StateManager::get()->enterGameState();
-        }
-
-#ifndef SERVER_ONLY
-        // If an important news message exists it is shown in a popup dialog.
-        if (!ProfileWorld::isNoGraphics())
-        {
-            const core::stringw important_message =
-                                        NewsManager::get()->getImportantMessage();
-            if (important_message!="")
-            {
-                new MessageDialog(important_message,
-                                MessageDialog::MESSAGE_DIALOG_OK,
-                                NULL, true);
-            }   // if important_message
-        }
-#endif
-
-        // Replay a race
-        // =============
-        if(history->replayHistory())
-        {
-            // This will setup the race manager etc.
-            history->Load();
-            if (!History::m_online_history_replay)
-            {
-                race_manager->setupPlayerKartInfo();
-                race_manager->startNew(false);
-                main_loop->run();
-                // The run() function will only return if the user aborts.
-                Log::flushBuffers();
-                exit(-3);
-            }   // if !online
         }
 
         // Not replaying
@@ -2265,11 +1592,6 @@ int main(int argc, char *argv[] )
 
     /* Program closing...*/
 
-#ifdef ENABLE_WIIUSE
-    if(wiimote_manager)
-        delete wiimote_manager;
-#endif
-
     // If the window was closed in the middle of a race, remove players,
     // so we don't crash later when StateManager tries to access input devices.
     StateManager::get()->resetActivePlayers();
@@ -2279,11 +1601,7 @@ int main(int argc, char *argv[] )
         input_manager = NULL;
     }
 
-    if (STKHost::existHost())
-        STKHost::get()->shutdown();
-
     cleanSuperTuxKart();
-    NetworkConfig::destroy();
 
 #ifdef DEBUG
     MemoryLeaks::checkForLeaks();
@@ -2296,10 +1614,8 @@ int main(int argc, char *argv[] )
     {
         Log::closeOutputFiles();
 #endif
-#ifndef ANDROID
         fclose(stderr);
         fclose(stdout);
-#endif
 #ifndef WIN32
     }
 #endif
@@ -2327,9 +1643,6 @@ static void cleanSuperTuxKart()
 
     delete main_loop;
 
-    if(Online::RequestManager::isRunning())
-        Online::RequestManager::get()->stopNetworkThread();
-
     // Stop music (this request will go into the sfx manager queue, so it needs
     // to be done before stopping the thread).
     music_manager->stopMusic();
@@ -2347,13 +1660,11 @@ static void cleanSuperTuxKart()
     if(kart_properties_manager) delete kart_properties_manager;
     if(track_manager)           delete track_manager;
     if(material_manager)        delete material_manager;
-    if(history)                 delete history;
     ReplayPlay::destroy();
     ReplayRecorder::destroy();
     delete ParticleKindManager::get();
     PlayerManager::destroy();
     if(unlock_manager)          delete unlock_manager;
-    Online::ProfileManager::destroy();
     GUIEngine::DialogQueue::deallocate();
     GUIEngine::clear();
     GUIEngine::cleanUp();
@@ -2368,27 +1679,6 @@ static void cleanSuperTuxKart()
     // was deleted (in cleanUserConfig below), but before STK finishes and
     // the OS takes all threads down.
 
-#ifndef SERVER_ONLY
-    if (!ProfileWorld::isNoGraphics())
-    {
-        if (UserConfigParams::m_internet_status == Online::RequestManager::
-            IPERM_ALLOWED && !NewsManager::get()->waitForReadyToDeleted(2.0f))
-        {
-            Log::info("Thread", "News manager not stopping, exiting anyway.");
-        }
-        NewsManager::deallocate();
-    }
-#endif
-
-    if (Online::RequestManager::get()->waitForReadyToDeleted(5.0f))
-    {
-        Online::RequestManager::deallocate();
-    }
-    else
-    {
-        Log::warn("Thread", "Request Manager not aborting in time, proceeding without cleanup.");
-    }
-
     if (!SFXManager::get()->waitForReadyToDeleted(2.0f))
     {
         Log::info("Thread", "SFXManager not stopping, exiting anyway.");
@@ -2400,13 +1690,6 @@ static void cleanSuperTuxKart()
     // deleted by the music manager).
     delete music_manager;
 
-    // The add-ons manager might still be called from a currenty running request
-    // in the request manager, so it can not be deleted earlier.
-#ifndef SERVER_ONLY
-    if(addons_manager)  delete addons_manager;
-#endif
-
-    ServersManager::deallocate();
     cleanUserConfig();
 
     StateManager::deallocate();
@@ -2420,7 +1703,6 @@ static void cleanSuperTuxKart()
 static void cleanUserConfig()
 {
     if(stk_config)              delete stk_config;
-    if(translations)            delete translations;
     if (user_config)
     {
         // In case that abort is triggered before user_config exists
@@ -2441,10 +1723,6 @@ void runUnitTests()
     MiniGLM::unitTesting();
     Log::info("UnitTest", "GraphicsRestrictions");
     GraphicsRestrictions::unitTesting();
-    Log::info("UnitTest", "NetworkString");
-    NetworkString::unitTesting();
-    Log::info("UnitTest", "TransportAddress");
-    TransportAddress::unitTesting();
     Log::info("UnitTest", "StringUtils::versionToInt");
     StringUtils::unitTesting();
 
@@ -2487,77 +1765,6 @@ void runUnitTests()
 
     Log::info("UnitTest", "Arena Graph");
     ArenaGraph::unitTesting();
-
-    Log::info("UnitTest", "Fonts for translation");
-    font_manager->unitTesting();
-
-    Log::info("UnitTest", "RewindQueue");
-    RewindQueue::unitTesting();
-
-    Log::info("UnitTest", "IP ban");
-    NetworkConfig::get()->unsetNetworking();
-    ServerLobby sl;
-    sl.setSaveServerConfig(false);
-
-    ServerConfig::m_server_ip_ban_list =
-        {
-            { "1.2.3.4/32", std::numeric_limits<uint32_t>::max() }
-        };
-    sl.updateBanList();
-    assert(sl.isBannedForIP(TransportAddress("1.2.3.4")));
-    assert(!sl.isBannedForIP(TransportAddress("1.2.3.5")));
-    assert(!sl.isBannedForIP(TransportAddress("1.2.3.3")));
-
-    ServerConfig::m_server_ip_ban_list =
-        {
-            { "1.2.3.4/23", std::numeric_limits<uint32_t>::max() }
-        };
-    sl.updateBanList();
-    assert(!sl.isBannedForIP(TransportAddress("1.2.1.255")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.2.0")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.2.3")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.2.4")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.2.5")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.3.3")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.3.4")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.3.5")));
-    assert(sl.isBannedForIP(TransportAddress("1.2.3.255")));
-    assert(!sl.isBannedForIP(TransportAddress("1.2.4.0")));
-
-    ServerConfig::m_server_ip_ban_list =
-        {
-            { "11.12.13.14/22", std::numeric_limits<uint32_t>::max() },
-            { "12.13.14.15/24", std::numeric_limits<uint32_t>::max() },
-            { "123.234.56.78/26", std::numeric_limits<uint32_t>::max() },
-            { "234.123.56.78/25", std::numeric_limits<uint32_t>::max() },
-            // Test for overlap handling
-            { "12.13.14.23/32", std::numeric_limits<uint32_t>::max() },
-            { "12.13.14.255/32", std::numeric_limits<uint32_t>::max() }
-        };
-    sl.updateBanList();
-    assert(!sl.isBannedForIP(TransportAddress("11.12.11.255")));
-    assert(sl.isBannedForIP(TransportAddress("11.12.12.0")));
-    assert(sl.isBannedForIP(TransportAddress("11.12.13.14")));
-    assert(sl.isBannedForIP(TransportAddress("11.12.15.255")));
-    assert(!sl.isBannedForIP(TransportAddress("11.12.16.0")));
-
-    assert(!sl.isBannedForIP(TransportAddress("12.13.13.255")));
-    assert(sl.isBannedForIP(TransportAddress("12.13.14.0")));
-    assert(sl.isBannedForIP(TransportAddress("12.13.14.15")));
-    assert(sl.isBannedForIP(TransportAddress("12.13.14.255")));
-    assert(!sl.isBannedForIP(TransportAddress("12.13.15.0")));
-
-    assert(!sl.isBannedForIP(TransportAddress("123.234.56.63")));
-    assert(sl.isBannedForIP(TransportAddress("123.234.56.64")));
-    assert(sl.isBannedForIP(TransportAddress("123.234.56.78")));
-    assert(sl.isBannedForIP(TransportAddress("123.234.56.127")));
-    assert(!sl.isBannedForIP(TransportAddress("123.234.56.128")));
-
-    assert(!sl.isBannedForIP(TransportAddress("234.123.55.255")));
-    assert(sl.isBannedForIP(TransportAddress("234.123.56.0")));
-    assert(sl.isBannedForIP(TransportAddress("234.123.56.78")));
-    assert(sl.isBannedForIP(TransportAddress("234.123.56.127")));
-    assert(!sl.isBannedForIP(TransportAddress("234.123.56.128")));
 
     Log::info("UnitTest", "=====================");
     Log::info("UnitTest", "Testing successful   ");

@@ -103,9 +103,6 @@ public:
         return true;
     };
     virtual void skidBonusTriggered() OVERRIDE {}
-    // ------------------------------------------------------------------------
-    virtual bool saveState(BareNetworkString *buffer) const OVERRIDE;
-    virtual void rewindTo(BareNetworkString *buffer) OVERRIDE;
     void setNetworkAI(bool val)                 { m_enabled_network_ai = val; }
     // ------------------------------------------------------------------------
     virtual void update(int ticks) OVERRIDE;

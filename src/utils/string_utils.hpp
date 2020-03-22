@@ -252,34 +252,18 @@ namespace StringUtils
                    unsigned int max_width, irr::gui::IGUIFont* font, bool right_to_left=false);
     bool breakable (wchar_t c);
     bool partOfLongUnicodeChar (wchar_t c);
-
-    inline std::string getUserAgentString()
-    {
-        std::string uagent(std::string("SuperTuxKart/") + STK_VERSION);
-#ifdef WIN32
-        uagent += (std::string)" (Windows)";
-#elif defined(__APPLE__)
-        uagent += (std::string)" (Macintosh)";
-#elif defined(__FreeBSD__)
-        uagent += (std::string)" (FreeBSD)";
-#elif defined(ANDROID)
-        uagent += (std::string)" (Android)";
-#elif defined(linux)
-        uagent += (std::string)" (Linux)";
-#else
-        // Unknown system type
-#endif
-        return uagent;
-    }
-
-    /**
-     * Returns the hostname part of an url (if any)
-     *
-     * Example https://online.supertuxkart.net/
-     *
-     */
-    std::string getHostNameFromURL(const std::string& url);
-
 } // namespace StringUtils
+
+#define _(String, ...)        (StringUtils::insertValues(w_gettext(String), ##__VA_ARGS__).c_str())
+
+inline const irr::core::stringw w_gettext(const char* original)
+{
+    return StringUtils::utf8ToWide(original);
+}
+
+inline const wchar_t* w_gettext(const wchar_t* original)
+{
+    return original;
+}
 
 #endif

@@ -50,15 +50,12 @@ using namespace irr;
 #include "modes/linear_world.hpp"
 #include "modes/world.hpp"
 #include "modes/soccer_world.hpp"
-#include "network/protocols/client_lobby.hpp"
 #include "race/race_manager.hpp"
-#include "states_screens/race_gui_multitouch.hpp"
 #include "tas/tas.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_object_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 /** The constructor is called before anything is attached to the scene node.
  *  So rendering to a texture can be done here. But world is not yet fully
@@ -118,28 +115,6 @@ RaceGUI::RaceGUI()
     float scaling = irr_driver->getFrameSize().Height / 480.0f;
     const float map_size = stk_config->m_minimap_size * map_size_splitscreen;
     const float top_margin = 3.5f * m_font_height;
-
-    bool multitouch_enabled = (UserConfigParams::m_multitouch_active == 1 && 
-                               irr_driver->getDevice()->supportsTouchDevice()) ||
-                               UserConfigParams::m_multitouch_active > 1;
-    
-    if (multitouch_enabled && UserConfigParams::m_multitouch_draw_gui &&
-        race_manager->getNumLocalPlayers() == 1)
-    {
-        m_multitouch_gui = new RaceGUIMultitouch(this);
-    }
-    
-    // Check if we have enough space for minimap when touch steering is enabled
-    if (m_multitouch_gui != NULL  && !m_multitouch_gui->isSpectatorMode())
-    {
-        const float map_bottom = (float)(irr_driver->getActualScreenSize().Height - 
-                                         m_multitouch_gui->getHeight());
-        
-        if ((map_size + 20.0f) * scaling > map_bottom - top_margin)
-        {
-            scaling = (map_bottom - top_margin) / (map_size + 20.0f);
-        }
-    }
     
     // Marker texture has to be power-of-two for (old) OpenGL compliance
     //m_marker_rendered_size  =  2 << ((int) ceil(1.0 + log(32.0 * scaling)));
@@ -175,13 +150,6 @@ RaceGUI::RaceGUI()
                      m_map_width - (int)( 10.0f * scaling);
         m_map_bottom        = (int)( 10.0f * scaling);
     }
-    else if (m_multitouch_gui != NULL  && !m_multitouch_gui->isSpectatorMode())
-    {
-        m_map_left = (int)((irr_driver->getActualScreenSize().Width - 
-                                                        m_map_width) * 0.95f);
-        m_map_bottom = (int)(irr_driver->getActualScreenSize().Height - 
-                                                    top_margin - m_map_height);
-    }
 
     m_is_tutorial = (race_manager->getTrackName() == "tutorial");
 
@@ -205,7 +173,6 @@ RaceGUI::RaceGUI()
 //-----------------------------------------------------------------------------
 RaceGUI::~RaceGUI()
 {
-    delete m_multitouch_gui;
 }   // ~Racegui
 
 
@@ -297,11 +264,7 @@ void RaceGUI::renderGlobal(float dt)
 
     if (!m_is_tutorial)
     {
-        if (m_multitouch_gui != NULL)
-        {
-            drawGlobalPlayerIcons(m_multitouch_gui->getHeight());
-        }
-        else if (UserConfigParams::m_minimap_display == 0 || /*map in the bottom-left*/
+        if (UserConfigParams::m_minimap_display == 0 || /*map in the bottom-left*/
                 (UserConfigParams::m_minimap_display == 1 &&
                 race_manager->getNumLocalPlayers() >= 2))
         {
@@ -347,11 +310,8 @@ void RaceGUI::renderPlayerView(const Camera *camera, float dt)
 
     if(!World::getWorld()->isRacePhase()) return;
 
-    if (m_multitouch_gui == NULL || m_multitouch_gui->isSpectatorMode())
-    {
-        drawPowerupIcons(kart, viewport, scaling);
-        drawSpeedEnergyRank(kart, viewport, scaling, dt);
-    }
+    drawPowerupIcons(kart, viewport, scaling);
+    drawSpeedEnergyRank(kart, viewport, scaling, dt);
 
     if (!m_is_tutorial)
         drawLap(kart, viewport, scaling);
@@ -496,18 +456,9 @@ void RaceGUI::drawLiveDifference()
  */
 void RaceGUI::drawGlobalMiniMap()
 {
-#ifndef SERVER_ONLY
     //TODO : exception for some game modes ? Another option "Hidden in race, shown in battle ?"
     if (UserConfigParams::m_minimap_display == 2) /*map hidden*/
         return;
-    
-    if (m_multitouch_gui != NULL && !m_multitouch_gui->isSpectatorMode())
-    {
-        float max_scale = 1.3f;
-                                                      
-        if (UserConfigParams::m_multitouch_scale > max_scale)
-            return;
-    }
 
     // draw a map when arena has a navigation mesh.
     Track *track = Track::getCurrentTrack();
@@ -577,22 +528,15 @@ void RaceGUI::drawGlobalMiniMap()
 
     AbstractKart* target_kart = NULL;
     Camera* cam = Camera::getActiveCamera();
-    auto cl = LobbyProtocol::get<ClientLobby>();
-    bool is_nw_spectate = cl && cl->isSpectator();
-    // For network spectator highlight
-    if (race_manager->getNumLocalPlayers() == 1 && cam && is_nw_spectate)
-        target_kart = cam->getKart();
 
+    bool is_nw_spectate = false;
     // Move AI/remote players to the beginning, so that local players icons
     // are drawn above them
     World::KartList karts = world->getKarts();
     std::partition(karts.begin(), karts.end(), [target_kart, is_nw_spectate]
         (const std::shared_ptr<AbstractKart>& k)->bool
     {
-        if (is_nw_spectate)
-            return k.get() != target_kart;
-        else
-            return !k->getController()->isLocalPlayerController();
+        return !k->getController()->isLocalPlayerController();
     });
 
     for (unsigned int i = 0; i < karts.size(); i++)
@@ -616,8 +560,7 @@ void RaceGUI::drawGlobalMiniMap()
         {
             continue;
         }
-        bool is_local = is_nw_spectate ? kart == target_kart :
-            kart->getController()->isLocalPlayerController();
+        bool is_local = kart->getController()->isLocalPlayerController();
         // int marker_height = m_marker->getSize().Height;
         core::rect<s32> source(core::position2di(0, 0), icon->getSize());
         int marker_half_size = (is_local
@@ -673,7 +616,6 @@ void RaceGUI::drawGlobalMiniMap()
                                  lower_y   -(int)(draw_at.getY()-(m_minimap_player_size/2.5f)));
         draw2DImage(m_soccer_ball, position, source, NULL, NULL, true);
     }
-#endif
 }   // drawGlobalMiniMap
 
 //-----------------------------------------------------------------------------

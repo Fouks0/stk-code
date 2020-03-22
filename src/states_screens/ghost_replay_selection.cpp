@@ -26,10 +26,8 @@
 #include "karts/kart_properties_manager.hpp"
 #include "states_screens/dialogs/ghost_replay_info_dialog.hpp"
 #include "states_screens/state_manager.hpp"
-#include "states_screens/online/tracks_screen.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_manager.hpp"
-#include "utils/translation.hpp"
 
 using namespace GUIEngine;
 
@@ -149,20 +147,20 @@ void GhostReplaySelection::loadedFromFile()
  */
 void GhostReplaySelection::beforeAddingWidget()
 {
-    m_replay_list_widget->addColumn(_C("column_name", "Track"), 9 );
+    m_replay_list_widget->addColumn(_("column_name", "Track"), 9 );
     if (m_active_mode_is_linear)
-        m_replay_list_widget->addColumn(_C("column_name", "Reverse"), 3);
+        m_replay_list_widget->addColumn(_("column_name", "Reverse"), 3);
     if (!m_same_difficulty)
-        m_replay_list_widget->addColumn(_C("column_name", "Difficulty"), 4);
+        m_replay_list_widget->addColumn(_("column_name", "Difficulty"), 4);
     if (m_active_mode_is_linear)
-        m_replay_list_widget->addColumn(_C("column_name", "Laps"), 3);
-    m_replay_list_widget->addColumn(_C("column_name", "Time"), 4);
-    m_replay_list_widget->addColumn(_C("column_name", "Kart"), 1);
-    m_replay_list_widget->addColumn(_C("column_name", "User"), 5);
+        m_replay_list_widget->addColumn(_("column_name", "Laps"), 3);
+    m_replay_list_widget->addColumn(_("column_name", "Time"), 4);
+    m_replay_list_widget->addColumn(_("column_name", "Kart"), 1);
+    m_replay_list_widget->addColumn(_("column_name", "User"), 5);
     if (m_multiplayer)
-        m_replay_list_widget->addColumn(_C("column_name", "Players"), 3);
+        m_replay_list_widget->addColumn(_("column_name", "Players"), 3);
     if (!m_same_version)
-        m_replay_list_widget->addColumn(_C("column_name", "Version"), 3);
+        m_replay_list_widget->addColumn(_("column_name", "Version"), 3);
 
     m_replay_list_widget->createHeader();
 }   // beforeAddingWidget
@@ -173,11 +171,8 @@ void GhostReplaySelection::init()
     Screen::init();
     m_cur_difficulty = race_manager->getDifficulty();
     
-    int icon_height = UserConfigParams::m_hidpi_enabled ? getHeight() / 15
-                                                        : getHeight() / 24;
-
-    int row_height = UserConfigParams::m_hidpi_enabled ? getHeight() / 12
-                                                       : getHeight() / 24;
+    int icon_height = getHeight() / 24;
+    int row_height = getHeight() / 24;
                                                         
     // 128 is the height of the image file
     m_icon_bank->setScale(icon_height/128.0f);
@@ -383,8 +378,7 @@ void GhostReplaySelection::loadList()
 
         std::vector<GUIEngine::ListWidget::ListCell> row;
         //The third argument should match the numbers used in beforeAddingWidget
-        row.push_back(GUIEngine::ListWidget::ListCell
-            (translations->fribidize(track->getName()) , -1, 9));
+        row.push_back(GUIEngine::ListWidget::ListCell(track->getName() , -1, 9));
         if (m_active_mode_is_linear)
         {
             row.push_back(GUIEngine::ListWidget::ListCell
@@ -468,12 +462,6 @@ void GhostReplaySelection::eventCallback(GUIEngine::Widget* widget,
         m_is_comparing = false;
         m_compare_toggle_widget->setState(false);
         refresh(/*reload replay files*/ false, /* update columns */ true);
-    }
-    else if (name == "record-ghost")
-    {
-        race_manager->setRecordRace(true);
-        race_manager->setMinorMode(m_active_mode);
-        TracksScreen::getInstance()->push();
     }
     else if (name == "replay_difficulty_toggle")
     {

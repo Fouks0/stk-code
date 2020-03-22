@@ -959,34 +959,6 @@ namespace StringUtils
     }
 
     // ------------------------------------------------------------------------
-    std::string getHostNameFromURL(const std::string& url)
-    {
-        // Not even a valid URL
-        if (url.length() < 8)
-            return "";
-
-        // protocol is substr(0, first_color_position)
-        const size_t first_colon_position = url.find_first_of(":");
-        if (first_colon_position == std::string::npos)
-            return "";
-
-        // skip ://
-        const std::string url_without_protocol = url.substr(first_colon_position + 3);
-
-        // Find end with port
-        const size_t port_colon_position = url_without_protocol.find_first_of(":");
-        if (port_colon_position != std::string::npos)
-            return url_without_protocol.substr(0, port_colon_position);
-
-        // Find end with path
-        const size_t slash_position = url_without_protocol.find_first_of("/");
-        if (slash_position != std::string::npos)
-            return url_without_protocol.substr(0, slash_position);
-
-        return url_without_protocol;
-    }
-
-    // ------------------------------------------------------------------------
     /** Breaks the text so that each line is smaller than max_width with the current settings.
       * The result is put into output, a vector of strings, with each line having its own string */
     // TODO : try to get rid of the complications induced by wchar

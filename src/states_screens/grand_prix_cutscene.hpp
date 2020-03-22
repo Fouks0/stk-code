@@ -30,10 +30,6 @@ class GrandPrixCutscene: public GUIEngine::CutsceneScreen
 public:
     GrandPrixCutscene(const char * filename) : CutsceneScreen(filename) {}
 protected:
-    void saveGPButton();
-
-    void setNewGPWithName(const irr::core::stringw& name);
-
     // implement callbacks from parent class GUIEngine::Screen
     void eventCallback(GUIEngine::Widget* widget,
                        const std::string& name,

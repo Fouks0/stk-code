@@ -24,7 +24,6 @@
 #include "guiengine/scalable_font.hpp"
 #include "io/file_manager.hpp"
 #include "utils/log.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 #include <IGUIElement.h>
@@ -243,7 +242,7 @@ void IconButtonWidget::add()
 
         setLabelFont();
 
-        m_label->setRightToLeft(translations->isRTLText(message));
+        m_label->setRightToLeft(false);
         m_label->setTextRestrainedInside(false);
     }
 

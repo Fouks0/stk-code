@@ -21,8 +21,6 @@
 #define HEADER_ACHIEVEMENTS_SLOT_HPP
 
 #include "achievements/achievement.hpp"
-#include "online/request_manager.hpp"
-#include "online/xml_request.hpp"
 #include "utils/types.hpp"
 
 #include <irrString.h>
@@ -204,13 +202,6 @@ private:
 
     bool                m_online;
     bool                m_valid;
-
-    class SyncAchievementsRequest : public Online::XMLRequest {
-        virtual void callback ();
-    public:
-        SyncAchievementsRequest() : Online::XMLRequest(true) {}
-    };
-
     void setEnumToString();
     void updateAchievementsProgress(UpdateType type, unsigned int enum_id);
 
@@ -221,7 +212,6 @@ public :
     void load(const XMLNode * input);
     void save(UTFWriter &out);
     void add(Achievement *achievement);
-    void sync(const std::vector<uint32_t> & achieved_ids);
     void increaseDataVar(unsigned int achieve_data_id, int increase);
     void resetDataVar(unsigned int achieve_data_id);
     void onRaceEnd(bool aborted=false);

@@ -19,7 +19,6 @@
 
 #include "states_screens/main_menu_screen.hpp"
 
-#include "addons/news_manager.hpp"
 #include "challenges/unlock_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/user_config.hpp"
@@ -37,16 +36,10 @@
 #include "modes/cutscene_world.hpp"
 #include "modes/overworld.hpp"
 #include "modes/demo_world.hpp"
-#include "network/network_config.hpp"
-#include "online/request_manager.hpp"
-#include "states_screens/addons_screen.hpp"
 #include "states_screens/credits.hpp"
-#include "states_screens/grand_prix_editor_screen.hpp"
 #include "states_screens/help_screen_1.hpp"
 #include "states_screens/offline_kart_selection.hpp"
-#include "states_screens/online/online_profile_achievements.hpp"
-#include "states_screens/online/online_profile_servers.hpp"
-#include "states_screens/online/online_screen.hpp"
+#include "states_screens/profile_achievements.hpp"
 #include "states_screens/options/options_screen_general.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
@@ -66,7 +59,6 @@
 
 
 using namespace GUIEngine;
-using namespace Online;
 
 // ----------------------------------------------------------------------------
 
@@ -119,7 +111,6 @@ void MainMenuScreen::init()
     assert(m_user_id);
 
     // reset in case we're coming back from a race
-    NetworkConfig::get()->cleanNetworkPlayers();
     StateManager::get()->resetActivePlayers();
     input_manager->getDeviceManager()->setAssignMode(NO_ASSIGN);
     input_manager->getDeviceManager()->setSinglePlayer( NULL );
@@ -138,20 +129,10 @@ void MainMenuScreen::init()
     // the key bindings for the first player the default again.
     input_manager->getDeviceManager()->clearLatestUsedDevice();
 
-#ifndef SERVER_ONLY
-    if (addons_manager->isLoading())
-    {
-        IconButtonWidget* w = getWidget<IconButtonWidget>("addons");
-        w->setActive(false);
-        w->resetAllBadges();
-        w->setBadge(LOADING_BADGE);
-    }
-
     LabelWidget* w = getWidget<LabelWidget>("info_addons");
-    const core::stringw &news_text = NewsManager::get()->getNextNewsMessage();
+    const core::stringw &news_text = "You are using the Fouks' STK 1.0 TAS Mod - Welcome to 21XX!";
     w->setText(news_text, true);
     w->update(0.01f);
-#endif
 
     RibbonWidget* r = getWidget<RibbonWidget>("menu_bottomrow");
     // FIXME: why do I need to do this manually
@@ -174,56 +155,23 @@ void MainMenuScreen::init()
 
 void MainMenuScreen::onUpdate(float delta)
 {
-#ifndef SERVER_ONLY
     PlayerProfile *player = PlayerManager::getCurrentPlayer();
-    if(PlayerManager::getCurrentOnlineState() == PlayerProfile::OS_GUEST  ||
-       PlayerManager::getCurrentOnlineState() == PlayerProfile::OS_SIGNED_IN)
-    {
-        m_user_id->setText(player->getLastOnlineName() + "@stk");
-    }
-    else if (PlayerManager::getCurrentOnlineState() == PlayerProfile::OS_SIGNED_OUT)
-    {
-        m_user_id->setText(player->getName());
-    }
-    else
-    {
-        // now must be either logging in or logging out
-        m_user_id->setText(player->getName());
-    }
+    m_user_id->setText(player->getName());
 
     IconButtonWidget* addons_icon = getWidget<IconButtonWidget>("addons");
     if (addons_icon != NULL)
     {
-        if (addons_manager->wasError())
-        {
-            addons_icon->setActive(true);
-            addons_icon->resetAllBadges();
-            addons_icon->setBadge(BAD_BADGE);
-        }
-        else if (addons_manager->isLoading() && UserConfigParams::m_internet_status
-            == Online::RequestManager::IPERM_ALLOWED)
-        {
-            // Addons manager is still initialising/downloading.
-            addons_icon->setActive(false);
-            addons_icon->resetAllBadges();
-            addons_icon->setBadge(LOADING_BADGE);
-        }
-        else
-        {
-            addons_icon->setActive(true);
-            addons_icon->resetAllBadges();
-        }
-        // maybe add a new badge when not allowed to access the net
+        addons_icon->setActive(true);
+        addons_icon->resetAllBadges();
     }
 
     LabelWidget* w = getWidget<LabelWidget>("info_addons");
     w->update(delta);
     if(w->scrolledOff())
     {
-        const core::stringw &news_text = NewsManager::get()->getNextNewsMessage();
+        const core::stringw &news_text = "Addons must be manually managed.";
         w->setText(news_text, true);
     }
-#endif
 }   // onUpdate
 
 // ----------------------------------------------------------------------------
@@ -231,7 +179,6 @@ void MainMenuScreen::onUpdate(float delta)
 void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
                                    const int playerID)
 {
-#ifndef SERVER_ONLY
     if(name=="user-id")
     {
         UserScreen::getInstance()->push();
@@ -385,7 +332,6 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
 #endif
     if (selection == "new")
     {
-        NetworkConfig::get()->unsetNetworking();
         KartSelectionScreen* s = OfflineKartSelectionScreen::getInstance();
         s->setMultiplayer(false);
         s->setFromOverworld(false);
@@ -394,7 +340,6 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
     else if (selection == "multiplayer")
     {
         KartSelectionScreen* s = OfflineKartSelectionScreen::getInstance();
-        NetworkConfig::get()->unsetNetworking();
         s->setMultiplayer(true);
         s->setFromOverworld(false);
         s->push();
@@ -405,12 +350,7 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
     }
     else if (selection == "quit")
     {
-#ifdef ANDROID
-        GUIEngine::EventHandler::get()->setAcceptEvents(false);
-        ANativeActivity_finish(global_android_app->activity);
-#else
         StateManager::get()->popMenu();
-#endif
         return;
     }
     else if (selection == "about")
@@ -458,7 +398,6 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
     }
     else if (selection == "story")
     {
-        NetworkConfig::get()->unsetNetworking();
         PlayerProfile *player = PlayerManager::getCurrentPlayer();
         if (player->isFirstTime())
         {
@@ -492,43 +431,23 @@ void MainMenuScreen::eventCallback(Widget* widget, const std::string& name,
     }
     else if (selection == "online")
     {
-        new MessageDialog(_("Let's wait 21XX..."));
+        new MessageDialog("Hey, your network hardware is way outdated! Please get some 21XX hardware!");
         return;
     }
     else if (selection == "addons")
     {
-        // Don't go to addons if there is no internet, unless some addons are
-        // already installed (so that you can delete addons without being online).
-        if(UserConfigParams::m_internet_status!=RequestManager::IPERM_ALLOWED)
-        {
-            if (!addons_manager->anyAddonsInstalled())
-            {
-                new MessageDialog(_("You can not download addons without internet access. "
-                                    "If you want to download addons, go in the options menu, "
-                                    "and check \"Connect to the Internet\"."));
-                return;
-            }
-            else
-            {
-                AddonsScreen::getInstance()->push();
-                new MessageDialog(_("You can not download addons without internet access. "
-                                    "If you want to download addons, go in the options menu, "
-                                    "and check \"Connect to the Internet\".\n\n"
-                                    "You can however delete already downloaded addons."));
-                return;
-            }
-        }
-        AddonsScreen::getInstance()->push();
+        new MessageDialog(_("Not supported, please manage manually the Addons files."));
+        return;
     }
     else if (selection == "gpEditor")
     {
-        GrandPrixEditorScreen::getInstance()->push();
+        new MessageDialog(_("Not supported, please use a Vanilla STK to create GPs."));
+        return;
     }
     else if (selection == "achievements")
     {
         OnlineProfileAchievements::getInstance()->push();
     }
-#endif
 }   // eventCallback
 
 // ----------------------------------------------------------------------------
@@ -539,40 +458,7 @@ void MainMenuScreen::tearDown()
 
 // ----------------------------------------------------------------------------
 
-void MainMenuScreen::onDisabledItemClicked(const std::string& item)
-{
-#ifndef SERVER_ONLY
-    if (item == "addons")
-    {
-        if (UserConfigParams::m_internet_status != RequestManager::IPERM_ALLOWED)
-        {
-            new MessageDialog( _("The add-ons module is currently disabled in "
-                                 "the Options screen") );
-        }
-        else if (addons_manager->wasError())
-        {
-            new MessageDialog( _("Sorry, an error occurred while contacting "
-                                 "the add-ons website. Make sure you are "
-                                 "connected to the Internet and that "
-                                 "SuperTuxKart is not blocked by a firewall"));
-        }
-        else if (addons_manager->isLoading())
-        {
-            new MessageDialog( _("Please wait while the add-ons are loading"));
-        }
-    }
-#endif
-}   // onDisabledItemClicked
-
-// ----------------------------------------------------------------------------
-
 bool MainMenuScreen::onEscapePressed()
 {
-#ifdef ANDROID
-    GUIEngine::EventHandler::get()->setAcceptEvents(false);
-    ANativeActivity_finish(global_android_app->activity);
-    return false;
-#endif
-
     return true;
 }   // onEscapePressed

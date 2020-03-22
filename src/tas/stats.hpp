@@ -26,7 +26,7 @@ private:
     // Speeds are in m/s here
     uint64_t m_speed_samples;
     float m_speed_sum, m_final_speed_avg, m_final_distance;
-    float m_prev_speed, m_cur_speed;
+    float m_prev_speed, m_cur_speed, m_lost_speed;
 
 public:
     Stats() {reset();}
@@ -39,6 +39,11 @@ public:
         m_final_distance = 0.;
         m_prev_speed = 0.;
         m_cur_speed = 0.;
+        m_lost_speed = 0.;
+    }
+
+    void resetLostSpeed() {
+    	m_lost_speed = 0.;
     }
 
     void addSpeedSample(float speed_sample)
@@ -47,10 +52,12 @@ public:
         speed_sample >= 0. ? m_speed_sum += speed_sample : m_speed_sum -= speed_sample;
         m_prev_speed = m_cur_speed;
         m_cur_speed = speed_sample;
+        if (dv() < 0.) m_lost_speed -= dv();
     }
 
     float v() const {return m_cur_speed;}
     float dv() const {return m_cur_speed - m_prev_speed;}
+    float lv() const {return m_lost_speed;}
     float averageSpeed() const
     {
         if (m_speed_samples != 0) return m_speed_sum/(float) m_speed_samples;

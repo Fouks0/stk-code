@@ -36,7 +36,6 @@
 #include <vector>
 
 class Kart;
-class STKPeer;
 
 /**
   * \ingroup items
@@ -148,13 +147,6 @@ public:
     // ------------------------------------------------------------------------
     /** Returns true if the items are switched atm. */
     bool           areItemsSwitched() { return (m_switch_ticks > 0); }
-    // ------------------------------------------------------------------------
-    /** Only used in the NetworkItemManager. */
-    virtual void setItemConfirmationTime(std::weak_ptr<STKPeer> peer,
-                                         int ticks)
-    {
-        assert(false);
-    }
     // ------------------------------------------------------------------------
     /** Returns the number of items. */
     unsigned int   getNumberOfItems() const

@@ -21,8 +21,6 @@
 
 #include "utils/types.hpp"
 
-class BareNetworkString;
-
 /**
   * \ingroup controller
   */
@@ -63,10 +61,7 @@ public:
     void setLookBack(bool b);
 
     // ------------------------------------------------------------------------
-    KartControl()
-    {
-        reset();
-    }
+    KartControl() {reset();}
     // ------------------------------------------------------------------------
     /** Resets all controls. */
     void reset()
@@ -81,8 +76,7 @@ public:
         m_look_back = false;
     }   // reset
     // ------------------------------------------------------------------------
-    /** Tests if two KartControls are equal. 
-      */
+    /** Tests if two KartControls are equal. */
     bool operator==(const KartControl &other)
     {
         return m_steer     == other.m_steer   &&
@@ -94,12 +88,6 @@ public:
                m_fire      == other.m_fire    &&
                m_look_back == other.m_look_back;
     }    // operator==
-    // ------------------------------------------------------------------------
-    /** Copies the important data from this objects into a memory buffer. */
-    void saveState(BareNetworkString *buffer) const;
-    // ------------------------------------------------------------------------
-    /** Restores this object from a previously saved memory  buffer. */
-    void rewindTo(BareNetworkString *buffer);
     // ------------------------------------------------------------------------
     /** Compresses all buttons into a single byte. */
     char getButtonsCompressed() const

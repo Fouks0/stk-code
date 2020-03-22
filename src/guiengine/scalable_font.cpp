@@ -20,7 +20,6 @@
 
 #include "font/font_settings.hpp"
 #include "font/font_with_face.hpp"
-#include "utils/translation.hpp"
 
 namespace irr
 {
@@ -30,8 +29,7 @@ namespace gui
 ScalableFont::ScalableFont(FontWithFace* face)
 {
     m_face = face;
-    m_font_settings = new FontSettings(false/*black_border*/,
-        translations->isRTLLanguage());
+    m_font_settings = new FontSettings(false/*black_border*/, false);
 }   // ScalableFont
 
 // ----------------------------------------------------------------------------
@@ -43,7 +41,7 @@ ScalableFont::~ScalableFont()
 // ----------------------------------------------------------------------------
 void ScalableFont::updateRTL()
 {
-    m_font_settings->setRTL(translations->isRTLLanguage());
+    m_font_settings->setRTL(false);
 }   // updateRTL
 
 // ----------------------------------------------------------------------------

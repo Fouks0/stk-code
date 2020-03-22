@@ -30,16 +30,15 @@
 #include "input/device_manager.hpp"
 #include "input/gamepad_device.hpp"
 #include "io/file_manager.hpp"
+#include "states_screens/dialogs/message_dialog.hpp"
 #include "states_screens/dialogs/press_a_key_dialog.hpp"
 #include "states_screens/options/options_screen_audio.hpp"
 #include "states_screens/options/options_screen_general.hpp"
 #include "states_screens/options/options_screen_input.hpp"
-#include "states_screens/options/options_screen_language.hpp"
 #include "states_screens/options/options_screen_video.hpp"
 #include "states_screens/options/options_screen_ui.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -85,12 +84,6 @@ void OptionsScreenDevice::init()
     ButtonWidget* delete_button = getWidget<ButtonWidget>("delete");
     ButtonWidget* disable_toggle = getWidget<ButtonWidget>("disable_toggle");
 
-    if (m_config->isGamePadAndroid())
-    {
-        delete_button->setActive(false);
-        disable_toggle->setActive(false);
-    }
-    else
     {
         core::stringw label;
 
@@ -554,7 +547,7 @@ void OptionsScreenDevice::eventCallback(Widget* widget,
         else if (selection == "tab_general")
             screen = OptionsScreenGeneral::getInstance();
         else if (selection == "tab_language")
-            screen = OptionsScreenLanguage::getInstance();
+            new MessageDialog("Deleted feature! There is only one surviving language since 20XX.");
         if(screen)
             StateManager::get()->replaceTopMostScreen(screen);
     }

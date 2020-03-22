@@ -19,7 +19,6 @@
 
 #include "tracks/track.hpp"
 
-#include "addons/addon.hpp"
 #include "audio/music_manager.hpp"
 #include "challenges/challenge_status.hpp"
 #include "challenges/unlock_manager.hpp"
@@ -52,7 +51,6 @@
 #include "io/xml_node.hpp"
 #include "items/item.hpp"
 #include "items/item_manager.hpp"
-#include "items/network_item_manager.hpp"
 #include "items/powerup_manager.hpp"
 #include "karts/abstract_kart.hpp"
 #include "karts/kart_properties.hpp"
@@ -60,8 +58,6 @@
 #include "modes/linear_world.hpp"
 #include "modes/easter_egg_hunt.hpp"
 #include "modes/profile_world.hpp"
-#include "network/network_config.hpp"
-#include "network/protocols/server_lobby.hpp"
 #include "physics/physical_object.hpp"
 #include "physics/physics.hpp"
 #include "physics/triangle_mesh.hpp"
@@ -79,7 +75,6 @@
 #include "utils/log.hpp"
 #include "utils/mini_glm.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <IBillboardTextSceneNode.h>
 #include <ILightSceneNode.h>
@@ -117,9 +112,9 @@ Track::Track(const std::string &filename)
     // If this is an addon track, add "addon_" to the identifier - just in
     // case that an addon track has the same directory name (and therefore
     // identifier) as an included track.
-    if(Addon::isAddon(filename))
+    if (StringUtils::startsWith(filename, file_manager->getAddonsDir()))
     {
-        m_ident = Addon::createAddonId(m_ident);
+        m_ident = "addon_" + m_ident;
         m_is_addon = true;
     }
     else
@@ -213,7 +208,7 @@ bool Track::operator<(const Track &other) const
     \note this is the LTR name, invoke fribidi as needed. */
 core::stringw Track::getName() const
 {
-    core::stringw translated = _LTR(m_name.c_str());
+    core::stringw translated = _(m_name.c_str());
     int index = translated.find("|");
     if(index>-1)
     {
@@ -231,14 +226,7 @@ core::stringw Track::getName() const
  */
 core::stringw Track::getSortName() const
 {
-    core::stringw translated = translations->w_gettext(m_name.c_str());
-    translated.make_lower();
-    int index = translated.find("|");
-    if(index>-1)
-    {
-        translated = translated.subString(index+1, translated.size());
-    }
-    return translated;
+    return StringUtils::utf8ToWide(m_name);
 }   // getSortName
 
 //-----------------------------------------------------------------------------
@@ -740,9 +728,7 @@ void Track::loadArenaGraph(const XMLNode &node)
         const unsigned pk = race_manager->getNumPlayers();
         for (unsigned i = 0; i < pk; i++)
         {
-            if (!race_manager->getKartInfo(i).isNetworkPlayer() &&
-                race_manager->getKartInfo(i).getKartTeam() ==
-                KART_TEAM_BLUE)
+            if (race_manager->getKartInfo(i).getKartTeam() == KART_TEAM_BLUE)
             {
                 m_minimap_invert_x_z = true;
                 break;
@@ -1895,16 +1881,12 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
         loadArenaGraph(*root);
     main_loop->renderGUI(3340);
 
-    if (NetworkConfig::get()->isNetworking())
-        NetworkItemManager::create();
-    else
-    {
-        // Seed random engine locally
-        uint32_t seed = (uint32_t)StkTime::getTimeSinceEpoch();
-        ItemManager::updateRandomSeed(seed);
-        ItemManager::create();
-        powerup_manager->setRandomSeed(seed);
-    }
+    // Seed random engine locally
+    uint32_t seed = (uint32_t) StkTime::getTimeSinceEpoch();
+    Log::info("Track", "Seed = %d", seed);
+    ItemManager::updateRandomSeed(seed);
+    ItemManager::create();
+    powerup_manager->setRandomSeed(seed);
     main_loop->renderGUI(3360);
 
     // Set the default start positions. Node that later the default
@@ -2204,9 +2186,6 @@ void Track::loadTrackModel(bool reverse_track, unsigned int mode_id)
     delete root;
     main_loop->renderGUI(5800);
 
-    if (auto sl = LobbyProtocol::get<ServerLobby>())
-        sl->saveInitialItems();
-
     main_loop->renderGUI(5900);
 
     if (UserConfigParams::m_track_debug && Graph::get() && !m_is_cutscene)
@@ -2291,8 +2270,7 @@ void Track::loadObjects(const XMLNode* root, const std::string& path,
         {
             int geo_level = 0;
             node->get("geometry-level", &geo_level);
-            if (UserConfigParams::m_geometry_level + geo_level - 2 > 0 &&
-                !NetworkConfig::get()->isNetworking())
+            if (UserConfigParams::m_geometry_level + geo_level - 2 > 0)
                 continue;
             m_track_object_manager->add(*node, parent, model_def_loader, parent_library);
         }

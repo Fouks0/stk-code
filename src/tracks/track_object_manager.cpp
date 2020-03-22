@@ -24,7 +24,6 @@
 #include "graphics/lod_node.hpp"
 #include "graphics/material_manager.hpp"
 #include "io/xml_node.hpp"
-#include "network/network_config.hpp"
 #include "physics/physical_object.hpp"
 #include "tracks/track_object.hpp"
 #include "utils/log.hpp"
@@ -87,17 +86,6 @@ void TrackObjectManager::init()
             curr->setInitiallyVisible(false);
             curr->setEnabled(false);
             continue;
-        }
-
-        // onWorldReady will hide some track objects using scripting
-        if (NetworkConfig::get()->isNetworking() &&
-            curr->isEnabled() && curr->getPhysicalObject() &&
-            curr->getPhysicalObject()->isDynamic())
-        {
-            curr->getPhysicalObject()->getBody()
-                ->setActivationState(DISABLE_DEACTIVATION);
-            curr->getPhysicalObject()->addForRewind();
-            moveable_objects++;
         }
     }
 }   // init

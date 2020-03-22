@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "utils/translation.hpp"
+#include "utils/string_utils.hpp"
 
 using irr::core::stringw;
 
@@ -116,11 +116,6 @@ public:
                            const std::string& track_group);
     void changeReverse(const GPReverseType use_reverse);
 
-    void createRandomGP(const unsigned int number_of_tracks,
-                        const std::string& track_group,
-                        const GPReverseType use_reverse,
-                        bool new_tracks=false);
-
     // Methods for the GP editor
     void setId(const std::string& id);
     void setName(const irr::core::stringw& name);
@@ -151,7 +146,7 @@ public:
     // -------------------------------------------------------------------------
     /** @return the (potentially translated) user-visible name of the Grand
      *  Prix (apply fribidi as needed) */
-    irr::core::stringw getName()      const { return m_editable ? m_name.c_str() : _LTR(m_name.c_str());   }
+    irr::core::stringw getName()      const { return m_editable ? m_name.c_str() : _(m_name.c_str());   }
 
     // -------------------------------------------------------------------------
     /** @return the internal indentifier of the Grand Prix (not translated) */
@@ -171,7 +166,6 @@ public:
     enum GPReverseType getReverseType()
                                       const { return m_reverse_type;           }
     static const char*        getRandomGPID()   { return "random";             }
-    static irr::core::stringw getRandomGPName() { return _LTR("Random Grand Prix"); }
 };   // GrandPrixData
 
 #endif

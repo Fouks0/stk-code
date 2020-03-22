@@ -26,14 +26,12 @@ class Player;
 
 class PlayerController : public Controller
 {
-friend class KartRewinder;
 friend class Tas;
 protected:
     int            m_steer_val, m_steer_val_l, m_steer_val_r;
     uint16_t       m_prev_accel;
     bool           m_prev_brake;
     bool           m_prev_nitro;
-
     int            m_penalty_ticks;
 
     virtual void  steer(int ticks, int steer_val);
@@ -44,55 +42,27 @@ public:
     virtual void update            (int ticks) OVERRIDE;
     virtual bool action            (PlayerAction action, int value,
                                     bool dry_run = false           ) OVERRIDE;
-    virtual void actionFromNetwork(PlayerAction action, int value,
-                                   int value_l, int value_r);
     virtual void skidBonusTriggered() OVERRIDE;
     virtual void reset             () OVERRIDE;
     virtual void handleZipper(bool play_sound) OVERRIDE;
     virtual void resetInputState();
-    virtual bool saveState(BareNetworkString *buffer) const OVERRIDE;
-    virtual void rewindTo(BareNetworkString *buffer) OVERRIDE;
-    // ------------------------------------------------------------------------
     virtual void  collectedItem(const ItemState &item,
                                 float previous_energy=0 ) OVERRIDE { };
-    // ------------------------------------------------------------------------
     virtual bool isPlayerController() const OVERRIDE { return true; }
-    // ------------------------------------------------------------------------
     virtual bool isLocalPlayerController() const OVERRIDE { return true; }
-    // ------------------------------------------------------------------------
     /** Called just before the position of the kart is changed. */
-    virtual void setPosition(int p) OVERRIDE
-    {
-    }   // setPosition
-    // ------------------------------------------------------------------------
-    virtual void crashed(const AbstractKart *k) OVERRIDE
-    {
-    }   // crashed(AbstractKart)
-    // ------------------------------------------------------------------------
-    virtual void crashed(const Material *m) OVERRIDE
-    {
-    }   // crashed(Material)
-    // ------------------------------------------------------------------------
+    virtual void setPosition(int p) OVERRIDE {}
+    virtual void crashed(const AbstractKart *k) OVERRIDE {}
+    virtual void crashed(const Material *m) OVERRIDE {}
     /** Callback whenever a new lap is triggered. Used by the AI
      *  to trigger a recomputation of the way to use, not used for players. */
-    virtual void  newLap(int lap) OVERRIDE
-    {
-    }
-    // ------------------------------------------------------------------------
+    virtual void  newLap(int lap) OVERRIDE {}
     /** Player will always be able to get a slipstream bonus. */
-    virtual bool  disableSlipstreamBonus() const OVERRIDE
-    {
-        return false; 
-    }
-    // ------------------------------------------------------------------------
+    virtual bool  disableSlipstreamBonus() const OVERRIDE {return false; }
     /** Called when a race is finished. */
-    virtual void finishedRace(float time) OVERRIDE
-    {
-    }   // finishedRace
-    // ------------------------------------------------------------------------
+    virtual void finishedRace(float time) OVERRIDE {}   // finishedRace
     /** Returns the name of the player profile. */
     core::stringw getName() const OVERRIDE;
-    // ------------------------------------------------------------------------
     /** Called when this kart started too early and got a start penalty. */
     virtual void  displayPenaltyWarning();
 

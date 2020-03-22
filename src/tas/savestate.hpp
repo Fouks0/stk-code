@@ -27,7 +27,6 @@
 #include "physics/kart_motion_state.hpp"
 #include "karts/max_speed.hpp"
 #include "karts/skidding.hpp"
-#include "network/smooth_network_body.hpp"
 #include "tracks/terrain_info.hpp"
 #include "ISceneNode.h"
 #include "stats.hpp"
@@ -53,19 +52,6 @@ private:
     uint64_t m_time_ticks; // For World
     double m_time;
     Stats m_stats;
-
-    // SmoothNetworkBody attributes
-    std::pair<Vec3, btQuaternion> kartStartSmoothingPostion;
-    std::pair<Vec3, btQuaternion> kartAdjustPosition;
-    Vec3 kartAdjustControlPoint;
-    std::pair<btTransform, Vec3> kartPrevPositionData;
-    btTransform kartSmoothedTransform;
-    float kartAdjustTime, kartAdjustTimeDt;
-    SmoothNetworkBody::SmoothingState kartSmoothing;
-    bool kartEnabled;
-    bool kartSmoothRotation;
-    bool kartAdjustVerticalOffset;
-    float kartMinAdjustLength, kartMaxAdjustLength, kartMinAdjustSpeed, kartMaxAdjustTime, kartAdjustLengthThreshold;
 
     // Moveable attributes
     Vec3  kartVelocityLC;

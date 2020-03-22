@@ -25,7 +25,6 @@
 #include "karts/kart_properties.hpp"
 #include "modes/follow_the_leader.hpp"
 #include "modes/three_strikes_battle.hpp"
-#include "network/network_string.hpp"
 #include "utils/mini_glm.hpp"
 
 #include "ISceneNode.h"
@@ -105,28 +104,6 @@ RescueAnimation::RescueAnimation(AbstractKart* kart, bool is_auto_rescue)
 }   // RescueAnimation
 
 //-----------------------------------------------------------------------------
-RescueAnimation::RescueAnimation(AbstractKart* kart, BareNetworkString* b)
-               : AbstractKartAnimation(kart, "RescueAnimation")
-{
-    m_referee = NULL;
-    restoreBasicState(b);
-    restoreData(b);
-}   // RescueAnimation
-
-//-----------------------------------------------------------------------------
-void RescueAnimation::restoreData(BareNetworkString* b)
-{
-    m_rescue_transform_compressed[0] = b->getInt24();
-    m_rescue_transform_compressed[1] = b->getInt24();
-    m_rescue_transform_compressed[2] = b->getInt24();
-    m_rescue_transform_compressed[3] = b->getUInt32();
-    btTransform rescue_transform =
-        MiniGLM::decompressbtTransform(m_rescue_transform_compressed);
-    float velocity = b->getFloat();
-    init(rescue_transform, velocity);
-}   // restoreData
-
-//-----------------------------------------------------------------------------
 /* When rescue transform and velocity is known, setting up the rest of data.
  * It is also used for each restoreState to make sure animation end in correct
  * time.
@@ -193,21 +170,3 @@ void RescueAnimation::updateGraphics(float dt)
     m_referee->setAnimationFrameWithCreatedTicks(m_created_ticks);
     AbstractKartAnimation::updateGraphics(dt);
 }   // updateGraphics
-
-// ----------------------------------------------------------------------------
-void RescueAnimation::saveState(BareNetworkString* buffer)
-{
-    AbstractKartAnimation::saveState(buffer);
-    buffer->addInt24(m_rescue_transform_compressed[0])
-        .addInt24(m_rescue_transform_compressed[1])
-        .addInt24(m_rescue_transform_compressed[2])
-        .addUInt32(m_rescue_transform_compressed[3]);
-    buffer->addFloat(m_velocity);
-}   // saveState
-
-// ----------------------------------------------------------------------------
-void RescueAnimation::restoreState(BareNetworkString* buffer)
-{
-    AbstractKartAnimation::restoreState(buffer);
-    restoreData(buffer);
-}   // restoreState

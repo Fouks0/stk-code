@@ -31,15 +31,13 @@
 #include "states_screens/options/options_screen_device.hpp"
 #include "states_screens/options/options_screen_audio.hpp"
 #include "states_screens/options/options_screen_general.hpp"
-#include "states_screens/options/options_screen_language.hpp"
 #include "states_screens/options/options_screen_video.hpp"
 #include "states_screens/options/options_screen_ui.hpp"
 #include "states_screens/dialogs/add_device_dialog.hpp"
-#include "states_screens/dialogs/multitouch_settings_dialog.hpp"
+#include "states_screens/dialogs/message_dialog.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -145,13 +143,6 @@ void OptionsScreenInput::buildDeviceList()
         }   // if config->isPlugged
     }   // for i<gpad_config_count
     
-    MultitouchDevice* touch_device = device_manager->getMultitouchDevice();
-                                                        
-    if (touch_device != NULL)
-    {
-        devices->addItem("touch_device", (core::stringw("   ") + 
-                                                _("Touch Device")).c_str(), 2);
-    }
 }   // buildDeviceList
 
 // -----------------------------------------------------------------------------
@@ -226,7 +217,7 @@ void OptionsScreenInput::eventCallback(Widget* widget, const std::string& name, 
         else if (selection == "tab_general")
             screen = OptionsScreenGeneral::getInstance();
         else if (selection == "tab_language")
-            screen = OptionsScreenLanguage::getInstance();
+            new MessageDialog("Deleted feature! There is only one surviving language since 20XX.");
         if(screen)
             StateManager::get()->replaceTopMostScreen(screen);
     }
@@ -275,15 +266,6 @@ void OptionsScreenInput::eventCallback(Widget* widget, const std::string& name, 
             {
                 Log::error("OptionsScreenInput", "Cannot read internal keyboard input device ID: %s",
                     selection.c_str());
-            }
-        }
-        else if (selection.find("touch_device") != std::string::npos)
-        {
-            // Don't edit multitouch settings during a race, because it needs
-            // to re-create all buttons to take an effect
-            if (StateManager::get()->getGameState() != GUIEngine::INGAME_MENU)
-            {
-                new MultitouchSettingsDialog(0.8f, 0.9f);
             }
         }
         else

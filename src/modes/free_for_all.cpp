@@ -18,10 +18,6 @@
 #include "modes/free_for_all.hpp"
 #include "karts/abstract_kart.hpp"
 #include "karts/controller/controller.hpp"
-#include "network/network_config.hpp"
-#include "network/network_string.hpp"
-#include "network/protocols/game_events_protocol.hpp"
-#include "network/stk_host.hpp"
 #include "tracks/track.hpp"
 
 #include <algorithm>
@@ -95,10 +91,6 @@ void FreeForAll::countdownReachedZero()
  */
 bool FreeForAll::kartHit(int kart_id, int hitter)
 {
-    if (NetworkConfig::get()->isNetworking() &&
-        NetworkConfig::get()->isClient())
-        return false;
-
     if (isRaceOver())
         return false;
 
@@ -113,33 +105,11 @@ bool FreeForAll::kartHit(int kart_id, int hitter)
  */
 void FreeForAll::handleScoreInServer(int kart_id, int hitter)
 {
-    int new_score = 0;
     if (kart_id == hitter || hitter == -1)
-        new_score = --m_scores[kart_id];
+        --m_scores[kart_id];
     else
-        new_score = ++m_scores[hitter];
-
-    if (NetworkConfig::get()->isNetworking() &&
-        NetworkConfig::get()->isServer())
-    {
-        NetworkString p(PROTOCOL_GAME_EVENTS);
-        p.setSynchronous(true);
-        p.addUInt8(GameEventsProtocol::GE_BATTLE_KART_SCORE);
-        if (kart_id == hitter || hitter == -1)
-            p.addUInt8((uint8_t)kart_id).addUInt16((int16_t)new_score);
-        else
-            p.addUInt8((uint8_t)hitter).addUInt16((int16_t)new_score);
-        STKHost::get()->sendPacketToAllPeers(&p, true);
-    }
+        ++m_scores[hitter];
 }   // handleScoreInServer
-
-// ----------------------------------------------------------------------------
-void FreeForAll::setKartScoreFromServer(NetworkString& ns)
-{
-    int kart_id = ns.getUInt8();
-    int16_t score = ns.getUInt16();
-    m_scores.at(kart_id) = score;
-}   // setKartScoreFromServer
 
 // ----------------------------------------------------------------------------
 /** Returns the internal identifier for this race.
@@ -182,10 +152,6 @@ void FreeForAll::update(int ticks)
  */
 bool FreeForAll::isRaceOver()
 {
-    if (NetworkConfig::get()->isNetworking() &&
-        NetworkConfig::get()->isClient())
-        return false;
-
     if (!getKartAtPosition(1))
         return false;
 
@@ -241,40 +207,3 @@ bool FreeForAll::getKartFFAResult(int kart_id) const
     int top_score = getKartScore(k->getWorldKartId());
     return getKartScore(kart_id) == top_score;
 }   // getKartFFAResult
-
-// ----------------------------------------------------------------------------
-void FreeForAll::saveCompleteState(BareNetworkString* bns)
-{
-    for (unsigned i = 0; i < m_scores.size(); i++)
-        bns->addUInt32(m_scores[i]);
-}   // saveCompleteState
-
-// ----------------------------------------------------------------------------
-void FreeForAll::restoreCompleteState(const BareNetworkString& b)
-{
-    for (unsigned i = 0; i < m_scores.size(); i++)
-        m_scores[i] = b.getUInt32();
-}   // restoreCompleteState
-
-// ----------------------------------------------------------------------------
-std::pair<uint32_t, uint32_t> FreeForAll::getGameStartedProgress() const
-{
-    std::pair<uint32_t, uint32_t> progress(
-        std::numeric_limits<uint32_t>::max(),
-        std::numeric_limits<uint32_t>::max());
-    if (race_manager->hasTimeTarget())
-    {
-        progress.first = (uint32_t)m_time;
-    }
-    AbstractKart* k = getKartAtPosition(1);
-    float score = -1.0f;
-    if (k)
-        score = (float)getKartScore(k->getWorldKartId());
-
-    if (score >= 0.0f)
-    {
-        progress.second = (uint32_t)(score /
-            (float)race_manager->getHitCaptureLimit() * 100.0f);
-    }
-    return progress;
-}   // getGameStartedProgress

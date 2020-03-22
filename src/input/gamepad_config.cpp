@@ -22,7 +22,6 @@
 #include "io/xml_node.hpp"
 #include "utils/log.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 #include <SKeyMap.h>
 

@@ -15,9 +15,7 @@
 #include "config/user_config.hpp"
 #include "graphics/2dutils.hpp"
 #include "graphics/irr_driver.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 #include "utils/time.hpp"
 
 #include "../../../lib/irrlicht/include/IrrCompileConfig.h"
@@ -963,11 +961,8 @@ void CGUIEditBox::draw()
 #ifndef SERVER_ONLY
     if (!IsVisible)
         return;
-
-    GUIEngine::ScreenKeyboard* screen_kbd = GUIEngine::ScreenKeyboard::getCurrent();
-    bool has_screen_kbd = (screen_kbd && screen_kbd->getEditBox() == this);
     
-    const bool focus = Environment->hasFocus(this) || has_screen_kbd;
+    const bool focus = Environment->hasFocus(this);
     
     IGUISkin* skin = Environment->getSkin();
     if (!skin)
@@ -1072,7 +1067,7 @@ void CGUIEditBox::draw()
                     startPos = ml ? BrokenTextPositions[i] : 0;
                 }
 
-                font->draw(translations->fribidize(txtLine->c_str()), CurrentTextRect,
+                font->draw(txtLine->c_str(), CurrentTextRect,
                            OverrideColorEnabled ? OverrideColor : skin->getColor(EGDC_BUTTON_TEXT),
                            false, true, &localClipRect);
                 // draw with fribidize no matter what language, because in fribidize function,
@@ -1308,21 +1303,6 @@ bool CGUIEditBox::processMouse(const SEvent& event)
                 return false;
             }
             
-            if (GUIEngine::ScreenKeyboard::shouldUseScreenKeyboard())
-            {
-                openScreenKeyboard();
-            }
-#ifdef ANDROID
-            else if (UserConfigParams::m_screen_keyboard == 3)
-            {
-                if (irr_driver->getDevice()->getType() == irr::EIDT_ANDROID)
-                {
-                    CIrrDeviceAndroid* dl = dynamic_cast<CIrrDeviceAndroid*>(
-                                                       irr_driver->getDevice());
-                    dl->showKeyboard(true);
-                }
-            }
-#endif
             // move cursor
             CursorPos = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 
@@ -1708,9 +1688,6 @@ void CGUIEditBox::calculateScrollPos()
 //! set text markers
 void CGUIEditBox::setTextMarkers(s32 begin, s32 end)
 {
-    if (GUIEngine::ScreenKeyboard::isActive())
-        return;
-        
     if ( begin != MarkBegin || end != MarkEnd )
     {
         MarkBegin = begin;
@@ -1780,15 +1757,3 @@ void CGUIEditBox::deserializeAttributes(io::IAttributes* in, io::SAttributeReadW
 
     // setOverrideFont(in->getAttributeAsFont("OverrideFont"));
 }
-
-void CGUIEditBox::openScreenKeyboard()
-{
-    if (UserConfigParams::m_screen_keyboard == 3)
-        return;
-    
-    if (GUIEngine::ScreenKeyboard::getCurrent() != NULL)
-        return;
-    
-    new GUIEngine::ScreenKeyboard(1.0f, 0.40f, this);
-}
-

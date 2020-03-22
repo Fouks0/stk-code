@@ -27,14 +27,13 @@
 #include "guiengine/widgets/spinner_widget.hpp"
 #include "guiengine/widget.hpp"
 #include "io/file_manager.hpp"
+#include "states_screens/dialogs/message_dialog.hpp"
 #include "states_screens/options/options_screen_general.hpp"
 #include "states_screens/options/options_screen_input.hpp"
-#include "states_screens/options/options_screen_language.hpp"
 #include "states_screens/options/options_screen_ui.hpp"
 #include "states_screens/options/options_screen_video.hpp"
 #include "states_screens/state_manager.hpp"
 #include "states_screens/options/user_screen.hpp"
-#include "utils/translation.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -116,7 +115,7 @@ void OptionsScreenAudio::eventCallback(Widget* widget, const std::string& name, 
         else if (selection == "tab_general")
             screen = OptionsScreenGeneral::getInstance();
         else if (selection == "tab_language")
-            screen = OptionsScreenLanguage::getInstance();
+            new MessageDialog("Deleted feature! There is only one surviving language since 20XX.");
         if(screen)
             StateManager::get()->replaceTopMostScreen(screen);
     }

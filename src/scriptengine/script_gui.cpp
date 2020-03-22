@@ -91,34 +91,24 @@ namespace Scripting
         /** Get translated version of string */
         std::string translate(std::string* input)
         {
-            irr::core::stringw out = translations->fribidize(translations->w_gettext(input->c_str()));
-
-            return StringUtils::wideToUtf8(out);
+            return *input;
         }
 
         /** Translate string and insert values. e.g. GUI::translate("Hello %s !", "John") */
         std::string translate(std::string* formatString, std::string* arg1)
         {
-            irr::core::stringw out = translations->w_gettext(formatString->c_str());
-
-            out = StringUtils::insertValues(out,
-                                            StringUtils::utf8ToWide(*arg1));
-
-            out = translations->fribidize(out);
-
+            irr::core::stringw out = StringUtils::utf8ToWide(*formatString);
+            out = StringUtils::insertValues(out, StringUtils::utf8ToWide(*arg1));
             return StringUtils::wideToUtf8(out);
         }
 
         /** Translate string and insert values. e.g. GUI::translate("Hello %s !", "John") */
         std::string translate(std::string* formatString, std::string* arg1, std::string* arg2)
         {
-            irr::core::stringw out = translations->w_gettext(formatString->c_str());
-
+            irr::core::stringw out = StringUtils::utf8ToWide(*formatString);
             out = StringUtils::insertValues(out,
                                             StringUtils::utf8ToWide(*arg1),
                                             StringUtils::utf8ToWide(*arg2));
-
-            out = translations->fribidize(out);
 
             return StringUtils::wideToUtf8(out);
         }
@@ -127,15 +117,11 @@ namespace Scripting
         std::string translate(std::string* formatString, std::string* arg1, std::string* arg2,
             std::string* arg3)
         {
-            irr::core::stringw out = translations->w_gettext(formatString->c_str());
-
+            irr::core::stringw out = StringUtils::utf8ToWide(*formatString);
             out = StringUtils::insertValues(out,
                                             StringUtils::utf8ToWide(*arg1),
                                             StringUtils::utf8ToWide(*arg2),
                                             StringUtils::utf8ToWide(*arg3));
-
-            out = translations->fribidize(out);
-
             return StringUtils::wideToUtf8(out);
         }
         /** @}*/

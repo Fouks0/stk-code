@@ -27,6 +27,8 @@
 #include "graphics/irr_driver.hpp"
 #endif
 
+#include <set>
+
 class ArenaGraph;
 
 namespace irr

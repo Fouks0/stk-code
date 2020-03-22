@@ -27,7 +27,6 @@
 #include "io/utf_writer.hpp"
 #include "config/player_manager.hpp"
 #include "utils/log.hpp"
-#include "utils/translation.hpp"
 
 #include <stdlib.h>
 
@@ -384,14 +383,4 @@ void Achievement::onCompletion()
     core::stringw name = m_achievement_info->getName();
     core::stringw s = _("Completed achievement \"%s\".", name);
     MessageQueue::add(MessageQueue::MT_ACHIEVEMENT, s);
-
-    // Sends a confirmation to the server that an achievement has been
-    // completed, if a user is signed in.
-    if (PlayerManager::isCurrentLoggedIn())
-    {
-        Online::HTTPRequest * request = new Online::HTTPRequest(true);
-        PlayerManager::setUserDetails(request, "achieving");
-        request->addParameter("achievementid", getID());
-        request->queue();
-    }
 }   // onCompletion

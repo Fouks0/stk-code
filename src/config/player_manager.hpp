@@ -31,13 +31,6 @@
 
 class AchievementsStatus;
 
-namespace Online
-{
-    class CurrentUser;
-    class HTTPRequest;
-    class OnlineProfile;
-    class XMLRequest;
-}
 class PlayerProfile;
 
 /** A special class that manages all local player accounts. It reads all player
@@ -45,11 +38,6 @@ class PlayerProfile;
  *  player an instance of PlayerProfile is created, which keeps track of
  *  story mode progress, achievements and other data. It also keeps track of
  *  the currently logged in player.
- *  It includes several handy static functions which avoid long call
- *  sequences, e.g.:
- *    PlayerManager::getCurrentOnlineId()
- *  which is just:
- *    PlayerManager::get()->getCurrentUser()->getID();
  */
 class PlayerManager : public NoCopy
 {
@@ -98,21 +86,6 @@ public:
     const PlayerProfile *getPlayerById(unsigned int id);
     void enforceCurrentPlayer();
     unsigned int getNumNonGuestPlayers() const;
-    static void setUserDetails(Online::HTTPRequest *request,
-                               const std::string &action,
-                               const std::string &php_name = "");
-    static unsigned int getCurrentOnlineId();
-    static bool isCurrentLoggedIn();
-    static Online::OnlineProfile* getCurrentOnlineProfile();
-
-    static PlayerProfile::OnlineState getCurrentOnlineState();
-    static const irr::core::stringw& getCurrentOnlineUserName();
-    static void requestOnlinePoll();
-    static void resumeSavedSession();
-    static void onSTKQuit();
-    static void requestSignOut();
-    static void requestSignIn(const irr::core::stringw &username,
-                              const irr::core::stringw &password);
 
     // ------------------------------------------------------------------------
     /** Returns the current player. */

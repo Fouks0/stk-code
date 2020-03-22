@@ -45,11 +45,6 @@
 #include <string>
 #include <vector>
 
-#ifdef ANDROID
-#include "main_android.hpp"
-#endif
-
-
 namespace SP
 {
     class SPDynamicDrawCall;
@@ -366,12 +361,6 @@ public:
     bool getShadowViz()           { return m_shadowviz;             }
     // ------------------------------------------------------------------------
     void toggleBoundingBoxesViz() { m_boundingboxesviz = !m_boundingboxesviz; }
-    // ------------------------------------------------------------------------
-    void toggleRenderNetworkDebug() { m_render_nw_debug = !m_render_nw_debug; }
-    // ------------------------------------------------------------------------
-    bool getRenderNetworkDebug() const            { return m_render_nw_debug; }
-    // ------------------------------------------------------------------------
-    void renderNetworkDebug();
     // ------------------------------------------------------------------------
     bool getBoundingBoxesViz()    { return m_boundingboxesviz;      }
     // ------------------------------------------------------------------------

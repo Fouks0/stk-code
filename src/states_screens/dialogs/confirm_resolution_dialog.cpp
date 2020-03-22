@@ -23,7 +23,6 @@
 #include "guiengine/widgets/label_widget.hpp"
 #include "states_screens/state_manager.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 
 using namespace GUIEngine;
 using namespace irr::gui;
@@ -34,11 +33,8 @@ using namespace irr::core;
 ConfirmResolutionDialog::ConfirmResolutionDialog(bool unsupported_res) : ModalDialog(0.7f, 0.7f)
 {
     loadFromFile("confirm_resolution_dialog.stkgui");
-    m_remaining_time = 10.99f;
+    m_remaining_time = 10.f;
     m_unsupported_resolution = unsupported_res;
-    if (m_unsupported_resolution)
-        m_remaining_time += 10.0f;
-
     updateMessage();
 }
 
@@ -82,15 +78,12 @@ void ConfirmResolutionDialog::updateMessage()
 {
     //I18N: In the 'confirm resolution' dialog, that's shown when switching resoluton
 
-    stringw msg = _P("Confirm resolution within %i second",
-        "Confirm resolution within %i seconds",
-        (int)m_remaining_time);
+    stringw msg = _("Confirm resolution within %i s", (int) m_remaining_time);
 
     if (m_unsupported_resolution)
     {
         msg += L"\n\n";
-        msg += _("Resolutions smaller than 1024x768 or 1280x720 are unsupported. "
-                                   "Some parts of the UI may not work correctly.");
+        msg += _("Optimal resolution is 1920x1080.");
     }
 
     LabelWidget* countdown_message = getWidget<LabelWidget>("title");

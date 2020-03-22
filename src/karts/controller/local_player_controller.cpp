@@ -37,17 +37,10 @@
 #include "karts/skidding.hpp"
 #include "karts/rescue_animation.hpp"
 #include "modes/world.hpp"
-#include "network/network_config.hpp"
-#include "network/protocols/game_events_protocol.hpp"
-#include "network/protocols/game_protocol.hpp"
-#include "network/race_event_manager.hpp"
-#include "network/rewind_manager.hpp"
-#include "race/history.hpp"
 #include "states_screens/race_gui_base.hpp"
 #include "tracks/track.hpp"
 #include "utils/constants.hpp"
 #include "utils/log.hpp"
-#include "utils/translation.hpp"
 
 /** The constructor for a loca player kart, i.e. a player that is playing
  *  on this machine (non-local player would be network clients).
@@ -167,18 +160,8 @@ bool LocalPlayerController::action(PlayerAction action, int value,
     if (action == PA_ACCEL && value != 0 && !m_has_started)
     {
         m_has_started = true;
-        if (!NetworkConfig::get()->isNetworking())
-        {
-            float f = m_kart->getStartupBoostFromStartTicks(
-                World::getWorld()->getAuxiliaryTicks());
-            m_kart->setStartupBoost(f);
-        }
-        else if (NetworkConfig::get()->isClient())
-        {
-            auto ge = RaceEventManager::getInstance()->getProtocol();
-            assert(ge);
-            ge->sendStartupBoost((uint8_t)m_kart->getWorldKartId());
-        }
+        float f = m_kart->getStartupBoostFromStartTicks(World::getWorld()->getAuxiliaryTicks());
+        m_kart->setStartupBoost(f);
     }
 
     // If this event does not change the control state (e.g.
@@ -186,22 +169,6 @@ bool LocalPlayerController::action(PlayerAction action, int value,
     // optimises traffic to the server and other clients.
     if (!PlayerController::action(action, value, /*dry_run*/true)) return false;
 
-    // Register event with history
-    if(!history->replayHistory())
-        history->addEvent(m_kart->getWorldKartId(), action, value);
-
-    // If this is a client, send the action to networking layer
-    if (NetworkConfig::get()->isNetworking() &&
-        NetworkConfig::get()->isClient() &&
-        !RewindManager::get()->isRewinding() &&
-        World::getWorld() && !World::getWorld()->isLiveJoinWorld())
-    {
-        if (auto gp = GameProtocol::lock())
-        {
-            gp->controllerAction(m_kart->getWorldKartId(), action, value,
-                m_steer_val_l, m_steer_val_r);
-        }
-    }
     return PlayerController::action(action, value, /*dry_run*/false);
 }   // action
 
@@ -423,16 +390,12 @@ void LocalPlayerController::nitroNotFullSound()
  */
 bool LocalPlayerController::canGetAchievements() const 
 {
-    return !RewindManager::get()->isRewinding() &&
-        m_player->getConstProfile() == PlayerManager::getCurrentPlayer();
+    return m_player->getConstProfile() == PlayerManager::getCurrentPlayer();
 }   // canGetAchievements
 
 // ----------------------------------------------------------------------------
 core::stringw LocalPlayerController::getName() const
 {
-    if (NetworkConfig::get()->isNetworking())
-        return PlayerController::getName();
-
     core::stringw name = m_player->getProfile()->getName();
     if (m_difficulty == PLAYER_DIFFICULTY_HANDICAP)
         name = _("%s (handicapped)", name);

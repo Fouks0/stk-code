@@ -24,8 +24,6 @@
 #include "karts/abstract_kart.hpp"
 #include "karts/kart_properties.hpp"
 #include "modes/follow_the_leader.hpp"
-#include "network/network_string.hpp"
-#include "network/protocols/client_lobby.hpp"
 #include "race/race_manager.hpp"
 #include "tracks/track.hpp"
 #include "utils/mini_glm.hpp"
@@ -122,35 +120,6 @@ ExplosionAnimation::ExplosionAnimation(AbstractKart* kart, bool direct_hit)
 }   // ExplosionAnimation
 
 //-----------------------------------------------------------------------------
-ExplosionAnimation::ExplosionAnimation(AbstractKart* kart, BareNetworkString* b)
-                  : AbstractKartAnimation(kart, "ExplosionAnimation")
-{
-    restoreBasicState(b);
-    restoreData(b);
-}   // RescueAnimation
-
-//-----------------------------------------------------------------------------
-void ExplosionAnimation::restoreData(BareNetworkString* b)
-{
-    bool direct_hit = b->getUInt8() == 1;
-    Vec3 normal = m_created_transform.getBasis().getColumn(1).normalized();
-    btTransform reset_transform =
-        btTransform(btQuaternion(0.0f, 0.0f, 0.0f, 1.0f));
-
-    if (race_manager->getMinorMode() ==
-        RaceManager::MINOR_MODE_CAPTURE_THE_FLAG && direct_hit)
-    {
-        m_reset_trans_compressed[0] = b->getInt24();
-        m_reset_trans_compressed[1] = b->getInt24();
-        m_reset_trans_compressed[2] = b->getInt24();
-        m_reset_trans_compressed[3] = b->getUInt32();
-        reset_transform =
-            MiniGLM::decompressbtTransform(m_reset_trans_compressed);
-    }
-    init(direct_hit, normal, reset_transform);
-}   // restoreData
-
-//-----------------------------------------------------------------------------
 ExplosionAnimation::~ExplosionAnimation()
 {
     // Only play with physics and camera if the object is getting destroyed
@@ -161,17 +130,6 @@ ExplosionAnimation::~ExplosionAnimation()
     {
         m_kart->getBody()->setLinearVelocity(btVector3(0,0,0));
         m_kart->getBody()->setAngularVelocity(btVector3(0,0,0));
-        // Don't reset spectate camera
-        auto cl = LobbyProtocol::get<ClientLobby>();
-        if (!cl || !cl->isSpectator())
-        {
-            for (unsigned i = 0; i < Camera::getNumCameras(); i++)
-            {
-                Camera *camera = Camera::getCamera(i);
-                if (camera->getType() != Camera::CM_TYPE_END)
-                    camera->setMode(Camera::CM_NORMAL);
-            }
-        }
     }
 }   // ~ExplosionAnimation
 
@@ -304,25 +262,3 @@ bool ExplosionAnimation::hasResetAlready() const
     return m_reset_ticks != -1 &&
         World::getWorld()->getTicksSinceStart() > m_reset_ticks;
 }   // update
-
-// ----------------------------------------------------------------------------
-void ExplosionAnimation::saveState(BareNetworkString* buffer)
-{
-    AbstractKartAnimation::saveState(buffer);
-    buffer->addUInt8(m_direct_hit ? 1 : 0);
-    if (race_manager->getMinorMode() ==
-        RaceManager::MINOR_MODE_CAPTURE_THE_FLAG && m_direct_hit)
-    {
-        buffer->addInt24(m_reset_trans_compressed[0])
-            .addInt24(m_reset_trans_compressed[1])
-            .addInt24(m_reset_trans_compressed[2])
-            .addUInt32(m_reset_trans_compressed[3]);
-    }
-}   // saveState
-
-// ----------------------------------------------------------------------------
-void ExplosionAnimation::restoreState(BareNetworkString* buffer)
-{
-    AbstractKartAnimation::restoreState(buffer);
-    restoreData(buffer);
-}   // restoreState

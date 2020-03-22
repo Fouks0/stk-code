@@ -51,42 +51,6 @@ GrandPrixData::GrandPrixData(const std::string& filename, enum GPGroupType group
 }   // GrandPrixData
 
 // ----------------------------------------------------------------------------
-/** Creates a random grand prix from the specified parameters.
- *  \param number_of_tracks How many tracks to select.
- *  \param track_group From which track group to select the tracks.
- *  \param use_reverse How the reverse setting is to be determined.
- *  \param new_tracks If true, new tracks are selected, otherwise existing
- *         tracks will not be changed (used to e.g. increase the number of
- *         tracks in an already existing random grand prix).
- *
- */
-void GrandPrixData::createRandomGP(const unsigned int number_of_tracks,
-                                   const std::string &track_group,
-                                   const GPReverseType use_reverse,
-                                   bool new_tracks)
-{
-    m_filename = "Random GP - Not loaded from a file!";
-    m_id       = getRandomGPID();
-    m_name     = getRandomGPName();
-    m_editable = false;
-    m_group    = GP_NONE;
-    m_reverse_type = use_reverse;
-
-    if(new_tracks)
-    {
-        m_tracks.clear();
-        m_laps.clear();
-        m_reversed.clear();
-    }
-    m_tracks.reserve(number_of_tracks);
-    m_laps.reserve(number_of_tracks);
-    m_reversed.reserve(number_of_tracks);
-
-    changeTrackNumber(number_of_tracks, track_group);
-    changeReverse(use_reverse);
-}   // createRandomGP
-
-// ----------------------------------------------------------------------------
 /** Either adds or removes tracks to get the requested numder of tracks in
  *  a random GP.
  *  \param number_of_tracks How many tracks should be in the random list.

@@ -29,7 +29,6 @@
 #include "guiengine/modaldialog.hpp"
 #include "guiengine/scalable_font.hpp"
 #include "guiengine/screen.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "guiengine/widgets.hpp"
 #include "io/file_manager.hpp"
 #include "states_screens/state_manager.hpp"
@@ -2358,13 +2357,7 @@ core::recti Skin::draw3DWindowBackground(IGUIElement *element,
                                          const core::recti *clip,
                                          core::recti* checkClientArea)
 {
-    if (ScreenKeyboard::getCurrent() &&
-        ScreenKeyboard::getCurrent()->getIrrlichtElement() == element)
-    {
-        drawBoxFromStretchableTexture( ScreenKeyboard::getCurrent(), rect,
-                           SkinConfig::m_render_params["window::neutral"]);
-    }
-    else if (ModalDialog::getCurrent() &&
+    if (ModalDialog::getCurrent() &&
              ModalDialog::getCurrent()->getIrrlichtElement() == element)
     {
         if (ModalDialog::getCurrent()->fadeBackground())

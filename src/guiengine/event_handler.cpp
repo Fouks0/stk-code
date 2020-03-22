@@ -26,7 +26,6 @@
 #include "guiengine/engine.hpp"
 #include "guiengine/modaldialog.hpp"
 #include "guiengine/screen.hpp"
-#include "guiengine/screen_keyboard.hpp"
 #include "guiengine/widget.hpp"
 #include "guiengine/widgets/list_widget.hpp"
 #include "guiengine/widgets/ribbon_widget.hpp"
@@ -75,12 +74,6 @@ bool EventHandler::OnEvent (const SEvent &event)
 
     if(!Debug::onEvent(event))
         return false;
-        
-    if (ScreenKeyboard::isActive())
-    {
-        if (ScreenKeyboard::getCurrent()->onEvent(event))
-            return true; // EVENT_BLOCK
-    }
     
     // TO DEBUG HATS (when you don't actually have a hat)
     /*
@@ -406,14 +399,7 @@ void EventHandler::sendNavigationEvent(const NavigationDirection nav, const int 
     
     if (w != NULL)
     {
-        if (ScreenKeyboard::isActive())
-        {
-            if (!ScreenKeyboard::getCurrent()->isMyIrrChild(w->getIrrlichtElement()))
-            {
-                w = NULL;
-            }
-        }
-        else if (ModalDialog::isADialogActive())
+        if (ModalDialog::isADialogActive())
         {
             if (!ModalDialog::getCurrent()->isMyIrrChild(w->getIrrlichtElement()))
             {
@@ -426,11 +412,7 @@ void EventHandler::sendNavigationEvent(const NavigationDirection nav, const int 
     {
         Widget* defaultWidget = NULL;
         
-        if (ScreenKeyboard::isActive())
-        {
-            defaultWidget = ScreenKeyboard::getCurrent()->getFirstWidget();
-        }
-        else if (ModalDialog::isADialogActive())
+        if (ModalDialog::isADialogActive())
         {
             defaultWidget = ModalDialog::getCurrent()->getFirstWidget();
         }
@@ -599,12 +581,7 @@ int EventHandler::findIDClosestWidget(const NavigationDirection nav, const int p
         }
 
         // if a dialog is shown, restrict to items in the dialog
-        if (ScreenKeyboard::isActive())
-        {
-            if (!ScreenKeyboard::getCurrent()->isMyChild(w_test))
-                continue;
-        }
-        else if (ModalDialog::isADialogActive())
+        if (ModalDialog::isADialogActive())
         {
             if (!ModalDialog::getCurrent()->isMyChild(w_test))
                 continue;
@@ -742,14 +719,6 @@ int EventHandler::findIDClosestWidget(const NavigationDirection nav, const int p
 
 void EventHandler::sendEventToUser(GUIEngine::Widget* widget, std::string& name, const int playerID)
 {
-    if (ScreenKeyboard::isActive())
-    {
-        if (ScreenKeyboard::getCurrent()->processEvent(widget->m_properties[PROP_ID]) != EVENT_LET)
-        {
-            return;
-        }
-    }
-    
     if (ModalDialog::isADialogActive())
     {
         if (ModalDialog::getCurrent()->processEvent(widget->m_properties[PROP_ID]) != EVENT_LET)
@@ -771,15 +740,6 @@ EventPropagation EventHandler::onWidgetActivated(GUIEngine::Widget* w, const int
 
     Widget* parent = w->m_event_handler;
     
-    //FIXME : sendEventToUser do the same screen keyboard and modal dialog checks, so they are done twice
-    if (ScreenKeyboard::isActive())
-    {
-        if (ScreenKeyboard::getCurrent()->processEvent(w->m_properties[PROP_ID]) == EVENT_BLOCK)
-        {
-            return EVENT_BLOCK;
-        }
-    }
-
     if (ModalDialog::isADialogActive() && (parent == NULL || parent->m_type != GUIEngine::WTYPE_RIBBON))
     {
         if (ModalDialog::getCurrent()->processEvent(w->m_properties[PROP_ID]) == EVENT_BLOCK)
@@ -880,19 +840,7 @@ EventPropagation EventHandler::onGUIEvent(const SEvent& event)
                 if (!w->isFocusable() || !w->isActivated()) return GUIEngine::EVENT_BLOCK;
 
                 // When a modal dialog is shown, don't select widgets out of the dialog
-                if (ScreenKeyboard::isActive())
-                {
-                    // check for parents too before discarding event
-                    if (!ScreenKeyboard::getCurrent()->isMyChild(w) && 
-                        w->m_event_handler != NULL)
-                    {
-                        if (!ScreenKeyboard::getCurrent()->isMyChild(w->m_event_handler))
-                        {
-                            break;
-                        }
-                    }
-                }
-                else if (ModalDialog::isADialogActive())
+                if (ModalDialog::isADialogActive())
                 {
                     // check for parents too before discarding event
                     if (!ModalDialog::getCurrent()->isMyChild(w) && 
@@ -994,7 +942,7 @@ EventPropagation EventHandler::onGUIEvent(const SEvent& event)
             {
                 // currently, enter pressed in text ctrl events can only happen in dialogs.
                 // FIXME : find a cleaner way to route the event to its proper location
-                if (!ScreenKeyboard::isActive() && ModalDialog::isADialogActive()) 
+                if (ModalDialog::isADialogActive())
                     ModalDialog::onEnterPressed();
                 break;
             }

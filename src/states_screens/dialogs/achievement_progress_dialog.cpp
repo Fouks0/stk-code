@@ -26,7 +26,6 @@
 #include "guiengine/widgets/list_widget.hpp"
 #include "guiengine/widgets/ribbon_widget.hpp"
 #include "states_screens/state_manager.hpp"
-#include "utils/translation.hpp"
 
 #include <IGUIEnvironment.h>
 
@@ -61,9 +60,9 @@ AchievementProgressDialog::AchievementProgressDialog(Achievement *achievement)
         for (int i = 1; i < m_depth; i++)
         {
             row.push_back(ListWidget::ListCell
-                (_C("achievement_info", "Subgoals"), -1, 2, true));
+                (_("achievement_info", "Subgoals"), -1, 2, true));
             row.push_back(ListWidget::ListCell
-                (_C("achievement_info", "Progress"), -1, 1, true));
+                (_("achievement_info", "Progress"), -1, 1, true));
         }
     
         m_progress_table->addItem(StringUtils::toString(0), row);        

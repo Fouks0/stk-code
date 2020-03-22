@@ -31,7 +31,6 @@
 #include "io/xml_node.hpp"
 #include "input/device_manager.hpp"
 #include "items/item_manager.hpp"
-#include "network/network_config.hpp"
 #include "physics/physical_object.hpp"
 #include "race/race_manager.hpp"
 #include "scriptengine/script_engine.hpp"
@@ -774,9 +773,8 @@ bool TrackObject::joinToMainTrack()
 
     // Scripting exploding barrel is assumed to be joinable in networking
     // as it doesn't support it
-    if (!NetworkConfig::get()->isNetworking() &&
-        (!m_physical_object->getOnKartCollisionFunction().empty() ||
-        !m_physical_object->getOnItemCollisionFunction().empty()))
+    if (!m_physical_object->getOnKartCollisionFunction().empty() ||
+        !m_physical_object->getOnItemCollisionFunction().empty())
         return false;
 
     // Skip driveable non-exact shape object

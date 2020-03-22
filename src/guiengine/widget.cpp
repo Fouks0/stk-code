@@ -33,7 +33,6 @@ using namespace gui;
 #include "guiengine/screen.hpp"
 #include "io/file_manager.hpp"
 #include "utils/string_utils.hpp"
-#include "utils/translation.hpp"
 #include "utils/vs.hpp"
 
 namespace GUIEngine

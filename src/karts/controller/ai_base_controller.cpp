@@ -25,7 +25,6 @@
 #include "karts/kart_properties.hpp"
 #include "karts/controller/ai_properties.hpp"
 #include "modes/world.hpp"
-#include "network/network_string.hpp"
 #include "tracks/track.hpp"
 #include "utils/constants.hpp"
 
@@ -330,20 +329,3 @@ void AIBaseController::determineTurnRadius(const Vec3 &end, Vec3 *center,
     }
 
 }   // determineTurnRadius
-
-//-----------------------------------------------------------------------------
-bool AIBaseController::saveState(BareNetworkString *buffer) const
-{
-    // Endcontroller needs this for proper offset in kart rewinder
-    // Must match the number of bytes in Playercontroller.
-    buffer->addUInt16(0).addUInt16(0).addUInt8(0);
-    return false;
-}   // copyToBuffer
-
-//-----------------------------------------------------------------------------
-void AIBaseController::rewindTo(BareNetworkString *buffer)
-{
-    // Endcontroller needs this for proper offset in kart rewinder.
-    // Skip the same number of bytes as PlayerController.
-    buffer->skip(2 + 2 + 1);
-}   // rewindTo

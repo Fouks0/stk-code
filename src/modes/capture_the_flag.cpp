@@ -24,11 +24,6 @@
 #include "karts/controller/controller.hpp"
 #include "karts/kart_model.hpp"
 #include "modes/ctf_flag.hpp"
-#include "network/network_config.hpp"
-#include "network/network_string.hpp"
-#include "network/protocols/game_events_protocol.hpp"
-#include "network/server_config.hpp"
-#include "network/stk_host.hpp"
 #include "physics/triangle_mesh.hpp"
 #include "states_screens/race_gui.hpp"
 #include "tracks/track.hpp"
@@ -111,11 +106,6 @@ void CaptureTheFlag::init()
 
     m_red_flag = std::make_shared<CTFFlag>(FC_RED, orig_red);
     m_blue_flag = std::make_shared<CTFFlag>(FC_BLUE, orig_blue);
-    if (NetworkConfig::get()->isNetworking())
-    {
-        m_red_flag->rewinderAdd();
-        m_blue_flag->rewinderAdd();
-    }
 
 #ifndef SERVER_ONLY
     m_red_flag->initFlagRenderInfo(m_red_flag_node);
@@ -237,7 +227,6 @@ void CaptureTheFlag::update(int ticks)
                 kart->getBody()->proceedToTransform(t);
                 kart->setTrans(t);
                 kart->getPowerup()->reset();
-                static_cast<SmoothNetworkBody*>(kart)->reset();
             }
             it++;
         }
@@ -252,7 +241,7 @@ void CaptureTheFlag::update(int ticks)
         (m_blue_flag->getBaseOrigin() - m_red_flag->getOrigin()).length() <
         g_capture_length)
     {
-        // Blue team scored
+        /*// Blue team scored
         if (!NetworkConfig::get()->isNetworking() ||
             NetworkConfig::get()->isServer())
         {
@@ -266,15 +255,15 @@ void CaptureTheFlag::update(int ticks)
                 p.setSynchronous(true);
                 p.addUInt8(GameEventsProtocol::GE_CTF_SCORED)
                     .addUInt8((int8_t)red_holder)
-                    .addUInt8(0/*red_team_scored*/)
+                    .addUInt8(0)
                     .addUInt16((int16_t)new_kart_scores)
                     .addUInt8((uint8_t)m_red_scores)
                     .addUInt8((uint8_t)new_blue_scores);
                 STKHost::get()->sendPacketToAllPeers(&p, true);
             }
-            ctfScored(red_holder, false/*red_team_scored*/, new_kart_scores,
+            ctfScored(red_holder, false, new_kart_scores,
                 m_red_scores, new_blue_scores);
-        }
+        }*/
         m_last_captured_flag_ticks = World::getWorld()->getTicksSinceStart();
         m_red_flag->resetToBase(race_manager->getFlagDeactivatedTicks());
     }
@@ -284,7 +273,7 @@ void CaptureTheFlag::update(int ticks)
         g_capture_length)
     {
         // Red team scored
-        if (!NetworkConfig::get()->isNetworking() ||
+        /*if (!NetworkConfig::get()->isNetworking() ||
             NetworkConfig::get()->isServer())
         {
             int blue_holder = m_blue_flag->getHolder();
@@ -297,15 +286,15 @@ void CaptureTheFlag::update(int ticks)
                 p.setSynchronous(true);
                 p.addUInt8(GameEventsProtocol::GE_CTF_SCORED)
                     .addUInt8((int8_t)blue_holder)
-                    .addUInt8(1/*red_team_scored*/)
+                    .addUInt8(1)
                     .addUInt16((int16_t)new_kart_scores)
                     .addUInt8((uint8_t)new_red_scores)
                     .addUInt8((uint8_t)m_blue_scores);
                 STKHost::get()->sendPacketToAllPeers(&p, true);
             }
-            ctfScored(blue_holder, true/*red_team_scored*/, new_kart_scores,
+            ctfScored(blue_holder, true, new_kart_scores,
                 new_red_scores, m_blue_scores);
-        }
+        }*/
         m_last_captured_flag_ticks = World::getWorld()->getTicksSinceStart();
         m_blue_flag->resetToBase(race_manager->getFlagDeactivatedTicks());
     }
@@ -461,9 +450,9 @@ bool CaptureTheFlag::isRaceOver()
     if (m_unfair_team)
         return true;
 
-    if (NetworkConfig::get()->isNetworking() &&
+    /*if (NetworkConfig::get()->isNetworking() &&
         NetworkConfig::get()->isClient())
-        return false;
+        return false;*/
 
     if ((m_count_down_reached_zero && race_manager->hasTimeTarget()) ||
         (m_red_scores >= race_manager->getHitCaptureLimit() ||
@@ -514,9 +503,9 @@ bool CaptureTheFlag::kartHit(int kart_id, int hitter)
     if (isRaceOver())
         return false;
 
-    if (!NetworkConfig::get()->isNetworking() ||
+    /*if (!NetworkConfig::get()->isNetworking() ||
         NetworkConfig::get()->isServer())
-        handleScoreInServer(kart_id, hitter);
+        handleScoreInServer(kart_id, hitter);*/
 
     loseFlagForKart(kart_id);
     return true;
@@ -535,18 +524,3 @@ const std::string& CaptureTheFlag::getIdent() const
 {
     return IDENT_CTF;
 }   // getIdent
-
-// ----------------------------------------------------------------------------
-void CaptureTheFlag::saveCompleteState(BareNetworkString* bns)
-{
-    FreeForAll::saveCompleteState(bns);
-    bns->addUInt32(m_red_scores).addUInt32(m_blue_scores);
-}   // saveCompleteState
-
-// ----------------------------------------------------------------------------
-void CaptureTheFlag::restoreCompleteState(const BareNetworkString& b)
-{
-    FreeForAll::restoreCompleteState(b);
-    m_red_scores = b.getUInt32();
-    m_blue_scores = b.getUInt32();
-}   // restoreCompleteState

@@ -19,12 +19,11 @@
 #ifndef HEADER_PHYSICAL_OBJECT_HPP
 #define HEADER_PHYSICAL_OBJECT_HPP
 
+#include <memory>
 #include <string>
 
 #include "btBulletDynamicsCommon.h"
 
-#include "network/rewinder.hpp"
-#include "network/smooth_network_body.hpp"
 #include "physics/user_pointer.hpp"
 #include "utils/vec3.hpp"
 #include "utils/leak_check.hpp"
@@ -37,8 +36,7 @@ class XMLNode;
 /**
   * \ingroup physics
   */
-class PhysicalObject : public Rewinder,
-                       public SmoothNetworkBody
+class PhysicalObject
 {
 public:
     /** The supported collision shapes. */
@@ -193,10 +191,6 @@ private:
     Vec3                  m_last_lv;
     Vec3                  m_last_av;
 
-    /* Used to determine if local state should be used, which is true
-     * when the object is not moving */
-    bool                  m_no_server_state;
-
 public:
                     PhysicalObject(bool is_dynamic, const Settings& settings,
                                    TrackObject* object);
@@ -281,16 +275,6 @@ public:
     /** @} */
     /** @} */
     /** @} */
-
-    void addForRewind();
-    virtual void saveTransform();
-    virtual void computeError();
-    virtual BareNetworkString* saveState(std::vector<std::string>* ru);
-    virtual void undoEvent(BareNetworkString *buffer) {}
-    virtual void rewindToEvent(BareNetworkString *buffer) {}
-    virtual void restoreState(BareNetworkString *buffer, int count);
-    virtual void undoState(BareNetworkString *buffer) {}
-    virtual std::function<void()> getLocalStateRestoreFunction();
     bool hasTriangleMesh() const { return m_triangle_mesh != NULL; }
     void joinToMainTrack();
     LEAK_CHECK()

@@ -29,10 +29,6 @@
 #include "io/file_manager.hpp"
 #include "modes/overworld.hpp"
 #include "modes/world.hpp"
-#include "network/protocols/client_lobby.hpp"
-#include "network/network_config.hpp"
-#include "network/network_string.hpp"
-#include "network/stk_host.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/help_screen_1.hpp"
 #include "states_screens/main_menu_screen.hpp"
@@ -40,7 +36,6 @@
 #include "states_screens/race_setup_screen.hpp"
 #include "states_screens/options/options_screen_general.hpp"
 #include "states_screens/state_manager.hpp"
-#include "utils/translation.hpp"
 
 using namespace GUIEngine;
 using namespace irr::core;
@@ -57,66 +52,21 @@ RacePausedDialog::RacePausedDialog(const float percentWidth,
     {
         loadFromFile("overworld_dialog.stkgui");
     }
-    else if (!NetworkConfig::get()->isNetworking())
-    {
-        loadFromFile("race_paused_dialog.stkgui");
-    }
     else
     {
-        loadFromFile("network_ingame_dialog.stkgui");
+        loadFromFile("race_paused_dialog.stkgui");
     }
 
     GUIEngine::RibbonWidget* back_btn = getWidget<RibbonWidget>("backbtnribbon");
     back_btn->setFocusForPlayer( PLAYER_ID_GAME_MASTER );
 
-    if (NetworkConfig::get()->isNetworking())
-    {
-        music_manager->pauseMusic();
-        SFXManager::get()->pauseAll();
-        m_text_box->clearListeners();
-        if (UserConfigParams::m_lobby_chat)
-        {
-            m_text_box->setActive(true);
-            getWidget("send")->setVisible(true);
-            m_text_box->addListener(this);
-            auto cl = LobbyProtocol::get<ClientLobby>();
-            if (cl && !cl->serverEnabledChat())
-            {
-                m_text_box->setActive(false);
-                getWidget("send")->setActive(false);
-            }
-        }
-        else
-        {
-            m_text_box->setActive(false);
-            m_text_box->setText(
-                _("Chat is disabled, enable in options menu."));
-            getWidget("send")->setVisible(false);
-        }
-    }
-    else
-    {
-        World::getWorld()->schedulePause(WorldStatus::IN_GAME_MENU_PHASE);
-    }
-
-#ifndef ANDROID
-    if (m_text_box && UserConfigParams::m_lobby_chat)
-        m_text_box->setFocusForPlayer(PLAYER_ID_GAME_MASTER);
-#endif
+    World::getWorld()->schedulePause(WorldStatus::IN_GAME_MENU_PHASE);
 }   // RacePausedDialog
 
 // ----------------------------------------------------------------------------
 RacePausedDialog::~RacePausedDialog()
 {
-    if (NetworkConfig::get()->isNetworking())
-    {
-        music_manager->resumeMusic();
-        SFXManager::get()->resumeAll();
-    }
-    else
-    {
-        World::getWorld()->scheduleUnpause();
-    }
+    World::getWorld()->scheduleUnpause();
 }   // ~RacePausedDialog
 
 // ----------------------------------------------------------------------------
@@ -140,17 +90,11 @@ void RacePausedDialog::loadedFromFile()
     // a time of 0:00:00.
     if ((race_manager->getMinorMode() != RaceManager::MINOR_MODE_NORMAL_RACE  &&
          race_manager->getMinorMode() != RaceManager::MINOR_MODE_TIME_TRIAL ) ||
-         World::getWorld()->isStartPhase() ||
-         NetworkConfig::get()->isNetworking())
+         World::getWorld()->isStartPhase())
     {
         GUIEngine::RibbonWidget* choice_ribbon =
             getWidget<GUIEngine::RibbonWidget>("choiceribbon");
         choice_ribbon->deleteChild("endrace");
-        // No restart in network game
-        if (NetworkConfig::get()->isNetworking())
-        {
-            choice_ribbon->deleteChild("restart");
-        }
     }
 }
 
@@ -187,26 +131,13 @@ GUIEngine::EventPropagation
         if (selection == "exit")
         {
             ModalDialog::dismiss();
-            if (STKHost::existHost())
-            {
-                STKHost::get()->shutdown();
-            }
             race_manager->exitRace();
             race_manager->setAIKartOverride("");
 
-            if (NetworkConfig::get()->isNetworking())
+            StateManager::get()->resetAndGoToScreen(MainMenuScreen::getInstance());
+            if (race_manager->raceWasStartedFromOverworld())
             {
-                StateManager::get()->resetAndSetStack(
-                    NetworkConfig::get()->getResetScreens().data());
-                NetworkConfig::get()->unsetNetworking();
-            }
-            else
-            {
-                StateManager::get()->resetAndGoToScreen(MainMenuScreen::getInstance());
-                if (race_manager->raceWasStartedFromOverworld())
-                {
-                    OverWorld::enterOverWorld();
-                }
+                OverWorld::enterOverWorld();
             }
             return GUIEngine::EVENT_BLOCK;
         }
@@ -232,26 +163,15 @@ GUIEngine::EventPropagation
         else if (selection == "newrace")
         {
             ModalDialog::dismiss();
-            if (NetworkConfig::get()->isNetworking())
-            {
-                // back lobby
-                NetworkString back(PROTOCOL_LOBBY_ROOM);
-                back.setSynchronous(true);
-                back.addUInt8(LobbyProtocol::LE_CLIENT_BACK_LOBBY);
-                STKHost::get()->sendToServer(&back, true);
-            }
-            else
-            {
-                World::getWorld()->scheduleUnpause();
-                race_manager->exitRace();
-                Screen* new_stack[] =
-                    {
-                        MainMenuScreen::getInstance(),
-                        RaceSetupScreen::getInstance(),
-                        NULL
-                    };
-                StateManager::get()->resetAndSetStack(new_stack);
-            }
+            World::getWorld()->scheduleUnpause();
+            race_manager->exitRace();
+            Screen* new_stack[] =
+                {
+                    MainMenuScreen::getInstance(),
+                    RaceSetupScreen::getInstance(),
+                    NULL
+                };
+            StateManager::get()->resetAndSetStack(new_stack);
             return GUIEngine::EVENT_BLOCK;
         }
         else if (selection == "endrace")
@@ -281,34 +201,12 @@ void RacePausedDialog::beforeAddingWidgets()
     int index = choice_ribbon->findItemNamed("newrace");
     if (index != -1)
         choice_ribbon->setItemVisible(index, !showSetupNewRace);
-
-    // Disable in game menu to avoid timer desync if not racing in network
-    // game
-    if (NetworkConfig::get()->isNetworking() &&
-        !(World::getWorld()->getPhase() == WorldStatus::MUSIC_PHASE ||
-        World::getWorld()->getPhase() == WorldStatus::RACE_PHASE))
-    {
-        index = choice_ribbon->findItemNamed("help");
-        if (index != -1)
-            choice_ribbon->setItemVisible(index, false);
-        index = choice_ribbon->findItemNamed("options");
-        if (index != -1)
-            choice_ribbon->setItemVisible(index, false);
-        index = choice_ribbon->findItemNamed("newrace");
-        if (index != -1)
-            choice_ribbon->setItemVisible(index, false);
-    }
-    if (NetworkConfig::get()->isNetworking())
-        m_text_box = getWidget<TextBoxWidget>("chat");
-    else
-        m_text_box = NULL;
+    m_text_box = NULL;
 }   // beforeAddingWidgets
 
 // ----------------------------------------------------------------------------
 bool RacePausedDialog::onEnterPressed(const irr::core::stringw& text)
 {
-    if (auto cl = LobbyProtocol::get<ClientLobby>())
-        cl->sendChat(text);
     m_self_destroy = true;
     return true;
 }   // onEnterPressed
