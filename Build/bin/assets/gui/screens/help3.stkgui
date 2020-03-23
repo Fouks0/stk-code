@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stkgui>
+    <icon-button id="back" x="0" y="0" height="8%" icon="gui/icons/back.png"/>
+    <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
+        <header width="80%" height="7%" align="center" text="Some reference numbers" text_align="center"/>
+        <spacer height="1%" width="100%"/>
+
+        <div width="100%" height="92%" layout="horizontal-row" >
+
+            <vertical-tabs id="category" height="100%" width="18%">
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/track_random.png"
+                        I18N="Tab in help menu" text="General"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/main_options.png"
+                        I18N="Tab in help menu" text="Tools"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/challenge.png"
+                        I18N="Tab in help menu" text="Some Numbers"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/main_about.png"
+                        I18N="Tab in help menu" text="TASing Tips"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/difficulty_hard.png"
+                        I18N="Tab in help menu" text="TAS techniques"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+                <icon-button id="page7" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+            </vertical-tabs>
+
+            <spacer width="2%" height="100%"/>
+            <box width="80%" height="100%" layout="vertical-row">
+                <spacer width="5" height="1%"/>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="A Tick corresponds to 1/120 = 0.008333... s"/>
+                </div>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="To get a Yellow Skid Bonus, the minimum Ticks needed is 120 (1 s). It is 360 for a Red one (3 s)."/>
+                    </div>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="After getting a Skid Bonus, you cannot skid again until 86 Ticks later."/>
+                </div>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="To get the Max Start Boost, you can start to accelerate as late as the Tick 517."/>
+                </div>
+                <div width="100%" proportion="2" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="A full Nitro press starts to wear off after 181 Ticks (if every 181 Ticks you can afford to use Nitro, you retain the max boost provided by Nitro, however in most cases you must instead spread its usage properly)."/>
+                </div>
+                <div width="100%" proportion="2" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Top Speeds for L/M/H-weights: 85.5/90.0/94.5 km/h. Nitro adds 16.2/18.0/19.8 km/h. Yellow Skid Bonus invariably adds 16.2 km/h, Red adds 23.4 km/h. Zipper can add up to 60 km/h."/>
+                </div>
+            </box>
+        </div>
+    </div>
+</stkgui>

@@ -1,0 +1,18 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Beastie Kart for SuperTuxKart
+Upstream-Contact: Néd J. "jymis" Édoire <nwad@crypticgate.net>
+Source: https://supertuxkart.net
+
+Files: *
+Copyright:
+ Copyright 2013 Micket
+ Copyright ???? Savino
+ Copyright 2016 Néd J. "jymis" Édoire <nwad@crypticgate.net>
+License: CC0 and CC-BY-SA 3.0
+Comment:
+ jymis made the 3D kart, model and textures (licensed under CC BY-SA 3.0)
+ jymis made beastie icon (licensed under CC0)
+ Savino made the steering wheel model (licensed under CC0)
+ Micket made the 3D model of beastie (licensed under CC0) 
+ From https://github.com/supertuxkart/stk-code/issues/3062,
+ beastie is used with permission

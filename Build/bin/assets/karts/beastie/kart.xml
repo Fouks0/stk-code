@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!-- Generated with script from SVN rev 16945 -->
+<kart name              = "Beastie"
+      version           = "3"
+      model-file        = "beastie.spm"
+      icon-file         = "beastie-icon.png"
+      minimap-icon-file = "beastie-icon.png"
+      shadow-file       = "beastie_shadow.png"
+      type              = "heavy"
+      groups            = "standard"
+      rgb               = "0.22 0.03 0.04" >
+  <sounds engine = "large"/>
+  <animations left = "0"
+              straight = "20"
+              right = "40"
+              start-losing = "41"
+              start-losing-loop = "55"
+              end-losing = "95"
+              start-winning = "96"
+              end-winning = "182"
+              start-jump = "183"
+              end-jump = "213"
+              backpedal-left = "214"
+              backpedal = "234"
+              backpedal-right = "254"/>
+  <wheels>
+    <front-left position = "-0.253872 0.146601 0.569697"
+                 model    = "wheel-front-left.spm"       />
+    <front-right position = "0.253872 0.146601 0.569697"
+                 model    = "wheel-front-right.spm"       />
+    <rear-left position = "-0.266939 0.215126 -0.459359"
+                 model    = "wheel-rear-left.spm"       />
+    <rear-right position = "0.267636 0.215126 -0.459359"
+                 model    = "wheel-rear-right.spm"       />
+  </wheels>
+  <nitro-emitter>
+    <nitro-emitter-a position = "0.355482 0.669351 -0.445523" />
+    <nitro-emitter-b position = "-0.352239 0.669351 -0.445523" />
+  </nitro-emitter>
+  <headlights>
+    <object position="-0.180627 0.455795 0.697112"
+            rotation="0.000045 -0.000000 0.000000"
+            scale="1.000000 1.000000 1.000000"
+            bone="Kart"
+            model="headlight_1.spm"/>
+    <object position="0.179045 0.456186 0.692728"
+            rotation="0.000045 -0.000000 0.000000"
+            scale="1.000000 1.000000 1.000000"
+            bone="Kart"
+            model="headlight_2.spm"/>
+  </headlights>
+  <hat position="0.001320 0.838464 -0.051670"
+       rotation="-0.957196 0.250786 -0.180353"
+       scale="0.789265 0.789265 0.789265"
+       bone="Beastie.Head"/>
+  <exhaust file="kart_exhaust.xml"/>
+</kart>

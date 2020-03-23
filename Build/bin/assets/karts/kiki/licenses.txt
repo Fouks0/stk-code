@@ -1,0 +1,20 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Kiki Kart for SuperTuxKart
+Upstream-Contact: Benau
+Source: https://supertuxkart.net
+
+Files: kiki_icon.png
+Copyright:
+ Copyright 2017 Néd J. "jymis" Édoire <nwad@crypticgate.net>
+License: CC0
+
+Files:
+ *.spm
+ *.xml
+ kiki_kart.png
+ kiki_kart_pbr_data.png
+ kiki_shadow.png
+Copyright:
+ Copyright 2017-2019 Benau
+License: CC-BY-SA 3.0
+Comment: Kiki mascot is designed by Tyson Tan.

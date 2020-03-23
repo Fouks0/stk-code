@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stkgui>
+    <icon-button id="back" x="0" y="0" height="8%" icon="gui/icons/back.png"/>
+    <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
+        <header width="80%" height="7%" align="center" text="Unused Section" text_align="center"/>
+        <spacer height="1%" width="100%"/>
+
+        <div width="100%" height="92%" layout="horizontal-row" >
+
+            <vertical-tabs id="category" height="100%" width="18%">
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/track_random.png"
+                        I18N="Tab in help menu" text="General"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/main_options.png"
+                        I18N="Tab in help menu" text="Tools"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/challenge.png"
+                        I18N="Tab in help menu" text="Some Numbers"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/main_about.png"
+                        I18N="Tab in help menu" text="TASing Tips"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/difficulty_hard.png"
+                        I18N="Tab in help menu" text="TAS techniques"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+                <icon-button id="page7" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+            </vertical-tabs>
+
+            <spacer width="2%" height="100%"/>
+            <box width="80%" height="100%" layout="vertical-row">
+                <spacer width="5" height="1%"/>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Unused Section (for now)"/>
+                </div>
+            </box>
+        </div>
+    </div>
+</stkgui>

@@ -17,6 +17,7 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "karts/controller/kart_control.hpp"
+#include <algorithm>
 #include <stdexcept>
 #include "irrMath.h"
 

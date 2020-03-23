@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stkgui>
+    <icon-button id="back" x="0" y="0" height="8%" icon="gui/icons/back.png"/>
+    <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
+        <header width="80%" height="7%" align="center" text="SuperTuxKart TAS Help" text_align="center"/>
+        <spacer height="1%" width="100%"/>
+
+        <div width="100%" height="92%" layout="horizontal-row" >
+
+            <vertical-tabs id="category" height="100%" width="18%">
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/track_random.png"
+                        I18N="Tab in help menu" text="General"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/main_options.png"
+                        I18N="Tab in help menu" text="Tools"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/challenge.png"
+                        I18N="Tab in help menu" text="Some Numbers"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/main_about.png"
+                        I18N="Tab in help menu" text="TASing Tips"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/difficulty_hard.png"
+                        I18N="Tab in help menu" text="TAS techniques"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+                <icon-button id="page7" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+            </vertical-tabs>
+
+            <spacer width="2%" height="100%"/>
+            <box width="80%" height="100%" layout="vertical-row">
+                <spacer width="5" height="1%"/>
+                <div width="100%" proportion="2" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="It is assumed that you have advanced knowledge of the STK gameplay/mechanics, and some basic TAS notions. Else, not sure why you are here Lol."/>
+                </div>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Some things differ from the Vanilla STK. In this Mod, you will find TAS tools like Frame Advancing or some sort of Save States. Some things like network and translations features were removed in order to simplify the code and more easily implement tools. For now, every Frame correponds to one physics step (a Tick) and none are skipped."/>
+                    </div>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Despite the changes, the mechanics should still be identical within usual running conditions (ILs including Egg Hunts, Story Mode). However, as STK will behave differently accross different computers, keep in mind that TASes will be like runs performed in a perfect computer. Very important, reproducibility between different computers is not guaranteed."/>
+                </div>
+
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="This Mod was created by Fouks and is still pretty incomplete. If you feel like, improvements to these tools are welcome! For now only IL TASing is supported and you can watch my videos to see what you can currently do with the tools."/>
+                </div>
+            </box>
+        </div>
+    </div>
+</stkgui>

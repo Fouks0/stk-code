@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- Generated with script from SVN rev Unknown -->
+<materials>
+  <material name="beastie_kart_diffuse.png" gloss-map="beastie_kart_gloss.png" colorizable="Y" colorization-mask="beastie_kart_colorizationMask.png"/>
+  <material name="beastie_n_kart_wheel_diffuse.png" shader="solid" tex-layer-2="beastie_n_kart_wheel_gloss.png" colorizable="Y" colorization-mask="beastie_n_kart_wheel_colorizationMask.png"/>
+  <material name="grid_diffuse.png" shader="alphatest" gloss-map="grid_gloss.png" mask="grid_alpha.png"/>
+  <material name="beastie_kart_leftDoor.png" gloss-map="beastie_kart_leftDoor_gloss.png" colorizable="Y" colorization-mask="beastie_kart_leftDoor_colorizationMask.png"/>
+  <material name="window.png" shader="alphablend"/>
+</materials>

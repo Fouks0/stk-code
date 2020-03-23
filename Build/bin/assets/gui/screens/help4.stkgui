@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stkgui>
+    <icon-button id="back" x="0" y="0" height="8%" icon="gui/icons/back.png"/>
+    <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
+        <header width="80%" height="7%" align="center" text="Some TASing Tips" text_align="center"/>
+        <spacer height="1%" width="100%"/>
+
+        <div width="100%" height="92%" layout="horizontal-row" >
+
+            <vertical-tabs id="category" height="100%" width="18%">
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/track_random.png"
+                        I18N="Tab in help menu" text="General"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/main_options.png"
+                        I18N="Tab in help menu" text="Tools"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/challenge.png"
+                        I18N="Tab in help menu" text="Some Numbers"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/main_about.png"
+                        I18N="Tab in help menu" text="TASing Tips"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/difficulty_hard.png"
+                        I18N="Tab in help menu" text="TAS techniques"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+                <icon-button id="page7" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+            </vertical-tabs>
+
+            <spacer width="2%" height="100%"/>
+            <box width="80%" height="100%" layout="vertical-row">
+                <spacer width="5" height="1%"/>
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="If you are TASing in the proper sense, in order to get the best times, having some speedrunning experience is a huge advantage. Before TASing a track, you should watch and analyze the current record. Also check if a previous TAS already exists so you might contact the TASer, who can provide you the inputs from which you can start and improve. Else, you will have to make the TAS entirely. Note that the tools are for now suited for Tick Perfect TASes, but not segmented TASing."/>
+                </div>
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="If you are new in TASing STK, you should first make some TAS Tests before more serious ones, doing very short ones as exercise like 1 Lap Oliver Math Class without using any existing TAS. Do such runs yourself recording the inputs, and pick a satisfying run which will be your starting point. Then start to edit and replay the inputs and try to improve your time (for example, edit inputs at the end of the race and try to save a few 1/100 s). If you are motivated enough, you will naturally find out the whole process of TASing an IL. After some work, if you got used to the tools, you should be able to get a better 1 Lap time than the record (but it is normal that it takes a lot of time to achieve this, do not give up easily if you like TASing)."/>
+                </div>
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="You will quickly realize that since the later inputs depend on the ones before them, and because editing a single input will usually make the later seconds totally different, it might be better to create your TASes entirely from the beginning of the race to the end, without a starting point. If you need to change inputs for example in a previous Lap, you will have to start over from that input (fortunately, often you just need to do some adjustments)... So make sure that you are satisfied before starting a next segment!"/>
+                    </div>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="If applicable, while TASing, you should always compare your TAS to current references. If you started from someone else's TAS, make sure that your edits makes the run faster. Else, compare to the current Non-TAS record, pick a segment and compare the times in both (for example choose 2 Nitros and compare the time taken to go from the Nitro A to Nitro B). Do this for the whole race; any segment should be faster in your TAS (unless you used a strategy, in this case there must be segments that save more time than the ones that lose time). That said, you may also be surprised how optimized some runs are, so don't always expect to save more than 0.1 s every 10 s..."/>
+                </div>
+            </box>
+        </div>
+    </div>
+</stkgui>

@@ -147,20 +147,20 @@ void GhostReplaySelection::loadedFromFile()
  */
 void GhostReplaySelection::beforeAddingWidget()
 {
-    m_replay_list_widget->addColumn(_("column_name", "Track"), 9 );
+    m_replay_list_widget->addColumn(_("Track"), 9 );
     if (m_active_mode_is_linear)
-        m_replay_list_widget->addColumn(_("column_name", "Reverse"), 3);
+        m_replay_list_widget->addColumn(_("Reverse"), 3);
     if (!m_same_difficulty)
-        m_replay_list_widget->addColumn(_("column_name", "Difficulty"), 4);
+        m_replay_list_widget->addColumn(_("Difficulty"), 4);
     if (m_active_mode_is_linear)
-        m_replay_list_widget->addColumn(_("column_name", "Laps"), 3);
-    m_replay_list_widget->addColumn(_("column_name", "Time"), 4);
-    m_replay_list_widget->addColumn(_("column_name", "Kart"), 1);
-    m_replay_list_widget->addColumn(_("column_name", "User"), 5);
+        m_replay_list_widget->addColumn(_("Laps"), 3);
+    m_replay_list_widget->addColumn(_("Time"), 4);
+    m_replay_list_widget->addColumn(_("Kart"), 1);
+    m_replay_list_widget->addColumn(_("User"), 5);
     if (m_multiplayer)
-        m_replay_list_widget->addColumn(_("column_name", "Players"), 3);
+        m_replay_list_widget->addColumn(_("Players"), 3);
     if (!m_same_version)
-        m_replay_list_widget->addColumn(_("column_name", "Version"), 3);
+        m_replay_list_widget->addColumn(_("Version"), 3);
 
     m_replay_list_widget->createHeader();
 }   // beforeAddingWidget

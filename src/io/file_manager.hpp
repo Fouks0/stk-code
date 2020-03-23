@@ -62,8 +62,7 @@ public:
                     CHALLENGE=ASSET_MIN,
                     GFX, GRANDPRIX, GUI_ICON, GUI_SCREEN, GUI_DIALOG,
                     LIBRARY, MODEL, MUSIC, REPLAY,
-                    SCRIPT, SFX, SHADER, SKIN, TEXTURE, TTF,
-                    TRANSLATION, ASSET_MAX = TRANSLATION,
+                    SCRIPT, SFX, SHADER, SKIN, TEXTURE, TTF, ASSET_MAX = TTF,
                     ASSET_COUNT};
 
 private:
@@ -128,12 +127,6 @@ private:
     void              checkAndCreateCachedTexturesDir();
     void              checkAndCreateGPDir();
     void              discoverPaths();
-#if !defined(WIN32) && !defined(__CYGWIN__) && !defined(__APPLE__)
-    std::string       checkAndCreateLinuxDir(const char *env_name,
-                                             const char *dir_name,
-                                             const char *fallback1,
-                                             const char *fallback2=NULL);
-#endif
 
 public:
                       FileManager();

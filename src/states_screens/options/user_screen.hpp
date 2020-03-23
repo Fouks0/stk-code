@@ -57,9 +57,6 @@ private:
      *  same time. */
     enum UserScreenState { STATE_NONE=0, STATE_LOGIN=1, STATE_LOGOUT=2} m_state;
 
-    /** User name entry field. */
-    GUIEngine::TextBoxWidget *m_username_tb;
-
     /** Label field for warning and error messages. */
     GUIEngine::LabelWidget * m_info_widget;
 

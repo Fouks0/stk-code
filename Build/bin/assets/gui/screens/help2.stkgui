@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stkgui>
+    <icon-button id="back" x="0" y="0" height="8%" icon="gui/icons/back.png"/>
+    <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
+        <header width="80%" height="7%" align="center" text="TAS Tools" text_align="center"/>
+        <spacer height="1%" width="100%"/>
+
+        <div width="100%" height="92%" layout="horizontal-row" >
+
+            <vertical-tabs id="category" height="100%" width="18%">
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/track_random.png"
+                        I18N="Tab in help menu" text="General"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/main_options.png"
+                        I18N="Tab in help menu" text="Tools"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/challenge.png"
+                        I18N="Tab in help menu" text="Some Numbers"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/main_about.png"
+                        I18N="Tab in help menu" text="TASing Tips"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/difficulty_hard.png"
+                        I18N="Tab in help menu" text="TAS techniques"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+                <icon-button id="page7" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+            </vertical-tabs>
+
+            <spacer width="2%" height="100%"/>
+            <box width="80%" height="100%" layout="vertical-row">
+                <spacer width="5" height="1%"/>
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Inputs recording/replaying: check 'Record inputs' in the Track Info Screen in order to record the game inputs. Replay them by filling the 'Load inputs file' field with the name of your .stktas file (without extension). You can do both at the same time. The encoding is as follow (you should make some tests to grasp the encoding in practice)"/>
+                </div>
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="First number is the action, a number between 0 and 255. Usually, each bit correspond to a specific action, for example 66 = 64 + 2 corresponds to Skid Left + Nitro. Second is the Steering, between -32768 (right) and 32768 (left) (yes, it is for some reason inverted). The extremes correspond to the right/left key in the default keyboard, the other values emulate an analog stick. Third is the Acceleration, between 0 and 65535, with a similar remark to the Steering."/>
+                </div>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Frame/Tick Advancing: press P to suspend the game, and O to advance by 1 Tick."/>
+                </div>
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Save States: for now they are incomplete and buggy. There does not seem to be any easy way to save properly states, and only the kart is saved. Press Shift + Z to save a State and Z to restore it. The main rule is to never save after restoring, and restart instead the whole race. Also often ensure that when replaying from the start, the kart behaves like expected. This feature will be reimplemented later."/>
+                    </div>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Record Frames: press L to record every frame starting from the press, and L again to stop recording. This will slow down a lot the game, but it is currently the only way to decently record a TAS video. You need to record the audio separately, for example by recording the ghost's audio in a Vanilla game (no sound effects like Skidding), or by setting your monitor at 120 Hz if possible (this currently limits the FPS) and hope that your computer is powerful enough to play at this speed without slow down."/>
+                </div>
+            </box>
+        </div>
+    </div>
+</stkgui>

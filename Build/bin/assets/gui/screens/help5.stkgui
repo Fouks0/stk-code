@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<stkgui>
+    <icon-button id="back" x="0" y="0" height="8%" icon="gui/icons/back.png"/>
+    <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
+        <header width="80%" height="7%" align="center" text="Some TAS techniques" text_align="center"/>
+        <spacer height="1%" width="100%"/>
+
+        <div width="100%" height="92%" layout="horizontal-row" >
+
+            <vertical-tabs id="category" height="100%" width="18%">
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/track_random.png"
+                        I18N="Tab in help menu" text="General"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/main_options.png"
+                        I18N="Tab in help menu" text="Tools"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/challenge.png"
+                        I18N="Tab in help menu" text="Some Numbers"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/main_about.png"
+                        I18N="Tab in help menu" text="TASing Tips"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/difficulty_hard.png"
+                        I18N="Tab in help menu" text="TAS techniques"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+                <icon-button id="page7" width="128" height="128" icon="gui/icons/main_help.png"
+                        I18N="Tab in help menu" text="-"/>
+            </vertical-tabs>
+
+            <spacer width="2%" height="100%"/>
+            <box width="80%" height="100%" layout="vertical-row">
+                <spacer width="5" height="1%"/>
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Generally, what applies to real time speedruns also apply to the TASes. Choose the best suited kart for your track (usually Pidgin), take the sharpest turns possible, spread your Nitro well,... And with the tools, you can optimize at a Frame Perfect level your run. Try to do some research whether someone thinks a shortcut is possible but too hard for a normal player, and try to use them. Or try to find yourself such shortcuts - that is a very rewarding part of TASing! But, always ensure that your shortcuts actually save time!"/>
+                </div>
+                <div width="100%" proportion="3" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Nitro and Zipper Usage is very tricky. For the Nitro, you should always try different ways to use them. By default, use Nitro during Skidding, such to maximize the speed at the Tick where you get the Speed Bonus - it is assumed to be a good strategy, but this is not proven to be the best, you might find a better strategy! Else, try to spread the Nitro the best possible way. Zippers should be used just before a Skid Bonus (optimal would be at the very last Skid Tick), not after: try it yourself and watch the Speedometer."/>
+                </div>
+                <div width="100%" proportion="2" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Sometimes, when you are Skidding in the air, releasing can suddenly change your kart direction (and possibly increase a lot the speed), which you may make use of. But usually, you should release just before landing, though not always at the latest Tick during the air."/>
+                    </div>
+                <div width="100%" proportion="2" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="Getting the Skid Bonus as soon as possible (in 120 or 360 Ticks) is not necessarily the best solution and there might be cases where you need to space your Skids. In these situations you can either Skid a bit longer or delay some Skids: there will be no speed loss until a certain point."/>
+                </div>
+                <div width="100%" proportion="1" layout="horizontal-row">
+                    <bubble proportion="1" height="100%" word_wrap="true"
+                            text="At the edge of some platforms/bridges, you might get a very minor speed boost of a few km/h."/>
+                </div>
+            </box>
+        </div>
+    </div>
+</stkgui>

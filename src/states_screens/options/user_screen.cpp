@@ -52,8 +52,6 @@ BaseUserScreen::BaseUserScreen(const std::string &name) : Screen(name.c_str())
 
 void BaseUserScreen::loadedFromFile()
 {
-    m_username_tb = getWidget<TextBoxWidget >("username");
-    assert(m_username_tb);
     m_players = getWidget<DynamicRibbonWidget>("players");
     assert(m_players);
     m_options_widget = getWidget<RibbonWidget>("options");
@@ -73,7 +71,6 @@ void BaseUserScreen::setNewAccountData(const core::stringw &name)
 {
     // Indicate for init that new user data is available.
     m_new_registered_data = true;
-    m_username_tb->setText(name);
 }   // setOnline
 
 // ----------------------------------------------------------------------------
@@ -169,17 +166,6 @@ EventPropagation BaseUserScreen::filterActions(PlayerAction action,
     Input::InputType type,
     int playerId)
 {
-    if (action == PA_MENU_SELECT)
-    {
-        if (m_username_tb != NULL && m_username_tb->isFocusedForPlayer(PLAYER_ID_GAME_MASTER))
-        {
-            PlayerProfile *player = getSelectedPlayer();
-            PlayerManager::get()->setCurrentPlayer(player);
-            closeScreen();
-            return EVENT_BLOCK;
-        }
-    }
-
     return EVENT_LET;
 }
 
@@ -198,9 +184,6 @@ void BaseUserScreen::selectUser(int index)
     bool focus_it = !getWidget<RibbonWidget>("options_choice");
     m_players->setSelection(StringUtils::toString(index), PLAYER_ID_GAME_MASTER,
                             focus_it);
-    
-    if (!m_new_registered_data)
-        m_username_tb->setText("");
 }   // selectUser
 
 // ----------------------------------------------------------------------------
@@ -240,10 +223,6 @@ void BaseUserScreen::eventCallback(Widget* widget,
         {
             RegisterScreen::getInstance()->push();
             RegisterScreen::getInstance()->setParent(this);
-            // Make sure the new user will have an empty online name field
-            // that can also be edited.
-            m_username_tb->setText("");
-            m_username_tb->setActive(true);
         }
         else if (button == "cancel")
         {
