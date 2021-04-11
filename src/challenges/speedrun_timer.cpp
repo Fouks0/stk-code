@@ -105,6 +105,8 @@ void SpeedrunTimer::testPlayerRun()
 {
     PlayerProfile *player = PlayerManager::getCurrentPlayer();
 
+    if (!player)
+        return;
     if (player->isFirstTime())
     {
         m_player_can_run = true;
